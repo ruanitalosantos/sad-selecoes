@@ -1,0 +1,3878 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Portal do Candidato</title>
+    <link rel="icon" href="https://statics.recife.pe.gov.br/images/dynamics/conecta/icons/favicon.png?w=32&h=32&fit=fill&border=2,transparent,shrink" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+        :root {
+            --brand-primary: #0053a4;
+            --brand-secondary: #003a73;
+            --brand-highlight: #00a3ff;
+            --brand-accent: #f8c12c;
+            --surface-bg: #f4f7f6;
+            --surface-white: #ffffff;
+            --border-color: #dee2e6;
+            --text-main: #1b263b;
+            --text-muted: #6c757d;
+            --brand: #0053a4;
+            --brand-dark: #003a73;
+        }
+
+        body {
+            font-family: "Public Sans", sans-serif;
+            background-color: var(--surface-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, var(--brand-secondary) 0%, #002d5a 100%);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-logo {
+            max-width: 140px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .nav-menu {
+            padding: 1.5rem 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 0.25rem 1rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background-color: var(--brand-highlight);
+            box-shadow: 0 4px 12px rgba(0, 163, 255, 0.3);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            flex-shrink: 0;
+            background-color: var(--brand-highlight);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            aspect-ratio: 1/1;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 2.5rem;
+            transition: all 0.3s;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--brand-primary);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--brand-accent);
+            border-radius: 2px;
+        }
+
+        /* Tab Content SPA Logic */
+        .tab-content {
+            display: none;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Forms & Cards */
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 8px 30px rgba(0, 83, 164, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            color: var(--brand-secondary);
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--brand-primary);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--brand-secondary);
+            font-size: 0.85rem;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 0.6rem;
+            padding: 0.75rem 1rem;
+            border-color: #ced4da;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--brand-highlight);
+            box-shadow: 0 0 0 0.25rem rgba(0, 163, 255, 0.15);
+        }
+
+        .required::after {
+            content: ' *';
+            color: #ef4444;
+        }
+
+        /* Wizard Multi-step Internal logic */
+        .step-panel { display: none; }
+        .step-panel.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .wizard-steps {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .wizard-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px; /* Adjusted for smaller circle */
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+
+        .wizard-step {
+            z-index: 1;
+            background: transparent;
+            padding: 0 5px; /* Reduced from 10px */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1; /* Ensure they share space */
+            min-width: 80px; /* Minimum width to keep them readable */
+        }
+
+        .wizard-index {
+            width: 40px; /* Reduced from 50px */
+            height: 40px; /* Reduced from 50px */
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .wizard-step.active .wizard-index {
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
+            box-shadow: 0 0 0 5px rgba(0, 83, 164, 0.1);
+        }
+
+        .wizard-step.completed .wizard-index {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+            color: white;
+        }
+
+        .wizard-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .wizard-step.active .wizard-label {
+            color: var(--brand-primary);
+        }
+        .wizard-index-label {
+            position: relative;
+            z-index: 2;
+        }
+
+        .wizard-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .wizard-step.active .wizard-label {
+            color: var(--brand-primary);
+        }
+
+    .step-card {
+      border: 0;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 20px 44px rgba(15, 23, 42, 0.08);
+      margin-bottom: 2.5rem;
+    }
+
+    .step-card .card-header {
+      background: linear-gradient(180deg, #ffffff 0%, #f5f7ff 100%);
+      border-bottom: 1px solid rgba(26, 115, 232, 0.12);
+      padding: 1.5rem;
+    }
+
+    .step-card .card-header h2 {
+      font-size: 1.1rem;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .step-card .card-body {
+      padding: 1.75rem;
+    }
+
+    .section-block {
+      margin-bottom: 2rem;
+    }
+
+    .section-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0b2447;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .required::after {
+      content: " *";
+      color: #dc3545;
+      font-weight: 600;
+    }
+
+    .form-text {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+    }
+
+    .wizard-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .wizard-controls .spacer {
+      flex: 1;
+    }
+
+    .wizard-controls .btn {
+      min-width: 140px;
+      font-weight: 600;
+      padding: 0.65rem 1.5rem;
+    }
+
+    .wizard-controls .btn-outline-secondary {
+      color: #4c5aa1;
+      border-color: #c3cffb;
+    }
+
+    .wizard-controls .btn-outline-secondary:hover {
+      background: #e9eeff;
+      border-color: #9daef5;
+      color: #2a3a87;
+    }
+
+    .wizard-controls .btn-primary {
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+      border: none;
+      color: white !important;
+      box-shadow: 0 10px 24px rgba(26, 115, 232, 0.25);
+    }
+
+    .wizard-controls .btn-primary:disabled {
+      opacity: 0.65;
+      box-shadow: none;
+    }
+
+    .summary-section {
+      border: 1px solid rgba(26, 115, 232, 0.08);
+      border-radius: 4px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      background: #ffffff;
+    }
+
+    .summary-section h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .summary-table {
+      width: 100%;
+    }
+
+    .summary-table th {
+      width: 32%;
+      font-weight: 600;
+      color: #22315b;
+      padding: 0.35rem 0.5rem 0.35rem 0;
+    }
+
+    .summary-table td {
+      padding: 0.35rem 0;
+      color: #3f4d7a;
+    }
+
+    .summary-placeholder {
+      color: #94a3d3;
+      font-style: italic;
+    }
+
+    .dropzone {
+      border: 2px dashed rgba(26, 115, 232, 0.25);
+      border-radius: 4px;
+      padding: 1rem 1.25rem;
+      background: rgba(232, 240, 254, 0.55);
+      color: #34518a;
+    }
+
+    .upload-row {
+      --upload-min-height: 220px;
+    }
+
+    .upload-card {
+      border: 2px dashed rgba(17, 37, 82, 0.18);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.75);
+      padding: 1.5rem 1.25rem;
+      min-height: var(--upload-min-height);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.75rem;
+      position: relative;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .upload-card.required::after {
+      content: "Obrigatório";
+      position: absolute;
+      top: 0.75rem;
+      right: 0.9rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #c2410c;
+    }
+
+    .upload-card .upload-emoji {
+      font-size: 2.4rem;
+      line-height: 1;
+    }
+
+    .upload-card .upload-title {
+      font-weight: 700;
+      color: #132b63;
+    }
+
+    .upload-card .upload-instruction {
+      font-size: 0.85rem;
+      color: #5061a2;
+      margin-bottom: 0;
+    }
+
+    .upload-card .upload-input {
+      display: none;
+    }
+
+    .upload-card .upload-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.45rem 1.35rem;
+      border-radius: 999px;
+      background: var(--brand);
+      color: #ffffff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      text-decoration: none;
+    }
+
+    .upload-card .upload-button:hover,
+    .upload-card .upload-button:focus {
+      background: var(--brand-dark);
+      color: #ffffff;
+    }
+
+    .upload-card .upload-filename {
+      font-size: 0.8rem;
+      color: #1a73e8;
+      word-break: break-word;
+    }
+
+    .upload-card.has-file {
+      border-color: rgba(26, 115, 232, 0.65);
+      background: rgba(232, 240, 254, 0.45);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .submission-success {
+      display: none;
+      margin: 0 auto 80px;
+      max-width: 720px;
+      text-align: center;
+      background: var(--surface);
+      border-radius: 4px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 18px 40px rgba(26, 115, 232, 0.12), 0 8px 22px rgba(26, 115, 232, 0.08);
+      border: 1px solid rgba(26, 115, 232, 0.12);
+    }
+
+    .submission-success.show {
+      display: block;
+    }
+
+    .submission-success .success-icon {
+      font-size: 2.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .submission-success .success-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #0b2447;
+    }
+
+    .submission-success .success-text {
+      color: #495057;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .submission-success .success-actions .btn {
+      min-width: 180px;
+    }
+
+    .submission-loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(11, 36, 71, 0.55);
+      backdrop-filter: blur(2px);
+      z-index: 1080;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .submission-loading.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .submission-loading .loading-dialog {
+      background: rgba(11, 36, 71, 0.92);
+      color: #ffffff;
+      padding: 2.25rem 2.5rem;
+      border-radius: 4px;
+      text-align: center;
+      box-shadow: 0 24px 48px rgba(11, 36, 71, 0.35);
+      max-width: 320px;
+      width: calc(100% - 48px);
+    }
+
+    .submission-loading .loading-text {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .submission-loading .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      border-width: 0.35rem;
+    }
+
+    .draft-toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: #0f5132;
+      color: #fff;
+      padding: 0.85rem 1.25rem;
+      border-radius: 4px;
+      box-shadow: 0 20px 45px rgba(15, 81, 50, 0.35);
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 50;
+    }
+
+    .draft-toast.show {
+      display: inline-flex;
+    }
+
+        /* Mobile Adjustments */
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1.5rem; }
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 1rem;
+                background: var(--brand-secondary);
+                color: white;
+                position: sticky;
+                top: 0;
+                z-index: 999;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .mobile-header { display: none; }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+
+</head>
+
+<body>
+    <div class="mobile-header">
+        <h5 class="mb-0">Portal do Candidato</h5>
+        <button class="btn text-white fs-3" id="mobile-toggle"><i class="fas fa-bars"></i></button>
+    </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4 class="mb-0">Portal do Candidato</h4>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item">
+                <a href="#" class="nav-link active" data-tab="inscricao"><i class="fas fa-edit"></i><span>Inscrição</span></a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-tab="documentacao"><i class="fas fa-file-upload"></i><span>Documentação</span></a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-tab="resumo"><i class="fas fa-clipboard-list"></i><span>Resumo</span></a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-tab="recursos"><i class="fas fa-gavel"></i><span>Recursos</span></a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-tab="pontuacao"><i class="fas fa-chart-line"></i><span>Pontuação</span></a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-tab="informativos"><i class="fas fa-envelope"></i><span>Informativos</span></a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-tab="cronograma"><i class="fas fa-calendar-alt"></i><span>Cronograma</span></a>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar" id="avatarInitials"></div>
+                <div>
+                    <div class="fw-bold small text-uppercase" id="userNameDisplay"></div>
+                    <div class="small opacity-75">CANDIDATO LOGADO</div>
+                </div>
+                <a href="javascript:void(0)" id="btnLogout" class="ms-auto text-white opacity-50" title="Sair do sistema"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Tab: Inscrição -->
+        <section id="inscricao" class="tab-content active">
+            <div class="section-header d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="section-title">Formulário de Inscrição</h2>
+                    <p class="text-muted mb-0">Complete todas as etapas para garantir sua participação.</p>
+                </div>
+                <div class="bg-white border rounded-3 px-4 py-2 mt-3 mt-md-0 shadow-sm" style="border-left: 4px solid var(--brand-highlight) !important;">
+                    <div class="small fw-bold text-muted text-uppercase">Nº da Inscrição</div>
+                    <div class="fs-4 fw-bold text-primary" id="numInscricaoDisplay" data-raw-value="{{ $json.inscricao }}">—</div>
+                </div>
+            </div>
+
+            <!-- Inscrição Wizard Header (The steps) -->
+            <div class="card p-4 mb-4">
+                <ol class="wizard-steps m-0" id="wizardSteps" role="tablist">
+                    <li class="wizard-step active" data-step="0">
+                        <span class="wizard-index">1</span>
+                        <span class="wizard-label">Identificação</span>
+                    </li>
+                    <li class="wizard-step" data-step="1">
+                        <span class="wizard-index">2</span>
+                        <span class="wizard-label">Endereço</span>
+                    </li>
+                    <li class="wizard-step" data-step="2">
+                        <span class="wizard-index">3</span>
+                        <span class="wizard-label">Profissional</span>
+                    </li>
+                    <li class="wizard-step" data-step="3">
+                        <span class="wizard-index">4</span>
+                        <span class="wizard-label">Revisão</span>
+                    </li>
+                </ol>
+            </div>
+
+    <form id="inscricaoForm" class="needs-validation" novalidate method="post"
+      action="https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/83d7be28-a3ca-4aca-80be-13155dd4d497"
+      enctype="multipart/form-data">
+      <input type="hidden" id="initialAuthorization" name="authorization"
+        value="{{ String($json.authorization ?? $json.Authorization ?? $json.token ?? '') }}" />
+
+      <input type="hidden" name="inscricao" value="{{ String($json.inscricao ?? '').trim() }}" />
+
+      <input type="hidden" id="cargosInscritos" value='{{ $json.cargos_inscritos }}' />
+      <input type="hidden" id="dynamicCargos" value='{{ $json.cargos }}' />
+      <input type="hidden" id="id_selecao" name="id_selecao" value="{{ $json.id_selecao }}" />
+      <input type="hidden" id="token" name="token" value="{{ $json.token }}" />
+
+      <section class="card step-card" data-step-panel="0">
+        <div class="card-header">
+          <h2>Identificação do candidato</h2>
+        </div>
+        <div class="card-body">
+          <div class="section-block">
+            <h3 class="section-title">Dados básicos</h3>
+            <p class="section-subtitle">Informe seus dados pessoais conforme documento oficial.</p>
+            <div class="row g-3">
+              <div class="col-12 col-md-6 col-lg-6">
+                <label for="nome" class="form-label required">Nome completo</label>
+                <input type="text" class="form-control" id="nome" name="nome" value="{{ $json.nome }}" required
+                  readonly />
+              </div>
+              <div class="col-12 col-md-4 col-lg-4">
+                <label for="nome_social" class="form-label">Nome social</label>
+                <input type="text" class="form-control" id="nome_social" name="nome_social"
+                  value="{{ $json.nome_social }}" />
+              </div>
+              <div class="col-12 col-md-2 col-lg-2">
+                <label for="cpf" class="form-label required">CPF</label>
+                <input type="text" class="form-control" id="cpf" name="cpf" maxlength="11" inputmode="numeric"
+                  pattern="\d{11}" title="Informe 11 dígitos" data-numeric-only="true" value="{{ $json.cpf }}" required
+                  readonly />
+              </div>
+              <div class="col-12 col-md-4">
+                <label for="nasc" class="form-label required">Data de nascimento</label>
+                <input type="date" class="form-control" id="nasc" name="nasc" value="{{ $json.nasc }}" required
+                  readonly />
+              </div>
+              <div class="col-md-4">
+                <label for="nacionalidade" class="form-label required">Nacionalidade</label>
+                <select id="nacionalidade" name="nacionalidade" class="form-select"
+                  data-prefill="{{ $json.nacionalidade }}" data-nacionalidade required>
+                  <option value="">Selecione...</option>
+                  <option value="BRASILEIRA">BRASILEIRA</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="nis" class="form-label">NIS</label>
+                <input type="text" class="form-control" id="nis" name="nis" maxlength="11" inputmode="numeric"
+                  pattern="\d{0,11}" title="Informe apenas números (até 11 dígitos)" data-numeric-only="true"
+                  value="{{ $json.nis }}" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h3 class="section-title">Naturalidade e filiação</h3>
+            <div class="row g-3 mb-1">
+              <div class="col-md-2 col-lg-3 col-xl-2 hidden">
+                <label for="naturalidade_uf" class="form-label required">UF</label>
+                <select id="naturalidade_uf" name="naturalidade_uf" class="form-select"
+                  data-prefill="{{ $json.naturalidade_uf }}" data-uf-select data-force-required="true" required>
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+              <div class="col-md-5 col-lg-6 hidden">
+                <label for="naturalidade_cidade" class="form-label required">Naturalidade</label>
+                <select id="naturalidade_cidade" name="naturalidade_cidade" class="form-select"
+                  data-prefill="{{ $json.naturalidade_cidade }}" required disabled>
+                  <option value="">Selecione a UF</option>
+                </select>
+              </div>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="mae" class="form-label required">Nome da mãe</label>
+                <input type="text" class="form-control text-uppercase" id="mae" name="mae" value="{{ $json.mae }}"
+                  required />
+              </div>
+              <div class="col-md-6">
+                <label for="pai" class="form-label">Nome do pai</label>
+                <input type="text" class="form-control text-uppercase" id="pai" name="pai" value="{{ $json.pai }}" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h3 class="section-title">Documentos de identificação</h3>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="rg_numero" class="form-label required">RG</label>
+                <input type="text" class="form-control" id="rg_numero" name="rg_numero" maxlength="14"
+                  inputmode="numeric" pattern="\d{1,14}" title="Informe apenas números" data-numeric-only="true"
+                  value="{{ $json.rg_numero }}" required />
+              </div>
+              <div class="col-md-4">
+                <label for="rg_orgao" class="form-label required">Órgão emissor</label>
+                <input type="text" class="form-control" id="rg_orgao" name="rg_orgao" value="{{ $json.rg_orgao }}"
+                  required />
+              </div>
+              <div class="col-md-2">
+                <label for="rg_uf" class="form-label required">UF</label>
+                <select id="rg_uf" name="rg_uf" class="form-select" data-prefill="{{ $json.rg_uf }}" data-uf-select
+                  required>
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label for="rg_data" class="form-label required">Expedição</label>
+                <input type="date" class="form-control" id="rg_data" name="rg_data" value="{{ $json.rg_data }}"
+                  required />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h3 class="section-title">Informações complementares</h3>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="sexo" class="form-label required">Sexo</label>
+                <select id="sexo" name="sexo" class="form-select" data-prefill="{{ $json.sexo }}" required>
+                  <option value="">Selecione...</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Prefiro não informar">Prefiro não informar</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="genero" class="form-label required">Gênero</label>
+                <select id="genero" name="genero" class="form-select" data-prefill="{{ $json.genero }}" required>
+                  <option value="">Selecione...</option>
+                  <option value="Mulher cisgênero">Mulher cisgênero</option>
+                  <option value="Mulher trans">Mulher trans</option>
+                  <option value="Homem cisgênero">Homem cisgênero</option>
+                  <option value="Homem trans">Homem trans</option>
+                  <option value="Pessoa não binária">Pessoa não binária</option>
+                  <option value="Travesti">Travesti</option>
+                  <option value="Outro">Outro</option>
+                  <option value="Prefiro não informar">Prefiro não informar</option>
+                </select>
+              </div>
+              <div class="col-md-4 hidden" id="generoOutroGroup">
+                <label for="genero_outro" class="form-label">Informe o gênero</label>
+                <input type="text" class="form-control" id="genero_outro" name="genero_outro" maxlength="80"
+                  placeholder="Descreva o gênero" value="{{ String($json.genero_outro ?? '').trim() }}" />
+              </div>
+              <div class="col-md-4">
+                <label for="estado_civil" class="form-label required">Estado civil</label>
+                <select id="estado_civil" name="estado_civil" class="form-select"
+                  data-prefill="{{ $json.estado_civil }}" required>
+                  <option value="">Selecione...</option>
+                  <option value="Solteiro(a)">Solteiro(a)</option>
+                  <option value="Casado(a)">Casado(a)</option>
+                  <option value="União estável">União estável</option>
+                  <option value="Divorciado(a)">Divorciado(a)</option>
+                  <option value="Viúvo(a)">Viúvo(a)</option>
+                  <option value="Separado(a)">Separado(a)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="raca" class="form-label required">Cor/Raça (IBGE)</label>
+                <select id="raca" name="raca" class="form-select" data-prefill="{{ $json.raca }}" required>
+                  <option value="">Selecione...</option>
+                  <option value="Branca">Branca</option>
+                  <option value="Preta">Preta</option>
+                  <option value="Parda">Parda</option>
+                  <option value="Amarela">Amarela</option>
+                  <option value="Indígena">Indígena</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Restored Inclusão e Acessibilidade -->
+          <div class="section-block">
+            <h3 class="section-title">Inclusão e acessibilidade</h3>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="cotasPPNI" class="form-label required">Deseja concorrer às vagas PPNI?</label>
+                <select id="cotasPPNI" name="cotasPPNI" class="form-select" data-prefill="{{ $json.cotasPPNI }}" required>
+                  <option value="">Selecione...</option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+                <div id="ppniDocsInfo" class="form-text mt-1 hidden text-primary fw-bold">
+                  * Você deverá anexar a documentação de heteroidentificação na aba "Documentação".
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label for="is_pcd" class="form-label required">Pessoa com deficiência (PCD)?</label>
+                <select id="is_pcd" name="is_pcd" class="form-select" data-prefill="{{ $json.is_pcd }}" required>
+                  <option value="">Selecione...</option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+              </div>
+              <div class="col-md-4 hidden" id="tipoPcdGroup">
+                <label for="tipo_pcd" class="form-label">Tipo de deficiência</label>
+                <input type="text" class="form-control" id="tipo_pcd" name="tipo_pcd" value="{{ $json.tipo_pcd }}" data-force-required="true" />
+              </div>
+              <div class="col-md-4 hidden" id="pcdCidGroup">
+                <label for="pcd_cid" class="form-label">CID (opcional)</label>
+                <input type="text" class="form-control" id="pcd_cid" name="pcd_cid" value="{{ $json.pcd_cid }}" />
+              </div>
+              <div class="col-md-4">
+                <label for="condicao_especial_opcao" class="form-label">Necessita de condição especial para realização das etapas?</label>
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="condicao_especial" id="condicao_especial_sim" value="SIM" {{ $json.condicao_especial === 'SIM' ? 'checked' : '' }} />
+                      <label class="form-check-label" for="condicao_especial_sim">Sim</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="condicao_especial" id="condicao_especial_nao" value="NAO" {{ $json.condicao_especial === 'NAO' ? 'checked' : '' }} />
+                      <label class="form-check-label" for="condicao_especial_nao">Não</label>
+                    </div>
+                </div>
+              </div>
+              <div class="col-md-8 hidden" id="necessidadeGroup">
+                <label for="necessidade" class="form-label">Qual a necessidade?</label>
+                <input type="text" class="form-control" id="necessidade" name="necessidade" value="{{ $json.necessidade }}" data-force-required="true" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Restored Experiências Adicionais -->
+          <div class="section-block">
+            <h3 class="section-title">Experiências adicionais</h3>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <span class="form-label">Já atuou como jurado(a)?</span>
+                <div class="d-flex gap-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="jurado_funcao" id="jurado_sim" value="SIM" {{ $json.foi_jurado === 'SIM' ? 'checked' : '' }} />
+                    <label class="form-check-label" for="jurado_sim">Sim</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="jurado_funcao" id="jurado_nao" value="NAO" {{ $json.foi_jurado === 'NAO' ? 'checked' : '' }} />
+                    <label class="form-check-label" for="jurado_nao">Não</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-8 hidden" id="juradoDetalhes">
+                <label for="jurado_periodo" class="form-label">Informações sobre atuação como jurado(a)</label>
+                <input type="text" class="form-control" id="jurado_periodo" name="jurado_periodo"
+                  placeholder="Tribunal, período ou outros detalhes" value="{{ $json.jurado_periodo }}" />
+              </div>
+              <div class="col-md-4">
+                <span class="form-label">Possui algum outro vínculo com o serviço público?</span>
+                <div class="d-flex gap-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="vinculo_publico_opcao" id="vinculo_publico_sim" value="Sim" {{ $json.vinculo_publico === 'Sim' ? 'checked' : '' }} />
+                    <label class="form-check-label" for="vinculo_publico_sim">Sim</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="vinculo_publico_opcao" id="vinculo_publico_nao" value="Não" {{ $json.vinculo_publico === 'Não' ? 'checked' : '' }} />
+                    <label class="form-check-label" for="vinculo_publico_nao">Não</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 hidden" id="qualVinculoGroup">
+                <label for="qual_vinculo" class="form-label">Qual vínculo?</label>
+                <input type="text" class="form-control text-uppercase" id="qual_vinculo" name="qual_vinculo"
+                  value="{{ $json.qual_vinculo }}" data-force-required="true" />
+              </div>
+              <div class="col-12 hidden" id="vinculoCargoGroup">
+                <label for="vinculo_cargo" class="form-label">Cargo</label>
+                <input type="text" class="form-control text-uppercase" id="vinculo_cargo" name="vinculo_cargo"
+                  value="{{ String($json.vinculo_cargo ?? '').trim().toUpperCase() }}" data-force-required="true" />
+              </div>
+              <!-- Hidden summary inputs for toggle logic -->
+              <input type="hidden" id="foi_jurado" name="foi_jurado" value="{{ $json.foi_jurado }}" />
+              <input type="hidden" id="vinculo_publico" name="vinculo_publico" value="{{ $json.vinculo_publico }}" />
+            </div>
+          </div>
+
+          <div class="section-block hidden" id="militarGroup">
+                <span class="form-label required">Serviço militar obrigatório quitado?</span>
+                <div class="d-flex gap-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="militar" id="militar_sim" value="SIM" data-force-required="true" {{ $json.militar === 'SIM' ? 'checked' : '' }} />
+                    <label class="form-check-label" for="militar_sim">Sim</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="militar" id="militar_nao" value="NAO" data-force-required="true" {{ $json.militar === 'NAO' ? 'checked' : '' }} />
+                    <label class="form-check-label" for="militar_nao">Não</label>
+                  </div>
+                </div>
+          </div>
+          
+          <div id="alistamentoWrapper" class="section-block hidden">
+            <h3 class="section-title">Certificado de reservista</h3>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="alistamento_numero" class="form-label">Número</label>
+                <input type="text" class="form-control" id="alistamento_numero" name="alistamento_numero" maxlength="12"
+                  inputmode="numeric" data-numeric-only="true" value="{{ $json.alistamento_numero }}" data-force-required="true" />
+              </div>
+              <div class="col-md-4">
+                <label for="alistamento_orgao" class="form-label">Órgão emissor</label>
+                <input type="text" class="form-control" id="alistamento_orgao" name="alistamento_orgao"
+                  value="{{ $json.alistamento_orgao }}" data-force-required="true" />
+              </div>
+              <div class="col-md-4">
+                <label for="alistamento_data" class="form-label">Data de emissão</label>
+                <input type="date" class="form-control" id="alistamento_data" name="alistamento_data"
+                  value="{{ $json.alistamento_data }}" data-force-required="true" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-top-0 pt-0">
+          <div class="wizard-controls">
+            <button type="button" class="btn btn-outline-secondary" id="prevBtn0" disabled>Voltar</button>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-primary" data-action="next">Avançar</button>
+          </div>
+        </div>
+      </section>
+      <section class="card step-card d-none" data-step-panel="1">
+        <div class="card-header">
+          <h2>Endereço e contato</h2>
+        </div>
+        <div class="card-body">
+          <div class="section-block">
+            <h3 class="section-title">Contato</h3>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="email" class="form-label required">E-mail</label>
+                <input type="email" class="form-control" id="email" name="email" data-allow-lowercase="true"
+                  value="{{ $json.email }}" required />
+              </div>
+              <div class="col-md-6">
+                <label for="email_confirm" class="form-label required">Confirme o e-mail</label>
+                <input type="email" class="form-control" id="email_confirm" name="email_confirm"
+                  data-allow-lowercase="true" value="" required />
+              </div>
+              <div class="col-md-4">
+                <label for="tel1" class="form-label required">Telefone 1</label>
+                <input type="text" class="form-control" id="tel1" name="tel1" maxlength="11" inputmode="numeric"
+                  placeholder="DDD + número" value="{{ $json.telefone1 }}" required />
+              </div>
+              <div class="col-md-4">
+                <label for="tel2" class="form-label">Telefone 2</label>
+                <input type="text" class="form-control" id="tel2" name="tel2" maxlength="11" inputmode="numeric"
+                  placeholder="DDD + número" value="{{ $json.tel2 }}" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h3 class="section-title">Endereço residencial</h3>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label for="cep" class="form-label required">CEP</label>
+                <input type="text" class="form-control" id="cep" name="cep" maxlength="8" inputmode="numeric"
+                  placeholder="00000-000" value="{{ $json.cep }}" required />
+              </div>
+              <div class="col-md-5">
+                <label for="logradouro" class="form-label required">Logradouro</label>
+                <input type="text" class="form-control" id="logradouro" name="logradouro" value="{{ $json.logradouro }}"
+                  required />
+              </div>
+              <div class="col-md-2">
+                <label for="numero" class="form-label required">Número</label>
+                <input type="text" class="form-control" id="numero" name="numero" value="{{ $json.numero }}" required />
+              </div>
+              <div class="col-md-2">
+                <label for="complemento" class="form-label">Complemento</label>
+                <input type="text" class="form-control" id="complemento" name="complemento"
+                  value="{{ $json.complemento }}" />
+              </div>
+              <div class="col-md-4">
+                <label for="bairro" class="form-label required">Bairro</label>
+                <input type="text" class="form-control" id="bairro" name="bairro" value="{{ $json.bairro }}" required />
+              </div>
+              <div class="col-md-4">
+                <label for="cidade" class="form-label required">Cidade</label>
+                <input type="text" class="form-control" id="cidade" name="cidade" value="{{ $json.cidade }}" required />
+              </div>
+              <div class="col-md-2">
+                <label for="endereco_uf" class="form-label required">UF</label>
+                <input type="text" class="form-control" id="endereco_uf" name="uf" maxlength="2" value="{{ $json.uf }}"
+                  required />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-top-0 pt-0">
+          <div class="wizard-controls">
+            <button type="button" class="btn btn-outline-secondary" data-action="prev">Voltar</button>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-primary" data-action="next">Avançar</button>
+          </div>
+        </div>
+      </section>
+      <section class="card step-card d-none" data-step-panel="2">
+        <div class="card-header">
+          <h2>Perfil profissional e vínculos</h2>
+        </div>
+        <div class="card-body">
+          <div class="section-block">
+            <h3 class="section-title">Formação acadêmica</h3>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="nivel" class="form-label required">Nível</label>
+                <select id="nivel" name="nivel" class="form-select" data-prefill="{{ $json.nivel }}" required>
+                  <option value="">Selecione...</option>
+                  <option value="Médio">Médio</option>
+                  <option value="Técnico">Técnico</option>
+                  <option value="Graduação">Graduação</option>
+                  <option value="Pós-graduação">Pós-graduação</option>
+                  <option value="Mestrado">Mestrado</option>
+                  <option value="Doutorado">Doutorado</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="ies" class="form-label required">Instituição</label>
+                <input type="text" class="form-control" id="ies" name="ies" value="{{ $json.ies }}" required />
+              </div>
+              <div class="col-md-4">
+                <label for="curso" class="form-label required">Curso</label>
+                <input type="text" class="form-control" id="curso" name="curso" value="{{ $json.curso }}" required />
+              </div>
+              <div class="col-md-3">
+                <label for="ano_conclusao" class="form-label required">Ano de conclusão</label>
+                <input type="text" class="form-control" id="ano_conclusao" name="ano_conclusao" maxlength="4"
+                  inputmode="numeric" pattern="\d{4}" title="Informe 4 dígitos" data-numeric-only="true"
+                  value="{{ $json.ano_conclusao }}" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h3 class="section-title">Atuação profissional</h3>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="cargo" class="form-label required">Cargo pretendido</label>
+                <select id="cargo" name="cargo" class="form-select" data-prefill="{{ $json.cargo }}" required>
+                  <option value="">Selecione...</option>
+                  <option value="Analista em Saúde Animal – Veterinário 40h">Analista em Saúde Animal – Veterinário 40h
+                  </option>
+                  <option value="Analista em Saúde Animal – Veterinário 20h">Analista em Saúde Animal – Veterinário 20h
+                  </option>
+                  <option value="Analista em Saúde Animal – Veterinário 40h Plantonista">Analista em Saúde Animal –
+                    Veterinário 40h Plantonista</option>
+                  <option value="Auxiliar em Saúde Animal - Auxiliar Veterinário 40h">Auxiliar em Saúde Animal -
+                    Auxiliar Veterinário 40h</option>
+                  <option value="Auxiliar em Saúde Animal - Auxiliar Veterinário 40h Plantonista">Auxiliar em Saúde
+                    Animal - Auxiliar Veterinário 40h Plantonista</option>
+                  <option value="Técnico em Saúde Animal - Radiologia e Imagenologia 24h">Técnico em Saúde Animal -
+                    Radiologia e Imagenologia 24h</option>
+                </select>
+              </div>
+              <div class="col-md-6 d-none" id="especialidadeGroup">
+                <label for="especialidade" class="form-label required">Especialidade (quando houver)</label>
+                <select class="form-select" id="especialidade" name="especialidade"
+                  data-prefill="{{ $json.especialidade }}">
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="section-block">
+            <h3 class="section-title">Situação eleitoral</h3>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="titulo" class="form-label required">Título de Eleitor</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" maxlength="12" inputmode="numeric"
+                  pattern="\d{0,12}" title="Informe apenas números" data-numeric-only="true" value="{{ $json.titulo }}"
+                  required data-force-required="true" />
+              </div>
+              <div class="col-md-4">
+                <label for="zona" class="form-label required">Zona</label>
+                <input type="text" class="form-control" id="zona" name="zona" maxlength="4" inputmode="numeric"
+                  pattern="\d{0,4}" title="Informe apenas números" data-numeric-only="true" value="{{ $json.zona }}"
+                  required data-force-required="true" />
+              </div>
+                  pattern="\d{0,4}" title="Informe apenas números" data-numeric-only="true" value="{{ $json.secao }}"
+                  required data-force-required="true" />
+              </div>
+            </div>
+          </div>
+        <div class="card-footer bg-transparent border-top-0 pt-0">
+          <div class="wizard-controls">
+            <button type="button" class="btn btn-outline-secondary" data-action="prev">Voltar</button>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-primary" data-action="next">Avançar</button>
+          </div>
+        </div>
+      </section>
+      <section class="card step-card d-none" data-step-panel="3">
+        <div class="card-header">
+          <h2>Revisão e envio</h2>
+        </div>
+        <div class="card-body">
+          <div class="section-block">
+            <h3 class="section-title">Revise seus dados</h3>
+            <p class="section-subtitle">Confira atentamente todas as informações antes de prosseguir para o anexo de documentos. Você
+              poderá retornar às etapas anteriores para ajustar qualquer dado.</p>
+            <div id="reviewSummary">
+              <div class="summary-section">
+                <h3>Resumo</h3>
+                <p class="summary-placeholder mb-0">Os dados preenchidos aparecerão aqui quando você chegar a esta
+                  etapa.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h3 class="section-title">Declaração</h3>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="termoResponsabilidade" name="termoResponsabilidade"
+                required />
+              <label class="form-check-label" for="termoResponsabilidade">Declaro que os dados informados são verdadeiros e estou de acordo com o edital.</label>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-top-0 pt-0">
+          <div class="wizard-controls">
+            <button type="button" class="btn btn-outline-secondary" data-action="prev">Voltar</button>
+            <div class="spacer"></div>
+            <button type="button" class="btn btn-primary" id="btnAvancarDocs" onclick="avancarParaDocumentacao()">
+              Avançar para Documentação
+            </button>
+          </div>
+        </div>
+      </section>
+            </form>
+            <div class="submission-success" id="submissionSuccess" aria-live="polite">
+                <div class="card p-5 text-center">
+                    <div class="success-animation">🎉</div>
+                    <h2 class="mb-3">Sua inscrição está sendo processada!</h2>
+                    <p class="text-muted mb-4">Aguarde o resultado do processamento no email informado no cadastro.</p>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-primary px-5 py-2" id="newSubmissionButton">Nova inscrição</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Documentação -->
+        <section id="documentacao" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Anexo de Documentação</h2>
+                <p class="text-muted">Por favor, envie todos os documentos obrigatórios para validar sua inscrição.</p>
+            </div>
+
+          <div class="section-block">
+            <h3 class="section-title">Documentos pessoais</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 upload-row">
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card required" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">🪪</div>
+                  <p class="upload-title">Documento de identificação (frente)</p>
+                  <p class="upload-instruction">Anexe apenas arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_id_frente" data-form-field="doc_id_frente" accept=".pdf" required
+                    aria-label="Documento de identificação (frente)" />
+                  <label class="upload-button" for="doc_id_frente">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card required" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">🪪</div>
+                  <p class="upload-title">Documento de identificação (verso)</p>
+                  <p class="upload-instruction">Anexe apenas arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_id_verso" data-form-field="doc_id_verso" accept=".pdf" required
+                    aria-label="Documento de identificação (verso)" />
+                  <label class="upload-button" for="doc_id_verso">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card required" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">🧾</div>
+                  <p class="upload-title">CPF</p>
+                  <p class="upload-instruction">Anexe apenas arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_cpf" data-form-field="doc_cpf" accept=".pdf" required
+                    aria-label="CPF" />
+                  <label class="upload-button" for="doc_cpf">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card required" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">🏠</div>
+                  <p class="upload-title">Comprovante de residência</p>
+                  <p class="upload-instruction">Anexe apenas arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_residencia" data-form-field="doc_residencia" accept=".pdf"
+                    required aria-label="Comprovante de residência" />
+                  <label class="upload-button" for="doc_residencia">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card required" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">🗳️</div>
+                  <p class="upload-title">Quitação eleitoral</p>
+                  <p class="upload-instruction">Anexe apenas arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_quitacao_eleitoral" data-form-field="doc_quitacao_eleitoral"
+                    accept=".pdf" required aria-label="Quitação eleitoral" />
+                  <label class="upload-button" for="doc_quitacao_eleitoral">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-4 hidden" id="docMilitarGroup">
+                <div class="upload-card" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">🎖️</div>
+                  <p class="upload-title">Quitação do serviço militar</p>
+                  <p class="upload-instruction">Candidatos do sexo masculino. Anexe apenas arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_militar" data-form-field="doc_militar" accept=".pdf"
+                    data-force-required="true" aria-label="Quitação do serviço militar" />
+                  <label class="upload-button" for="doc_militar">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h3 class="section-title">Comprovação profissional</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 upload-row">
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card required" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">🎓</div>
+                  <p class="upload-title">Escolaridade e Requisitos</p>
+                  <p class="upload-instruction">Conforme Anexo II. Anexe um único arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_escolaridade" data-form-field="doc_escolaridade" accept=".pdf"
+                    required aria-label="Comprovação da escolaridade" />
+                  <label class="upload-button" for="doc_escolaridade">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card required" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">📁</div>
+                  <p class="upload-title">Anexo V e Comprovantes</p>
+                  <p class="upload-instruction">Curriculo e títulos. Anexe um único arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_curriculo" data-form-field="doc_curriculo" accept=".pdf" required
+                    aria-label="Experiência, títulos ou certificados" />
+                  <label class="upload-button" for="doc_curriculo">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block mt-5">
+              <div class="card bg-light border-0 p-4">
+                  <div class="d-flex align-items-center gap-3 mb-3">
+                      <div class="bg-primary text-white p-3 rounded-circle"><i class="fas fa-check-circle fa-2x"></i></div>
+                      <h3 class="mb-0">Finalizar Inscrição</h3>
+                  </div>
+                  <p>Após conferir seus dados e anexar os documentos, clique no botão abaixo para submeter sua participação.</p>
+                  <button type="button" class="btn btn-primary btn-lg w-100 py-3 mt-2" id="finalSubmitBtn" onclick="validateAndSubmit()">
+                      <i class="fas fa-paper-plane me-2"></i>Concluir e Enviar Inscrição
+                  </button>
+              </div>
+          </div>
+        </section>
+
+        <!-- Tab: Resumo -->
+        <section id="resumo" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Resumo da Participação</h2>
+                <p class="text-muted">Confira o status e detalhes das suas inscrições ativas.</p>
+            </div>
+            <div class="card p-5 text-center">
+                <i class="fas fa-clipboard-list fa-4x text-muted mb-3 opacity-25"></i>
+                <h3 class="text-muted">Sem inscrições finalizadas</h3>
+                <p class="text-muted">Utilize a aba "Inscrição" para participar da seleção.</p>
+            </div>
+        </section>
+
+        <!-- Tab: Recursos -->
+        <section id="recursos" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Interposição de Recursos</h2>
+                <p class="text-muted">Acompanhe prazos e submeta recursos contra resultados preliminares.</p>
+            </div>
+            <div class="card p-5 text-center">
+                <i class="fas fa-gavel fa-4x text-muted mb-3 opacity-25"></i>
+                <h3 class="text-muted">Período de recursos fechado</h3>
+                <p class="text-muted">Consulte o cronograma da seleção para saber as datas de abertura de recursos.</p>
+            </div>
+        </section>
+
+        <!-- Tab: Pontuação -->
+        <section id="pontuacao" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Minha Pontuação</h2>
+                <p class="text-muted">Confira sua pontuação detalhada pós-análise curricular.</p>
+            </div>
+            <div class="card p-5 text-center">
+                <i class="fas fa-chart-line fa-4x text-muted mb-3 opacity-25"></i>
+                <h3 class="text-muted">Aguardando Avaliação</h3>
+                <p class="text-muted">Sua pontuação será exibida nesta área após a publicação do resultado preliminar.</p>
+            </div>
+        </section>
+
+        <!-- Tab: Informativos -->
+        <section id="informativos" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Informativos e Editais</h2>
+                <p class="text-muted">Documentos oficiais e comunicados da seleção.</p>
+            </div>
+            <div class="card p-4">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div>
+                            <h6 class="mb-1 fw-bold">Edital de Abertura nº 01/2026</h6>
+                            <p class="small text-muted mb-0">Publicado em: 01/01/2026</p>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-2"></i>Download</a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Tab: Cronograma -->
+        <section id="cronograma" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">Cronograma da Seleção</h2>
+                <p class="text-muted">Fique atento às datas importantes do certame.</p>
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-4 py-3">Evento</th>
+                                <th class="px-4 py-3">Data Prevista</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="px-4 py-3">Início das Inscrições</td>
+                                <td class="px-4 py-3">01/01/2026</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3">Término das Inscrições</td>
+                                <td class="px-4 py-3">15/01/2026</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+  <div class="pattern-bottom"></div>
+
+  <div class="draft-toast" id="draftToast" role="status" aria-live="polite">
+    <span>Rascunho salvo com sucesso!</span>
+  </div>
+
+  <div class="submission-loading" id="submissionLoading" aria-hidden="true" aria-live="polite">
+    <div class="loading-dialog" role="status">
+      <div class="spinner-border text-light mb-3" role="presentation" aria-hidden="true"></div>
+      <p class="loading-text">Conferindo seus dados...</p>
+    </div>
+  </div>
+
+  <div class="modal fade" id="preRegistrationModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+    data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">⏰ Inscrições ainda não abertas</h5>
+        </div>
+        <div class="modal-body">
+          <div class="emoji-bounce">⏳</div>
+          <p class="modal-message">As inscrições para este processo seletivo ainda não
+            estão abertas.</p>
+          <p class="modal-message"><strong>Abertura em:</strong></p>
+          <div class="countdown-display" id="preRegCountdown">Carregando...</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="closePreRegModal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="friendlyAlert" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="friendlyAlertTitle">Aviso!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body" id="friendlyAlertMessage"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Limpa os parâmetros da barra de endereços após o carregamento
+    // Limpa os parâmetros da barra de endereços, mas preserva id_selecao e token para o reload
+    if (window.location.search) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const newParams = new URLSearchParams();
+      ['id_selecao', 'token'].forEach(key => {
+        if (urlParams.has(key)) newParams.set(key, urlParams.get(key));
+      });
+      const newSearch = newParams.toString();
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + (newSearch ? '?' + newSearch : '');
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+
+    // Sidebar toggle for mobile
+    const sidebar = document.getElementById('sidebar');
+    const mobileToggle = document.getElementById('mobile-toggle');
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+        });
+    }
+
+    // Tab switcher logic
+    const navLinks = document.querySelectorAll('.nav-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    const showTab = (tabId) => {
+        tabContents.forEach(content => content.classList.remove('active'));
+        navLinks.forEach(link => link.classList.remove('active'));
+
+        const targetTab = document.getElementById(tabId);
+        const targetLink = document.querySelector(`[data-tab="${tabId}"]`);
+
+        if (targetTab) targetTab.classList.add('active');
+        if (targetLink) targetLink.classList.add('active');
+        
+        // Hide sidebar on mobile after click
+        if (window.innerWidth < 992 && sidebar) {
+            sidebar.classList.remove('show');
+        }
+    };
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tabId = link.getAttribute('data-tab');
+            showTab(tabId);
+        });
+    });
+
+    // Initialize Avatar and Name
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    const avatarInitials = document.getElementById('avatarInitials');
+    if (userNameDisplay && avatarInitials) {
+        const fullName = userNameDisplay.textContent.trim();
+        if (fullName && fullName !== 'CANDIDATO' && !fullName.includes('{{')) {
+            const parts = fullName.split(' ');
+            const initials = parts.length > 1 
+                ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase()
+                : parts[0].substring(0, 2).toUpperCase();
+            avatarInitials.textContent = initials;
+        }
+    }
+
+    // Failsafe: Limpa campos que ainda contenham a estrutura {{ $json... }}
+    const isRawTemplate = (val) => typeof val === 'string' && (val.includes('{{') || val.includes('$json'));
+    const sanitizePlaceholders = () => {
+      // Clean inputs/selects
+      document.querySelectorAll('input, select, textarea').forEach(field => {
+        if (field.value && isRawTemplate(field.value)) {
+          field.value = '';
+        }
+        if (field.dataset.prefill && isRawTemplate(field.dataset.prefill)) {
+          field.dataset.prefill = '';
+        }
+        if (field.dataset.prefillRadio && isRawTemplate(field.dataset.prefillRadio)) {
+          field.dataset.prefillRadio = '';
+        }
+      });
+
+      // Sidebar identity: extract first + last name from nome field
+      const nomeField = document.getElementById('nome');
+      const rawNome = (nomeField && !isRawTemplate(nomeField.value)) ? nomeField.value.trim() : '';
+      const nameParts = rawNome.split(/\s+/).filter(Boolean);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+      const displayName = (firstName && lastName) ? `${firstName} ${lastName}`.toUpperCase() : (firstName || 'CANDIDATO').toUpperCase();
+      const initials = ((firstName[0] || 'C') + (lastName[0] || 'N')).toUpperCase();
+
+      const avatarEl = document.getElementById('avatarInitials');
+      const nameEl = document.getElementById('userNameDisplay');
+      if (avatarEl) avatarEl.textContent = initials;
+      if (nameEl) nameEl.textContent = displayName;
+
+      // Registration number
+      const inscEl = document.getElementById('numInscricaoDisplay');
+      if (inscEl) {
+        const rawVal = (inscEl.dataset.rawValue || '').trim();
+        inscEl.textContent = (rawVal && !isRawTemplate(rawVal)) ? rawVal : '\u2014';
+      }
+
+      // Clean any other visible text that leaked templates
+      document.querySelectorAll('.registration-value, .fs-4.fw-bold.text-primary').forEach(el => {
+        if (el.id === 'numInscricaoDisplay') return; // Already handled
+        if (isRawTemplate(el.textContent)) {
+          el.textContent = '\u2014';
+        }
+      });
+
+      // Logout button
+      const logoutBtn = document.getElementById('btnLogout');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          const token = document.getElementById('token')?.value || '';
+          if (token && !isRawTemplate(token)) {
+            window.location.href = `https://login.recife.pe.gov.br/auth/realms/recife/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(window.location.origin)}`;
+          } else {
+            window.location.reload();
+          }
+        });
+      }
+    };
+    sanitizePlaceholders();
+
+    const form = document.getElementById('inscricaoForm');
+    const wizardSteps = Array.from(document.querySelectorAll('.wizard-step'));
+    const stepPanels = Array.from(document.querySelectorAll('[data-step-panel]'));
+    const draftToast = document.getElementById('draftToast');
+    const friendlyAlertElement = document.getElementById('friendlyAlert');
+    const friendlyAlertMessage = document.getElementById('friendlyAlertMessage');
+    const friendlyAlertTitle = document.getElementById('friendlyAlertTitle');
+    const friendlyAlertTitleBaseClass = friendlyAlertTitle?.className || '';
+    let friendlyAlertInstance;
+    const submissionLoading = document.getElementById('submissionLoading');
+    let submissionLoadingTimer;
+    const SUBMISSION_SUSPENSE_DELAY = 2300;
+    const registrationNumberElement = document.getElementById('registrationNumber');
+    const registrationValueElement = registrationNumberElement?.querySelector('.registration-value');
+    const successScreen = document.getElementById('submissionSuccess');
+    const successRegistrationNumber = document.getElementById('successRegistrationNumber');
+    const newSubmissionButton = document.getElementById('newSubmissionButton');
+    const nacionalidadeSelect = document.getElementById('nacionalidade');
+    const naturalidadeUfSelect = document.getElementById('naturalidade_uf');
+    const naturalidadeCidadeSelect = document.getElementById('naturalidade_cidade');
+    const naturalidadeUfLabel = document.querySelector('label[for="naturalidade_uf"]');
+    const naturalidadeCidadeLabel = document.querySelector('label[for="naturalidade_cidade"]');
+    const ufSelects = Array.from(document.querySelectorAll('[data-uf-select]'));
+    const generoSelect = document.getElementById('genero');
+    const nivelSelect = document.getElementById('nivel');
+    const cargoSelect = document.getElementById('cargo');
+    const cargosInscritosInput = document.getElementById('cargosInscritos');
+    const especialidadeGroup = document.getElementById('especialidadeGroup');
+    const especialidadeSelect = document.getElementById('especialidade');
+    const countdownStatus = document.getElementById('countdownStatus');
+    const countdownTimer = document.getElementById('countdownTimer');
+    const submitButton = form?.querySelector('button[type="submit"]');
+    const REGISTRATION_START = new Date('{{ $json.inicio_inscricoes }}');
+    const REGISTRATION_END = new Date('{{ $json.termino_inscricoes }}');
+    let countdownInterval;
+    let hasSubmitted = false;
+
+    const formatRemainingTime = (remainingMs) => {
+      const totalSeconds = Math.max(0, Math.floor(remainingMs / 1000));
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      const parts = [];
+      if (days > 0) {
+        parts.push(`${days}d`);
+      }
+      parts.push(hours.toString().padStart(2, '0') + 'h');
+      parts.push(minutes.toString().padStart(2, '0') + 'm');
+      parts.push(seconds.toString().padStart(2, '0') + 's');
+
+      return parts.join(' ');
+    };
+
+    const updateSubmissionAvailability = (now) => {
+      if (!submitButton || hasSubmitted) return;
+      const isOpen = now >= REGISTRATION_START && now <= REGISTRATION_END;
+      submitButton.disabled = !isOpen;
+      submitButton.ariaDisabled = (!isOpen).toString();
+
+      if (isOpen) {
+        submitButton.title = '';
+      } else {
+        const formatDate = (date) => {
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          const hours = String(date.getHours()).padStart(2, '0');
+          const minutes = String(date.getMinutes()).padStart(2, '0');
+          return `${day}/${month}/${year} ${hours}:${minutes}`;
+        };
+        submitButton.title = `Envio disponível somente entre ${formatDate(REGISTRATION_START)} e ${formatDate(REGISTRATION_END)}.`;
+      }
+    };
+
+    const updateCountdownTimer = () => {
+      if (!countdownStatus || !countdownTimer) return;
+
+      const now = new Date();
+
+      if (now < REGISTRATION_START) {
+        countdownStatus.textContent = '⏳ Inscrições abrem em:';
+        countdownTimer.textContent = `🗓️ ${formatRemainingTime(REGISTRATION_START - now)}`;
+        updateSubmissionAvailability(now);
+        return;
+      }
+
+      if (now <= REGISTRATION_END) {
+        countdownStatus.textContent = '🚀 Inscrições abertas! Encerra em:';
+        countdownTimer.textContent = `⏱️ ${formatRemainingTime(REGISTRATION_END - now)}`;
+        updateSubmissionAvailability(now);
+        return;
+      }
+
+      countdownStatus.textContent = '🔒 Período de inscrições encerrado.';
+      countdownTimer.textContent = '⏹️ Prazo finalizado';
+      updateSubmissionAvailability(now);
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+    };
+
+    const startCountdown = () => {
+      updateCountdownTimer();
+      countdownInterval = window.setInterval(updateCountdownTimer, 1000);
+    };
+
+    // Pre-registration modal logic
+    const preRegModal = document.getElementById('preRegistrationModal');
+    const preRegCountdown = document.getElementById('preRegCountdown');
+    const closePreRegButton = document.getElementById('closePreRegModal');
+    const mainContent = document.querySelector('main.frame-card');
+    const wizardShell = document.querySelector('.wizard-shell');
+    let preRegCountdownInterval;
+
+    const updatePreRegCountdown = () => {
+      if (!preRegCountdown) return;
+      const now = new Date();
+      const remaining = REGISTRATION_START - now;
+
+      if (remaining <= 0) {
+        preRegCountdown.textContent = 'Abrindo...';
+        if (preRegCountdownInterval) {
+          clearInterval(preRegCountdownInterval);
+        }
+        return;
+      }
+
+      preRegCountdown.textContent = formatRemainingTime(remaining);
+    };
+
+    const checkRegistrationStatus = () => {
+      const now = new Date();
+
+      console.log('=== Debug Registration Status ===');
+      console.log('Now:', now);
+      console.log('Start:', REGISTRATION_START);
+      console.log('End:', REGISTRATION_END);
+      console.log('Before start?', now < REGISTRATION_START);
+
+      if (now < REGISTRATION_START) {
+        console.log('Action: Blocking form...');
+        // Block all interactive elements
+        const header = document.querySelector('header.site-header');
+        const patternTop = document.querySelector('.pattern-top');
+
+        if (header) header.classList.add('form-blocked');
+        if (patternTop) patternTop.classList.add('form-blocked');
+        if (mainContent) {
+          mainContent.classList.add('form-blocked');
+          console.log('Main content blocked');
+        }
+        if (wizardShell) {
+          wizardShell.classList.add('form-blocked');
+          console.log('Wizard shell blocked');
+        }
+
+        // Show modal
+        if (preRegModal && typeof bootstrap !== 'undefined' && bootstrap?.Modal) {
+          const modalInstance = new bootstrap.Modal(preRegModal);
+          modalInstance.show();
+
+          // Start countdown in modal
+          updatePreRegCountdown();
+          preRegCountdownInterval = setInterval(updatePreRegCountdown, 1000);
+        }
+      }
+    };
+
+    // Close button handler with redirect
+    if (closePreRegButton) {
+      closePreRegButton.addEventListener('click', () => {
+        if (preRegCountdownInterval) {
+          clearInterval(preRegCountdownInterval);
+        }
+        window.location.href = 'https://secti.recife.pe.gov.br/10a4b028-f7d2-423b-9781-1673a7314490';
+      });
+    }
+
+    const especialidadeEntries = [];
+    const normalizeEspecialidadeValue = (value) =>
+      String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toUpperCase();
+    const findMatchingEspecialidade = (entries, normalizedValue) =>
+      entries.find((entry) => {
+        if (normalizeEspecialidadeValue(entry.value) === normalizedValue) {
+          return true;
+        }
+        return (entry.legacyValues || []).some(
+          (legacyValue) => normalizeEspecialidadeValue(legacyValue) === normalizedValue,
+        );
+      });
+
+    const normalizeCargoValue = (value) =>
+      String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[–—]/g, '-') // Normalize dashes
+        .replace(/\s+/g, ' ')  // Collapse whitespace
+        .trim()
+        .toUpperCase();
+
+    const parseDynamicCargos = () => {
+      const input = document.getElementById('dynamicCargos');
+      if (!input) return new Map();
+      let value = input.value?.trim();
+      if (!value || value.startsWith('{{')) return new Map();
+
+      const map = new Map(); // Nivel -> Map(Cargo -> Set(Specialties))
+
+      const processStringToken = (token) => {
+        if (!token) return;
+        const parts = String(token).split('|');
+        let nivel, cargo, specialty;
+
+        if (parts.length >= 3) {
+            nivel = parts[0].trim();
+            cargo = parts[1].trim();
+            specialty = parts[2].trim();
+        } else if (parts.length === 2) {
+            nivel = 'TODOS';
+            cargo = parts[0].trim();
+            specialty = parts[1].trim();
+        } else {
+            nivel = 'TODOS';
+            cargo = parts[0].trim();
+            specialty = '';
+        }
+        
+        if (!cargo) return;
+        
+        const normNivel = normalizeCargoValue(nivel);
+        if (!map.has(normNivel)) map.set(normNivel, new Map());
+        const cargoMap = map.get(normNivel);
+        
+        if (!cargoMap.has(cargo)) cargoMap.set(cargo, new Set());
+        if (specialty) cargoMap.get(cargo).add(specialty);
+      };
+
+      const addItemToMap = (item) => {
+        if (!item) return;
+        if (typeof item === 'object') {
+            // Try common keys from n8n or generic ones
+            const val = item.cargo || item.cargos || item.cargo_nome || item.descricao || 
+                        item.value || item.text || item.name || item.nome || 
+                        Object.values(item)[0];
+            if (typeof val === 'string') {
+                val.split(';').forEach(sub => processStringToken(sub.trim()));
+            } else if (Array.isArray(val)) {
+                val.forEach(addItemToMap);
+            } else if (typeof val === 'object') {
+                addItemToMap(val); // Recursive for nested objects if n8n gives one
+            }
+            return;
+        }
+        if (typeof item !== 'string') return;
+        const subItems = item.split(';');
+        subItems.forEach(sub => processStringToken(sub.trim()));
+      };
+
+      try {
+        const raw = JSON.parse(value);
+        if (Array.isArray(raw)) {
+          raw.forEach(addItemToMap);
+        } else if (typeof raw === 'string') {
+          addItemToMap(raw);
+        }
+      } catch (e) {
+        value.split(';').forEach(sub => processStringToken(sub.trim()));
+      }
+      return map;
+    };
+
+    const extractCargoEspecialidade = (value) => {
+      const rawValue = String(value ?? '').trim();
+      if (!rawValue) {
+        return { cargo: '', especialidade: '' };
+      }
+      const legacyMatch = rawValue.match(/^(.*?)-\s*Especialidade:\s*(.+)$/i);
+      if (legacyMatch) {
+        return { cargo: legacyMatch[1].trim(), especialidade: legacyMatch[2].trim() };
+      }
+      const dashSeparators = [' — ', ' – '];
+      for (const separator of dashSeparators) {
+        const index = rawValue.indexOf(separator);
+        if (index !== -1) {
+          const cargo = rawValue.slice(0, index).trim();
+          const especialidade = rawValue.slice(index + separator.length).trim();
+          if (cargo && especialidade) {
+            return { cargo, especialidade };
+          }
+        }
+      }
+      return { cargo: rawValue, especialidade: '' };
+    };
+
+    const parseCargosInscritos = () => {
+      const input = document.getElementById('cargosInscritos');
+      if (!input) return [];
+      let value = input.value?.trim();
+      if (!value || value.startsWith('{{')) return [];
+
+      let rawItems = [];
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) rawItems = parsed;
+      } catch (e) {
+        rawItems = value.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      return rawItems
+        .map((item) => {
+          const trimmed = String(item ?? '').trim();
+          if (!trimmed) return null;
+          const { cargo, especialidade } = extractCargoEspecialidade(trimmed);
+          return { raw: trimmed, cargo, especialidade };
+        })
+        .filter(Boolean);
+    };
+
+    const buildCargosInscritosIndex = () => {
+      const entries = parseCargosInscritos();
+      const blockedCargos = new Set();
+      const blockedEspecialidades = new Map();
+      entries.forEach(({ cargo, especialidade }) => {
+        const normalizedCargo = normalizeCargoValue(cargo);
+        if (!normalizedCargo) return;
+        if (especialidade) {
+          const normalizedEspecialidade = normalizeEspecialidadeValue(especialidade);
+          if (!normalizedEspecialidade) return;
+          if (!blockedEspecialidades.has(normalizedCargo)) {
+            blockedEspecialidades.set(normalizedCargo, new Set());
+          }
+          blockedEspecialidades.get(normalizedCargo).add(normalizedEspecialidade);
+          return;
+        }
+        blockedCargos.add(normalizedCargo);
+      });
+      return { entries, blockedCargos, blockedEspecialidades };
+    };
+
+    const normalizeSimpleValue = (value) =>
+      String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]+/g, '')
+        .toLowerCase();
+
+    const getCargoCategory = (value) => {
+      const normalized = normalizeSimpleValue(value);
+      if (!normalized) return 'placeholder';
+      if (normalized.includes('analista')) return 'analista';
+      if (normalized.includes('tecnico')) return 'tecnico';
+      if (normalized.includes('auxiliar')) return 'auxiliar';
+      return 'other';
+    };
+
+    const cargoBaseOptions = cargoSelect
+      ? Array.from(cargoSelect.options).map((option) => ({
+        value: option.value,
+        label: option.textContent,
+        disabled: option.disabled,
+        hidden: option.hidden,
+        defaultSelected: option.defaultSelected,
+        category: getCargoCategory(option.value),
+      }))
+      : [];
+
+    const getNivelTier = (value) => {
+      const normalized = normalizeSimpleValue(value);
+      if (!normalized) return 'all';
+      if (
+        normalized === 'graduacao' ||
+        normalized === 'posgraduacao' ||
+        normalized === 'mestrado' ||
+        normalized === 'doutorado'
+      ) {
+        return 'graduacao';
+      }
+      if (normalized === 'tecnico') {
+        return 'tecnico';
+      }
+      if (normalized === 'medio' || normalized === 'fundamental') {
+        return 'auxiliar';
+      }
+      return 'auxiliar';
+    };
+
+    const updateEspecialidadeOptions = () => {
+      if (!cargoSelect || !especialidadeSelect || !especialidadeGroup) return;
+      const selectedCargo = cargoSelect.value?.trim();
+      const dynamicMap = parseDynamicCargos();
+
+      const storedValue = especialidadeSelect.dataset.currentValue || especialidadeSelect.value || '';
+      const normalizedPrefill = normalizeEspecialidadeValue(especialidadeSelect.dataset.prefill);
+
+      const specialtiesSet = dynamicMap.get(selectedCargo);
+      especialidadeSelect.innerHTML = '';
+
+      if (!specialtiesSet || specialtiesSet.size === 0) {
+        especialidadeGroup.classList.add('d-none');
+        especialidadeSelect.required = false;
+        especialidadeSelect.disabled = true;
+        especialidadeSelect.value = '';
+        especialidadeSelect.dataset.currentValue = '';
+        return;
+      }
+
+      especialidadeGroup.classList.remove('d-none');
+      especialidadeSelect.disabled = false;
+      especialidadeSelect.required = true;
+
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Selecione...';
+      placeholderOption.disabled = true;
+      placeholderOption.selected = true;
+      especialidadeSelect.appendChild(placeholderOption);
+
+      specialtiesSet.forEach(spec => {
+        const option = document.createElement('option');
+        option.value = spec;
+        option.textContent = spec;
+        especialidadeSelect.appendChild(option);
+      });
+
+      // Restoration logic
+      if (normalizedPrefill) {
+        const match = Array.from(specialtiesSet).find(s => normalizeEspecialidadeValue(s) === normalizedPrefill);
+        if (match) {
+          especialidadeSelect.value = match;
+          delete especialidadeSelect.dataset.prefill;
+        }
+      }
+      if (!especialidadeSelect.value && storedValue) {
+        const match = Array.from(specialtiesSet).find(s => normalizeEspecialidadeValue(s) === normalizeEspecialidadeValue(storedValue));
+        if (match) especialidadeSelect.value = match;
+      }
+
+      if (!especialidadeSelect.value && specialtiesSet.size === 1) {
+        especialidadeSelect.value = Array.from(specialtiesSet)[0];
+      }
+
+      placeholderOption.selected = !especialidadeSelect.value;
+      especialidadeSelect.dataset.currentValue = especialidadeSelect.value || '';
+    };
+    const generoBaseOptions = generoSelect
+      ? Array.from(generoSelect.options).map((option) => ({ value: option.value, label: option.textContent }))
+      : [];
+    const ufValues = [
+      'AC',
+      'AL',
+      'AP',
+      'AM',
+      'BA',
+      'CE',
+      'DF',
+      'ES',
+      'GO',
+      'MA',
+      'MT',
+      'MS',
+      'MG',
+      'PA',
+      'PB',
+      'PR',
+      'PE',
+      'PI',
+      'RJ',
+      'RN',
+      'RO',
+      'RR',
+      'RS',
+      'SC',
+      'SE',
+      'SP',
+      'TO',
+    ];
+    const storageKey = 'inscricao-hospvet-draft';
+    let currentStep = 0;
+    let cepController;
+    const visitedSteps = new Set();
+    const authorizationField = document.getElementById('initialAuthorization');
+    const showSubmissionSuspense = (callback, delay = SUBMISSION_SUSPENSE_DELAY) => {
+      if (submissionLoadingTimer) {
+        clearTimeout(submissionLoadingTimer);
+        submissionLoadingTimer = null;
+      }
+      const executeCallback = () => {
+        if (submissionLoading) {
+          submissionLoading.classList.remove('is-visible');
+          submissionLoading.setAttribute('aria-hidden', 'true');
+        }
+        submissionLoadingTimer = null;
+        if (typeof callback === 'function') {
+          callback();
+        }
+      };
+      if (!submissionLoading || delay <= 0) {
+        window.setTimeout(executeCallback, Math.max(delay, 0));
+        return;
+      }
+      submissionLoading.classList.add('is-visible');
+      submissionLoading.setAttribute('aria-hidden', 'false');
+      submissionLoadingTimer = window.setTimeout(executeCallback, delay);
+    };
+
+    const hideSubmissionSuspense = () => {
+      if (submissionLoadingTimer) {
+        clearTimeout(submissionLoadingTimer);
+        submissionLoadingTimer = null;
+      }
+      if (submissionLoading) {
+        submissionLoading.classList.remove('is-visible');
+        submissionLoading.setAttribute('aria-hidden', 'true');
+      }
+    };
+
+    let _firstInvalidField = null;
+
+    const showFriendlyAlert = (content, options = {}) => {
+      if (!friendlyAlertElement || !friendlyAlertMessage) {
+        window.alert(typeof content === 'string' ? content : String(content ?? ''));
+        return;
+      }
+      const { title, titleClass } = options ?? {};
+      if (friendlyAlertTitle) {
+        friendlyAlertTitle.className = friendlyAlertTitleBaseClass;
+        const titleText = typeof title === 'string' && title.trim() ? title : 'Aviso!';
+        friendlyAlertTitle.textContent = titleText;
+        if (titleClass) {
+          const classes = Array.isArray(titleClass)
+            ? titleClass
+            : String(titleClass)
+              .split(/\s+/)
+              .filter(Boolean);
+          classes.forEach((className) => friendlyAlertTitle.classList.add(className));
+        }
+      }
+      friendlyAlertMessage.innerHTML = '';
+      if (typeof content === 'string') {
+        const paragraph = document.createElement('p');
+        paragraph.className = 'mb-0';
+        paragraph.textContent = content;
+        friendlyAlertMessage.appendChild(paragraph);
+      } else if (content instanceof Node) {
+        friendlyAlertMessage.appendChild(content);
+      } else {
+        const paragraph = document.createElement('p');
+        paragraph.className = 'mb-0';
+        paragraph.textContent = String(content ?? '');
+        friendlyAlertMessage.appendChild(paragraph);
+      }
+      if (typeof bootstrap !== 'undefined' && bootstrap?.Modal) {
+        friendlyAlertInstance = bootstrap.Modal.getOrCreateInstance(friendlyAlertElement);
+        // Auto-scroll to first invalid field when modal closes
+        friendlyAlertElement.addEventListener('hidden.bs.modal', function _onClose() {
+          friendlyAlertElement.removeEventListener('hidden.bs.modal', _onClose);
+          if (_firstInvalidField) {
+            const targetEl = _firstInvalidField;
+            _firstInvalidField = null;
+            requestAnimationFrame(() => {
+              targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              if (typeof targetEl.focus === 'function') targetEl.focus({ preventScroll: true });
+            });
+          }
+        });
+        friendlyAlertInstance.show();
+      } else {
+        window.alert(friendlyAlertMessage.textContent || '');
+      }
+    };
+
+    const escapeSelector = (value) => {
+      const stringValue = String(value ?? '');
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        return CSS.escape(stringValue);
+      }
+      return stringValue.replace(/([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, '\\$1');
+    };
+
+    const isElementVisible = (element) => {
+      if (!element) return false;
+      if (element.offsetParent !== null) return true;
+      return element.getClientRects().length > 0;
+    };
+
+    const getFieldLabel = (field) => {
+      if (!field) return '';
+      if (field.labels && field.labels.length > 0) {
+        const labelText = Array.from(field.labels)
+          .map((label) => label.textContent?.trim())
+          .find((text) => text);
+        if (labelText) {
+          return labelText;
+        }
+      }
+      let container = field.parentElement;
+      while (container && container !== form) {
+        const label = container.querySelector('.form-label, label');
+        if (label && !label.classList.contains('form-check-label')) {
+          const text = label.textContent?.trim();
+          if (text) {
+            return text.replace(/\s*\*+$/, '').trim();
+          }
+        }
+        container = container.parentElement;
+      }
+      return field.getAttribute('placeholder')?.trim() || field.name || 'Campo obrigatório';
+    };
+
+    const getSectionName = (field) => {
+      if (!field) return 'Formulário';
+      const sectionBlock = field.closest('.section-block');
+      const sectionTitle = sectionBlock?.querySelector('.section-title')?.textContent?.trim();
+      if (sectionTitle) return sectionTitle;
+      const stepCard = field.closest('.step-card');
+      const cardHeading = stepCard?.querySelector('.card-header h2')?.textContent?.trim();
+      if (cardHeading) return cardHeading;
+      return 'Formulário';
+    };
+
+    const collectInvalidFields = (root, { ignoreVisibility = false } = {}) => {
+      if (!root) return [];
+      const items = [];
+      const radioNames = new Set();
+      const fields = Array.from(root.querySelectorAll('input, select, textarea'));
+      fields.forEach((field) => {
+        if (!field) return;
+        if (field.disabled) return;
+        if (field.type === 'hidden') return;
+        if (field.type === 'radio') {
+          if (!field.name || radioNames.has(field.name)) return;
+          radioNames.add(field.name);
+          const selector = `input[type="radio"][name="${escapeSelector(field.name)}"]`;
+          const group = Array.from(root.querySelectorAll(selector));
+          if (!group.length) return;
+          const hasVisibleOption = group.some((radio) => ignoreVisibility || isElementVisible(radio));
+          if (!hasVisibleOption) return;
+          const isRequiredGroup = group.some((radio) => radio.required);
+          if (!isRequiredGroup) return;
+          const hasSelection = group.some((radio) => radio.checked);
+          if (!hasSelection) {
+            const representative = group.find((radio) => ignoreVisibility || isElementVisible(radio)) || field;
+            items.push({
+              field: representative,
+              label: getFieldLabel(representative),
+              section: getSectionName(representative),
+            });
+          }
+          return;
+        }
+        if (!ignoreVisibility && !isElementVisible(field)) return;
+        if (!field.checkValidity()) {
+          items.push({ field, label: getFieldLabel(field), section: getSectionName(field) });
+        }
+      });
+
+      // Check required file upload cards
+      root.querySelectorAll('.upload-card.required').forEach((card) => {
+        if (!ignoreVisibility && card.closest('.hidden')) return;
+        const input = card.querySelector('.upload-input');
+        if (!input) return;
+        const hasFile = input.files && input.files.length > 0;
+        if (!hasFile) {
+          const label = card.querySelector('.upload-label, .form-label, label');
+          const labelText = label?.textContent?.trim() || input.name || 'Documento obrigatório';
+          items.push({
+            field: input,
+            label: labelText,
+            section: getSectionName(input),
+          });
+        }
+      });
+
+      return items;
+    };
+
+    const buildMissingFieldsAlertContent = (items) => {
+      const container = document.createElement('div');
+      const intro = document.createElement('p');
+      intro.textContent = 'Os seguintes campos obrigatórios ainda precisam ser preenchidos:';
+      container.appendChild(intro);
+      const list = document.createElement('ul');
+      list.className = 'mb-0';
+      const grouped = new Map();
+      items.forEach(({ label, section }) => {
+        const sectionName = section || 'Formulário';
+        if (!grouped.has(sectionName)) {
+          grouped.set(sectionName, new Set());
+        }
+        if (label) {
+          grouped.get(sectionName).add(label);
+        }
+      });
+      if (!grouped.size) {
+        const fallback = document.createElement('li');
+        fallback.textContent = 'Preencha os campos obrigatórios.';
+        list.appendChild(fallback);
+      } else {
+        grouped.forEach((labels, section) => {
+          const sectionItem = document.createElement('li');
+          const strong = document.createElement('strong');
+          strong.textContent = section;
+          sectionItem.appendChild(strong);
+          const innerList = document.createElement('ul');
+          labels.forEach((label) => {
+            const item = document.createElement('li');
+            item.textContent = label;
+            innerList.appendChild(item);
+          });
+          sectionItem.appendChild(innerList);
+          list.appendChild(sectionItem);
+        });
+      }
+      container.appendChild(list);
+      return container;
+    };
+
+    const stepHasPendingRequired = (index) => {
+      const panel = stepPanels[index];
+      if (!panel) return false;
+      return collectInvalidFields(panel, { ignoreVisibility: true }).length > 0;
+    };
+
+    const updateWizardStepStates = () => {
+      wizardSteps.forEach((step, i) => {
+        const isActive = i === currentStep;
+        const wasVisited = visitedSteps.has(i);
+        const hasPending = stepHasPendingRequired(i);
+        const shouldShowStatus = (wasVisited || i < currentStep) && !isActive;
+        const isCompleted = shouldShowStatus && !hasPending && i < currentStep;
+        const isWarning = shouldShowStatus && hasPending;
+        step.classList.toggle('active', isActive);
+        step.classList.toggle('completed', isCompleted);
+        step.classList.toggle('warning', isWarning);
+        step.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        step.setAttribute('tabindex', isActive ? '0' : '-1');
+        const indexLabel = step.querySelector('.wizard-index');
+        if (indexLabel) {
+          const original = indexLabel.dataset.stepIndex || String(i + 1);
+          if (isCompleted) {
+            indexLabel.textContent = '✓';
+          } else if (isWarning) {
+            indexLabel.textContent = '!';
+          } else {
+            indexLabel.textContent = original;
+          }
+        }
+      });
+    };
+
+    const getBestCargoMap = (dynamicLevelsMap, normNivel) => {
+        // 1. Exact match
+        let map = dynamicLevelsMap.get(normNivel);
+        
+        // 2. Fuzzy match (synonyms or substrings)
+        if (!map && normNivel) {
+            const matchingKey = Array.from(dynamicLevelsMap.keys()).find(key => 
+                key !== 'TODOS' && (key.includes(normNivel) || normNivel.includes(key))
+            );
+            if (matchingKey) map = dynamicLevelsMap.get(matchingKey);
+        }
+
+        // 3. Merge with TODOS (global)
+        const globalCargos = dynamicLevelsMap.get('TODOS') || new Map();
+        const combined = new Map([...globalCargos, ...(map || new Map())]);
+
+        // 4. Ultimate fallback: if still empty but we have data, show EVERYTHING
+        if (combined.size === 0 && dynamicLevelsMap.size > 0) {
+            dynamicLevelsMap.forEach((m) => {
+                m.forEach((specs, cargo) => {
+                    if (!combined.has(cargo)) combined.set(cargo, new Set());
+                    specs.forEach(s => combined.get(cargo).add(s));
+                });
+            });
+        }
+        return combined;
+    };
+
+    const filterCargoOptions = () => {
+      if (!cargoSelect) return;
+      const dynamicLevelsMap = parseDynamicCargos();
+      
+      const nivelValue = nivelSelect ? (nivelSelect.value || nivelSelect.dataset.prefill || '') : '';
+      const normNivel = normalizeCargoValue(nivelValue);
+      
+      const combinedCargosMap = getBestCargoMap(dynamicLevelsMap, normNivel);
+
+      const previousValue = cargoSelect.value || '';
+      const previousNormalized = normalizeCargoValue(previousValue);
+      const { blockedCargos } = buildCargosInscritosIndex();
+      const allowedValueNormalized = normalizeCargoValue(cargoSelect.dataset.prefill);
+
+      cargoSelect.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Selecione...';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      cargoSelect.appendChild(placeholder);
+
+      const dynamicCargos = Array.from(combinedCargosMap.keys());
+      dynamicCargos.forEach(cargoName => {
+        const normalized = normalizeCargoValue(cargoName);
+
+        // Blocked check
+        if (blockedCargos.has(normalized) && normalized !== allowedValueNormalized && normalized !== previousNormalized) {
+          return;
+        }
+
+        const option = document.createElement('option');
+        option.value = cargoName;
+        option.textContent = cargoName;
+        cargoSelect.appendChild(option);
+      });
+
+      // Restore selection
+      let targetValue = '';
+      if (Array.from(cargoSelect.options).some(opt => normalizeCargoValue(opt.value) === previousNormalized)) {
+        targetValue = previousValue;
+      } else if (allowedValueNormalized) {
+        const match = Array.from(cargoSelect.options).find(opt => normalizeCargoValue(opt.value) === allowedValueNormalized);
+        if (match) targetValue = match.value;
+      }
+
+      if (targetValue) cargoSelect.value = targetValue;
+      else if (cargoSelect.options.length > 1) cargoSelect.selectedIndex = 0;
+
+      if (cargoSelect.value !== previousValue) {
+        cargoSelect.dispatchEvent(new Event('change'));
+      }
+    };
+
+    const filterEspecialidadeOptions = () => {
+        if (!especialidadeSelect || !cargoSelect) return;
+        const cargoValue = cargoSelect.value;
+        if (!cargoValue) {
+            especialidadeGroup.classList.add('d-none');
+            especialidadeSelect.value = '';
+            return;
+        }
+
+        const dynamicLevelsMap = parseDynamicCargos();
+        const nivelValue = nivelSelect?.value || '';
+        const normNivel = normalizeCargoValue(nivelValue);
+        
+        const combinedCargosMap = getBestCargoMap(dynamicLevelsMap, normNivel);
+        const specialties = combinedCargosMap.get(cargoValue) || new Set();
+        
+        if (specialties.size > 0) {
+            especialidadeGroup.classList.remove('d-none');
+            const prev = especialidadeSelect.value;
+            especialidadeSelect.innerHTML = '<option value="">Selecione...</option>';
+            specialties.forEach(spec => {
+                const opt = document.createElement('option');
+                opt.value = spec;
+                opt.textContent = spec;
+                especialidadeSelect.appendChild(opt);
+            });
+            if (Array.from(especialidadeSelect.options).some(o => o.value === prev)) {
+                especialidadeSelect.value = prev;
+            } else if (especialidadeSelect.dataset.prefill) {
+                especialidadeSelect.value = especialidadeSelect.dataset.prefill;
+            }
+        } else {
+            especialidadeGroup.classList.add('d-none');
+            especialidadeSelect.value = '';
+        }
+    };
+
+    const resolveInitialAuthorization = () => {
+      const bodyAuth = document.body?.dataset?.authorization?.trim();
+      const hiddenAuth = authorizationField?.value?.trim();
+      const globalAuth = typeof window !== 'undefined' ? (window.initialAuthorization || window.__AUTHORIZATION__ || '') : '';
+      const queryAuth = new URLSearchParams(window.location.search).get('authorization')?.trim();
+      return hiddenAuth || bodyAuth || globalAuth || queryAuth || '';
+    };
+    let cachedAuthorization = resolveInitialAuthorization();
+    if (authorizationField && !authorizationField.value && cachedAuthorization) {
+      authorizationField.value = cachedAuthorization;
+    }
+
+    const isRadioGroup = (field) => {
+      if (!field) return false;
+      if (typeof RadioNodeList !== 'undefined' && field instanceof RadioNodeList) return true;
+      if (Array.isArray(field)) return field.length > 0 && field[0] instanceof HTMLInputElement && field[0].type === 'radio';
+      const length = typeof field.length === 'number' ? field.length : 0;
+      if (!length) return false;
+      const first = field[0];
+      return first instanceof HTMLInputElement && first.type === 'radio';
+    };
+
+    const updateUploadIndicator = (input) => {
+      if (!input) return;
+      const card = input.closest('[data-upload-card]');
+      if (!card) return;
+      const output = card.querySelector('[data-upload-filename]');
+      if (!output) return;
+      if (!input.files || input.files.length === 0) {
+        output.textContent = 'Nenhum arquivo selecionado';
+        card.classList.remove('has-file');
+        return;
+      }
+      const names = Array.from(input.files).map((file) => file.name);
+      output.textContent = input.multiple ? names.join(', ') : names[0];
+      card.classList.add('has-file');
+      input.classList.remove('is-invalid');
+    };
+
+    const resetUploadIndicator = (input) => {
+      if (!input) return;
+      input.value = '';
+      updateUploadIndicator(input);
+      input.classList.remove('is-invalid');
+    };
+
+    const normalizeEmail = (value) => String(value || '').trim().toLowerCase();
+
+    let emailMismatchAlertShown = false;
+
+    const validateEmailsMatch = (shouldAlert = false) => {
+      const email = document.getElementById('email');
+      const confirm = document.getElementById('email_confirm');
+      if (!email || !confirm) return true;
+      const normalizedEmail = normalizeEmail(email.value);
+      const normalizedConfirm = normalizeEmail(confirm.value);
+      if (confirm.value && email.value && normalizedEmail !== normalizedConfirm) {
+        confirm.setCustomValidity('Os e-mails precisam ser iguais.');
+        confirm.classList.add('is-invalid');
+        if ((shouldAlert || document.activeElement !== confirm) && !emailMismatchAlertShown) {
+          emailMismatchAlertShown = true;
+          showFriendlyAlert('Os e-mails informados não coincidem.');
+        }
+        return false;
+      }
+      emailMismatchAlertShown = false;
+      confirm.setCustomValidity('');
+      if (confirm.classList.contains('is-invalid') && confirm.checkValidity()) {
+        confirm.classList.remove('is-invalid');
+      }
+      return true;
+    };
+
+    const getAuthorizationValue = () => authorizationField?.value?.trim() || cachedAuthorization || resolveInitialAuthorization();
+    const showSuccessFeedback = () => {
+      const registrationText = registrationValueElement?.textContent?.trim();
+      if (successRegistrationNumber && registrationText) {
+        successRegistrationNumber.textContent = registrationText;
+      }
+      if (form) {
+        form.classList.add('d-none');
+      }
+      const wizardShell = document.querySelector('.wizard-shell');
+      if (wizardShell) {
+        wizardShell.classList.add('d-none');
+      }
+      if (successScreen) {
+        successScreen.classList.add('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        showFriendlyAlert('Inscrição enviada com sucesso!');
+      }
+    };
+
+    const markStepVisited = (index) => {
+      if (!Number.isInteger(index)) return;
+      if (index < 0 || index >= stepPanels.length) return;
+      visitedSteps.add(index);
+    };
+
+    const buildFormData = () => {
+      const raw = new FormData(form);
+      const sanitized = new FormData();
+      for (const [key, value] of raw.entries()) {
+        if (value instanceof File) {
+          if (!value.name && value.size === 0) {
+            continue;
+          }
+          sanitized.append(key, value);
+          continue;
+        }
+        sanitized.append(key, value);
+      }
+      return sanitized;
+    };
+
+    const isValidatableElement = (field) =>
+      field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement;
+
+    const handleValidityState = (field) => {
+      if (!isValidatableElement(field)) return;
+      if (field.type === 'hidden') return;
+      if (field.checkValidity()) {
+        field.classList.remove('is-invalid');
+      }
+    };
+
+    const applySelectPrefill = (select) => {
+      if (!select) return;
+      const value = select.dataset.prefill?.trim();
+      if (!value) return;
+      if (!select.options || !select.options.length) return;
+      const option = Array.from(select.options).find((opt) => opt.value.toUpperCase() === value.toUpperCase());
+      if (option) {
+        select.value = option.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        if (select.id === 'is_pcd') {
+          requestAnimationFrame(() => updatePCD());
+        }
+      }
+    };
+
+    const selectPrefills = () => {
+      document.querySelectorAll('select[data-prefill]').forEach((select) => applySelectPrefill(select));
+    };
+
+    const radioPrefills = () => {
+      document.querySelectorAll('[data-prefill-radio]').forEach((group) => {
+        const value = group.dataset.prefillRadio?.trim();
+        if (!value) return;
+        const input = group.querySelector(`input[type="radio"][value="${value}"]`) || group.querySelector(`input[type="radio"][value="${value.toUpperCase()}"]`);
+        if (input) {
+          input.checked = true;
+          input.dispatchEvent(new Event('change'));
+        }
+      });
+    };
+
+    const showStep = (index) => {
+      currentStep = Math.max(0, Math.min(index, stepPanels.length - 1));
+      markStepVisited(currentStep);
+      stepPanels.forEach((panel, i) => {
+        panel.classList.toggle('d-none', i !== currentStep);
+      });
+      updateWizardStepStates();
+      if (currentStep === stepPanels.length - 1) {
+        buildReview();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const validateCurrentStep = () => {
+      const panel = stepPanels[currentStep];
+      const inputs = Array.from(panel.querySelectorAll('input, select, textarea'));
+      for (const field of inputs) {
+        if (!field.checkValidity()) {
+          field.reportValidity();
+          return false;
+        }
+      }
+      if (currentStep === 1 && !validateEmailsMatch(true)) {
+        document.getElementById('email_confirm').reportValidity();
+        return false;
+      }
+      return true;
+    };
+
+    const goNext = () => {
+      if (!validateCurrentStep()) return;
+      markStepVisited(currentStep);
+      showStep(currentStep + 1);
+    };
+
+    const goPrev = () => {
+      markStepVisited(currentStep);
+      showStep(currentStep - 1);
+    };
+
+    const avancarParaDocumentacao = () => {
+        if (!validateCurrentStep()) return;
+        showTab('documentacao');
+    };
+
+
+    const validateAndSubmit = () => {
+        // Check files in documentacao tab
+        const docTab = document.getElementById('documentacao');
+        const invalidFields = collectInvalidFields(docTab);
+        
+        if (invalidFields.length > 0) {
+            _firstInvalidField = invalidFields[0]?.field || null;
+            const content = buildMissingFieldsAlertContent(invalidFields);
+            showFriendlyAlert(content, { title: 'Documentos Pendentes' });
+            return;
+        }
+
+        // Final submission logic
+        if (form) {
+            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+    };
+
+    const toggleHiddenGroup = (condition, element) => {
+      if (!element) return;
+      element.classList.toggle('hidden', !condition);
+      element.setAttribute('aria-hidden', (!condition).toString());
+      element.querySelectorAll('input, select, textarea').forEach((field) => {
+        field.toggleAttribute('required', condition && field.dataset.forceRequired === 'true');
+        if (!condition) {
+          field.classList.remove('is-invalid');
+        }
+      });
+    };
+
+    const updateGeneroOutro = () => {
+      const genero = document.getElementById('genero');
+      const outro = document.getElementById('generoOutroGroup');
+      toggleHiddenGroup(genero.value === 'Outro', outro);
+    };
+
+    const updateMilitar = () => {
+      const sexo = document.getElementById('sexo');
+      const show = sexo && sexo.value === 'Masculino';
+      const wrapper = document.getElementById('alistamentoWrapper');
+      const docGroup = document.getElementById('docMilitarGroup');
+      const militarGroup = document.getElementById('militarGroup');
+      toggleHiddenGroup(show, militarGroup);
+      toggleHiddenGroup(show, wrapper);
+      toggleHiddenGroup(show, docGroup);
+      if (docGroup) {
+        const docCard = docGroup.querySelector('.upload-card');
+        if (docCard) {
+          docCard.classList.toggle('required', show);
+        }
+      }
+      if (!show) {
+        document.querySelectorAll('input[name="militar"]').forEach((input) => {
+          input.checked = false;
+        });
+        if (wrapper) {
+          wrapper.querySelectorAll('input').forEach((input) => {
+            input.value = '';
+          });
+        }
+        const docMilitar = document.getElementById('doc_militar');
+        if (docMilitar) {
+          resetUploadIndicator(docMilitar);
+        }
+      }
+      updateGeneroOptions();
+    };
+
+    const updateJurado = () => {
+      const juradoSim = document.getElementById('jurado_sim');
+      const juradoNao = document.getElementById('jurado_nao');
+      const detalhes = document.getElementById('juradoDetalhes');
+      const docs = document.getElementById('juradoDocs');
+      const hasSelection = juradoSim.checked || juradoNao.checked;
+      document.getElementById('foi_jurado').value = hasSelection ? (juradoSim.checked ? 'SIM' : 'NAO') : '';
+      toggleHiddenGroup(juradoSim.checked, detalhes);
+      toggleHiddenGroup(juradoSim.checked, docs);
+      if (!juradoSim.checked) {
+        if (detalhes) {
+          detalhes.querySelectorAll('input').forEach((input) => {
+            input.value = '';
+          });
+        }
+        if (docs) {
+          docs.querySelectorAll('.upload-input').forEach(resetUploadIndicator);
+        }
+      }
+    };
+
+    const updateVinculoPublico = () => {
+      const radioSim = document.getElementById('vinculo_publico_sim');
+      const radioNao = document.getElementById('vinculo_publico_nao');
+      const group = document.getElementById('qualVinculoGroup');
+      const cargoGroup = document.getElementById('vinculoCargoGroup');
+      const orgaoGroup = document.getElementById('vinculoOrgaoGroup');
+      const tempoGroup = document.getElementById('vinculoTempoGroup');
+      const hasSelection = (radioSim && radioSim.checked) || (radioNao && radioNao.checked);
+      const val = hasSelection ? (radioSim.checked ? 'Sim' : 'Não') : '';
+      if (document.getElementById('vinculo_publico')) {
+        document.getElementById('vinculo_publico').value = val;
+      }
+      toggleHiddenGroup(radioSim && radioSim.checked, group);
+      toggleHiddenGroup(radioSim && radioSim.checked, cargoGroup);
+      toggleHiddenGroup(radioSim && radioSim.checked, orgaoGroup);
+      toggleHiddenGroup(radioSim && radioSim.checked, tempoGroup);
+      if (radioSim && !radioSim.checked) {
+        ['qual_vinculo', 'vinculo_cargo', 'vinculo_orgao', 'vinculo_tempo_servico'].forEach((fieldId) => {
+          const field = document.getElementById(fieldId);
+          if (field) field.value = '';
+        });
+      }
+    };
+
+    const updatePCD = () => {
+      const pcd = document.getElementById('is_pcd');
+      const isYes = pcd && pcd.value.toUpperCase() === 'SIM';
+      
+      const group = document.getElementById('tipoPcdGroup');
+      const cid = document.getElementById('pcdCidGroup');
+      const docsGroup = document.getElementById('pcdDocs');
+      
+      toggleHiddenGroup(isYes, group);
+      toggleHiddenGroup(isYes, cid);
+      toggleHiddenGroup(isYes, docsGroup);
+      
+      if (docsGroup) {
+        docsGroup.querySelectorAll('.upload-card').forEach((card) => {
+          const input = card.querySelector('.upload-input');
+          if (input) {
+            input.toggleAttribute('required', isYes && input.dataset.forceRequired === 'true');
+            card.classList.toggle('required', isYes && input.dataset.forceRequired === 'true');
+          }
+        });
+      }
+      
+      if (!isYes) {
+        if (group) group.querySelector('input').value = '';
+        if (cid) cid.querySelector('input').value = '';
+        if (docsGroup) docsGroup.querySelectorAll('.upload-input').forEach(resetUploadIndicator);
+      }
+    };
+
+    const updatePPNI = () => {
+      const ppni = document.getElementById('cotasPPNI');
+      const isYes = ppni && ppni.value.toUpperCase() === 'SIM';
+      const info = document.getElementById('ppniDocsInfo');
+      const docsGroup = document.getElementById('ppniDocs');
+      
+      toggleHiddenGroup(isYes, info);
+      toggleHiddenGroup(isYes, docsGroup);
+      
+      if (docsGroup) {
+        docsGroup.querySelectorAll('.upload-card').forEach((card) => {
+          const input = card.querySelector('.upload-input');
+          if (input) {
+            input.toggleAttribute('required', isYes);
+            card.classList.toggle('required', isYes);
+          }
+        });
+      }
+      
+      if (!isYes && docsGroup) {
+        docsGroup.querySelectorAll('.upload-input').forEach(resetUploadIndicator);
+      }
+    };
+
+    const updateCondicaoEspecial = () => {
+      const sim = document.getElementById('condicao_especial_sim');
+      const shouldShow = sim && sim.checked;
+      const group = document.getElementById('necessidadeGroup');
+      toggleHiddenGroup(shouldShow, group);
+      if (!shouldShow && group) {
+        group.querySelector('input').value = '';
+      }
+    };
+
+    const updateGeneroOptions = () => {
+      if (!generoSelect || !generoBaseOptions.length) return;
+      const sexoValue = document.getElementById('sexo')?.value || '';
+      const currentValue = generoSelect.value;
+      generoSelect.innerHTML = '';
+      generoBaseOptions.forEach((option) => {
+        if (sexoValue === 'Masculino' && option.value === 'Mulher cisgênero') return;
+        if (sexoValue === 'Feminino' && option.value === 'Homem cisgênero') return;
+        if (sexoValue === 'Masculino' && option.value === 'Homem trans') return;
+        if (sexoValue === 'Feminino' && option.value === 'Mulher trans') return;
+        const opt = document.createElement('option');
+        opt.value = option.value;
+        opt.textContent = option.label;
+        generoSelect.appendChild(opt);
+      });
+      if (Array.from(generoSelect.options).some((option) => option.value === currentValue)) {
+        generoSelect.value = currentValue;
+      } else {
+        generoSelect.value = '';
+      }
+      generoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const updateNacionalidadeRequirement = () => {
+      if (!naturalidadeUfSelect && !naturalidadeCidadeSelect) return;
+      const selected = (nacionalidadeSelect?.value || '').toUpperCase();
+      const isBrasileira = selected === 'BRASILEIRA';
+
+      // Get the parent column elements
+      const ufColumn = naturalidadeUfSelect?.closest('.col-md-2, .col-lg-3, .col-xl-2');
+      const cidadeColumn = naturalidadeCidadeSelect?.closest('.col-md-5, .col-lg-6');
+
+      // Show/hide the fields based on nationality
+      if (ufColumn) {
+        if (isBrasileira) {
+          ufColumn.classList.remove('hidden');
+        } else {
+          ufColumn.classList.add('hidden');
+        }
+      }
+
+      if (cidadeColumn) {
+        if (isBrasileira) {
+          cidadeColumn.classList.remove('hidden');
+        } else {
+          cidadeColumn.classList.add('hidden');
+        }
+      }
+
+      if (naturalidadeUfSelect) {
+        if (isBrasileira) {
+          naturalidadeUfSelect.setAttribute('required', '');
+        } else {
+          naturalidadeUfSelect.removeAttribute('required');
+          naturalidadeUfSelect.classList.remove('is-invalid');
+          naturalidadeUfSelect.value = '';
+        }
+      }
+      if (naturalidadeCidadeSelect) {
+        if (isBrasileira) {
+          naturalidadeCidadeSelect.setAttribute('required', '');
+        } else {
+          naturalidadeCidadeSelect.removeAttribute('required');
+          naturalidadeCidadeSelect.classList.remove('is-invalid');
+          naturalidadeCidadeSelect.value = '';
+        }
+      }
+      if (naturalidadeUfLabel) {
+        naturalidadeUfLabel.classList.toggle('required', isBrasileira);
+      }
+      if (naturalidadeCidadeLabel) {
+        naturalidadeCidadeLabel.classList.toggle('required', isBrasileira);
+      }
+    };
+
+    const setNaturalidadeDisabled = (disabled, placeholder = 'Selecione a UF') => {
+      if (!naturalidadeCidadeSelect) return;
+      naturalidadeCidadeSelect.disabled = disabled;
+      if (disabled) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = placeholder;
+        naturalidadeCidadeSelect.innerHTML = '';
+        naturalidadeCidadeSelect.appendChild(option);
+      }
+    };
+
+    const populateNaturalidadeOptions = (cities, prefillValue) => {
+      if (!naturalidadeCidadeSelect) return;
+      const fragment = document.createDocumentFragment();
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Selecione...';
+      fragment.appendChild(defaultOption);
+      cities.forEach((entry) => {
+        const label =
+          (typeof entry === 'string' ? entry : entry?.nome || entry?.name || entry?.cidade || entry?.label || entry?.title || '') ||
+          '';
+        const text = String(label).trim();
+        if (!text) return;
+        const option = document.createElement('option');
+        option.value = text;
+        option.textContent = text;
+        fragment.appendChild(option);
+      });
+      naturalidadeCidadeSelect.innerHTML = '';
+      naturalidadeCidadeSelect.appendChild(fragment);
+      const desiredValue = prefillValue || naturalidadeCidadeSelect.dataset.prefill || '';
+      if (desiredValue) {
+        const match = Array.from(naturalidadeCidadeSelect.options).find(
+          (option) => option.value.toUpperCase() === desiredValue.toUpperCase(),
+        );
+        if (match) {
+          naturalidadeCidadeSelect.value = match.value;
+        }
+      }
+    };
+
+    const fetchNaturalidadeCities = async (uf) => {
+      if (!naturalidadeCidadeSelect) return;
+      const sanitizedUf = String(uf || '').trim();
+      if (!sanitizedUf) {
+        setNaturalidadeDisabled(true);
+        return;
+      }
+      setNaturalidadeDisabled(true, 'Carregando...');
+      try {
+        const response = await fetch(
+          'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/listarnaturalidades',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uf: sanitizedUf }),
+          },
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        const cities = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.cidades)
+            ? data.cidades
+            : Array.isArray(data?.data)
+              ? data.data
+              : [];
+        populateNaturalidadeOptions(cities, naturalidadeCidadeSelect.dataset.prefill || '');
+        naturalidadeCidadeSelect.disabled = false;
+      } catch (error) {
+        console.error('Erro ao carregar cidades de naturalidade', error);
+        populateNaturalidadeOptions([]);
+        naturalidadeCidadeSelect.disabled = false;
+      }
+    };
+
+    const handleNaturalidadeUfChange = () => {
+      fetchNaturalidadeCities(naturalidadeUfSelect?.value || '');
+    };
+
+    const populateUfSelects = () => {
+      ufSelects.forEach((select) => {
+        if (!select) return;
+        const fragment = document.createDocumentFragment();
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Selecione...';
+        fragment.appendChild(defaultOption);
+        ufValues.forEach((uf) => {
+          const option = document.createElement('option');
+          option.value = uf;
+          option.textContent = uf;
+          fragment.appendChild(option);
+        });
+        select.innerHTML = '';
+        select.appendChild(fragment);
+        applySelectPrefill(select);
+      });
+    };
+
+    const extractNacionalidadeLabel = (entry) => {
+      if (!entry) return '';
+      if (typeof entry === 'string') return entry;
+      return (
+        entry.descricao ||
+        entry.descr ||
+        entry.description ||
+        entry.nome ||
+        entry.nacionalidade ||
+        entry.label ||
+        entry.title ||
+        ''
+      );
+    };
+
+    const populateNacionalidades = async () => {
+      if (!nacionalidadeSelect) return;
+      const fallback = [
+        'ALEMÃ',
+        'ANGOLANA',
+        'ARGENTINA',
+        'BOLIVIANA',
+        'CANADENSE',
+        'CHILIENA',
+        'CHINESA',
+        'COLOMBIANA',
+        'CUBANA',
+        'ESPANHOLA',
+        'ESTADUNIDENSE',
+        'FRANCESA',
+        'HOLANDESA',
+        'ITALIANA',
+        'JAPONESA',
+        'MOÇAMBICANA',
+        'PARAGUAIA',
+        'PERUANA',
+        'PORTUGUESA',
+        'URUGUAIA',
+        'VENEZUELANA',
+      ];
+      const seen = new Set();
+      const addLabel = (label) => {
+        const normalized = String(label || '').trim().toUpperCase();
+        if (!normalized) return;
+        seen.add(normalized);
+      };
+      addLabel('BRASILEIRA');
+      try {
+        const response = await fetch('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/nacionalidades');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        const entries = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        entries.map(extractNacionalidadeLabel).filter(Boolean).forEach(addLabel);
+      } catch (error) {
+        console.error('Erro ao carregar nacionalidades', error);
+      }
+      if (seen.size === 1) {
+        fallback.forEach(addLabel);
+      }
+      const ordered = ['BRASILEIRA', ...Array.from(seen).filter((value) => value !== 'BRASILEIRA').sort()];
+      const currentValue = nacionalidadeSelect.value;
+      nacionalidadeSelect.innerHTML = '';
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Selecione...';
+      nacionalidadeSelect.appendChild(defaultOption);
+      ordered.forEach((label) => {
+        const option = document.createElement('option');
+        option.value = label;
+        option.textContent = label;
+        nacionalidadeSelect.appendChild(option);
+      });
+      if (currentValue) {
+        nacionalidadeSelect.value = currentValue.toUpperCase();
+      }
+      applySelectPrefill(nacionalidadeSelect);
+      updateNacionalidadeRequirement();
+    };
+
+    const applyUppercaseTransform = () => {
+      if (!form) return;
+      const inputs = Array.from(form.querySelectorAll('input[type="text"]')).filter(
+        (field) => field.dataset.allowLowercase !== 'true' && field.dataset.numericOnly !== 'true',
+      );
+      inputs.forEach((field) => {
+        field.value = field.value.toUpperCase();
+        field.addEventListener('input', () => {
+          const { selectionStart, selectionEnd } = field;
+          const upper = field.value.toUpperCase();
+          if (field.value !== upper) {
+            field.value = upper;
+            if (typeof field.setSelectionRange === 'function') {
+              const start = selectionStart ?? upper.length;
+              const end = selectionEnd ?? upper.length;
+              field.setSelectionRange(start, end);
+            }
+          }
+        });
+        field.addEventListener('blur', () => {
+          field.value = field.value.toUpperCase();
+        });
+      });
+    };
+
+    const applyLowercaseToEmails = () => {
+      const emailFields = [document.getElementById('email'), document.getElementById('email_confirm')].filter(Boolean);
+      emailFields.forEach((field) => {
+        field.value = field.value.toLowerCase();
+        field.addEventListener('input', () => {
+          const { selectionStart, selectionEnd } = field;
+          const lower = field.value.toLowerCase();
+          if (field.value !== lower) {
+            field.value = lower;
+            if (typeof field.setSelectionRange === 'function') {
+              const start = selectionStart ?? lower.length;
+              const end = selectionEnd ?? lower.length;
+              field.setSelectionRange(start, end);
+            }
+          }
+        });
+        field.addEventListener('blur', () => {
+          field.value = field.value.toLowerCase();
+        });
+      });
+    };
+
+    const enforceNumericOnly = () => {
+      document.querySelectorAll('input[data-numeric-only="true"]').forEach((field) => {
+        field.addEventListener('input', () => {
+          const { selectionStart, selectionEnd } = field;
+          const digits = field.value.replace(/\D+/g, '');
+          const max = field.maxLength && field.maxLength > 0 ? field.maxLength : undefined;
+          const nextValue = typeof max === 'number' ? digits.slice(0, max) : digits;
+          if (field.value !== nextValue) {
+            field.value = nextValue;
+            if (document.activeElement === field && typeof field.setSelectionRange === 'function') {
+              const position = selectionStart ?? nextValue.length;
+              const end = selectionEnd ?? nextValue.length;
+              field.setSelectionRange(position, end);
+            }
+          }
+        });
+      });
+    };
+
+    const buildReview = () => {
+      const summary = document.getElementById('reviewSummary');
+      summary.innerHTML = '';
+      const getValue = (name) => {
+        const field = form.elements[name];
+        if (!field) return '';
+        if (isRadioGroup(field)) {
+          if (typeof field.value === 'string') {
+            return field.value || '';
+          }
+          const checked = Array.from(field).find((input) => input.checked);
+          return checked ? checked.value : '';
+        }
+        if (field.type === 'file') {
+          const files = Array.from(field.files || []);
+          return files.length ? files.map((file) => file.name).join(', ') : '';
+        }
+        return field.value || '';
+      };
+
+      const sections = [
+        {
+          title: 'Dados pessoais',
+          fields: [
+            { label: 'Nome completo', name: 'nome' },
+            { label: 'Nome social', name: 'nome_social' },
+            { label: 'CPF', name: 'cpf' },
+            { label: 'Data de nascimento', name: 'nasc' },
+            { label: 'Nacionalidade', name: 'nacionalidade' },
+            { label: 'Naturalidade', name: 'naturalidade_cidade' },
+            { label: 'UF', name: 'naturalidade_uf' },
+            { label: 'Nome da mãe', name: 'mae' },
+            { label: 'Nome do pai', name: 'pai' },
+            { label: 'Sexo', name: 'sexo' },
+            { label: 'Gênero', name: 'genero' },
+            { label: 'Outro gênero', name: 'genero_outro' },
+            { label: 'Estado civil', name: 'estado_civil' },
+            { label: 'Raça', name: 'raca' },
+            { label: 'NIS', name: 'nis' },
+            { label: 'RG', name: 'rg_numero' },
+            { label: 'Órgão RG', name: 'rg_orgao' },
+            { label: 'UF RG', name: 'rg_uf' },
+            { label: 'Data expedição RG', name: 'rg_data' },
+          ],
+        },
+        {
+          title: 'Contato e endereço',
+          fields: [
+            { label: 'E-mail', name: 'email' },
+            { label: 'Telefone 1', name: 'tel1' },
+            { label: 'Telefone 2', name: 'tel2' },
+            { label: 'CEP', name: 'cep' },
+            { label: 'Logradouro', name: 'logradouro' },
+            { label: 'Número', name: 'numero' },
+            { label: 'Complemento', name: 'complemento' },
+            { label: 'Bairro', name: 'bairro' },
+            { label: 'Cidade', name: 'cidade' },
+            { label: 'UF', name: 'uf' },
+          ],
+        },
+        {
+          title: 'Perfil profissional',
+          fields: [
+            { label: 'Nível', name: 'nivel' },
+            { label: 'Instituição', name: 'ies' },
+            { label: 'Curso', name: 'curso' },
+            { label: 'Ano de conclusão', name: 'ano_conclusao' },
+            { label: 'Cargo pretendido', name: 'cargo' },
+            { label: 'Especialidade', name: 'especialidade' },
+            { label: 'Título de eleitor', name: 'titulo' },
+            { label: 'Zona', name: 'zona' },
+            { label: 'Seção', name: 'secao' },
+            { label: 'Serviço militar', name: 'militar' },
+            { label: 'Certificado de reservista', name: 'alistamento_numero' },
+            { label: 'Órgão do certificado', name: 'alistamento_orgao' },
+            { label: 'Data do certificado', name: 'alistamento_data' },
+            { label: 'Atuação como jurado(a)', name: 'foi_jurado' },
+            { label: 'Informações do jurado', name: 'jurado_periodo' },
+            { label: 'Vínculo público', name: 'vinculo_publico' },
+            { label: 'Qual vínculo', name: 'qual_vinculo' },
+            { label: 'Cargo no vínculo', name: 'vinculo_cargo' },
+            { label: 'Órgão do vínculo', name: 'vinculo_orgao' },
+            { label: 'Tempo de serviço', name: 'vinculo_tempo_servico' },
+          ],
+        },
+        {
+          title: 'Inclusão e acessibilidade',
+          fields: [
+            { label: 'Concorrer PPNI', name: 'cotasPPNI' },
+            { label: 'É PCD', name: 'is_pcd' },
+            { label: 'Tipo de deficiência', name: 'tipo_pcd' },
+            { label: 'CID', name: 'pcd_cid' },
+            { label: 'Condição especial', name: 'condicao_especial' },
+            { label: 'Necessidade descrita', name: 'necessidade' },
+          ],
+        },
+        {
+          title: 'Documentos anexados',
+          fields: [
+            { label: 'Documento identificação (frente)', name: 'doc_id_frente' },
+            { label: 'Documento identificação (verso)', name: 'doc_id_verso' },
+            { label: 'CPF', name: 'doc_cpf' },
+            { label: 'Comprovante de residência', name: 'doc_residencia' },
+            { label: 'Quitação eleitoral', name: 'doc_quitacao_eleitoral' },
+            { label: 'Quitação militar', name: 'doc_militar' },
+            { label: 'Certidão jurado', name: 'doc_jurado' },
+            { label: 'Certidão jurado (art. 440)', name: 'doc_jurado_440' },
+            { label: 'Comprovação escolaridade', name: 'doc_escolaridade' },
+            { label: 'Experiência / títulos', name: 'doc_curriculo' },
+            { label: 'Declaração heteroidentificação', name: 'het_declaracao' },
+            { label: 'Documento heteroidentificação', name: 'het_id' },
+            { label: 'Foto frente', name: 'het_frente' },
+            { label: 'Foto perfil', name: 'het_perfil' },
+            { label: 'Vídeo', name: 'het_video' },
+            { label: 'Laudo médico', name: 'pcd_laudo' },
+            { label: 'Declaração PCD', name: 'pcd_declaracao' },
+            { label: 'Exames complementares', name: 'pcd_exames' },
+          ],
+        },
+      ];
+
+      sections.forEach((section) => {
+        const wrapper = document.createElement('section');
+        wrapper.className = 'summary-section';
+        const heading = document.createElement('h3');
+        heading.textContent = section.title;
+        wrapper.appendChild(heading);
+        const table = document.createElement('table');
+        table.className = 'summary-table';
+
+        section.fields.forEach((field) => {
+          const value = getValue(field.name);
+          if (value === null || value === undefined || value === '') return;
+          const row = document.createElement('tr');
+          const th = document.createElement('th');
+          th.textContent = field.label;
+          const td = document.createElement('td');
+          td.textContent = value;
+          row.appendChild(th);
+          row.appendChild(td);
+          table.appendChild(row);
+        });
+
+        if (!table.children.length) {
+          const empty = document.createElement('p');
+          empty.className = 'summary-placeholder mb-0';
+          empty.textContent = 'Nenhum dado informado nesta seção.';
+          wrapper.appendChild(empty);
+        } else {
+          wrapper.appendChild(table);
+        }
+
+        summary.appendChild(wrapper);
+      });
+    };
+
+    const saveDraft = (event) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const data = {};
+      Array.from(form.elements).forEach((field) => {
+        if (!field.name) return;
+        if (field.type === 'file') return;
+        if (field.type === 'radio') {
+          if (!field.checked) return;
+          data[field.name] = field.value;
+          return;
+        }
+        if (field.type === 'checkbox') {
+          data[field.name] = field.checked;
+          return;
+        }
+        data[field.name] = field.value;
+      });
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(data));
+        if (draftToast) {
+          draftToast.classList.add('show');
+          setTimeout(() => draftToast.classList.remove('show'), 3200);
+        } else {
+          showFriendlyAlert('Rascunho salvo com sucesso!');
+        }
+      } catch (error) {
+        console.error('Erro ao salvar rascunho', error);
+        showFriendlyAlert('Não foi possível salvar o rascunho neste navegador.');
+      }
+    };
+
+    const loadDraft = () => {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        Object.entries(data).forEach(([name, value]) => {
+          const field = form.elements[name];
+          if (!field) return;
+          if (isRadioGroup(field)) {
+            const radios = Array.from(field);
+            const radio = radios.find((input) => input.value === value);
+            if (radio) {
+              radio.checked = true;
+              radio.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            return;
+          }
+          if (field.type === 'checkbox') {
+            field.checked = Boolean(value);
+            return;
+          }
+          let newValue = value;
+          if (field.dataset.numericOnly === 'true') {
+            newValue = String(value || '').replace(/\D+/g, '');
+            if (field.maxLength && field.maxLength > 0) {
+              newValue = newValue.slice(0, field.maxLength);
+            }
+          }
+          if (field.type === 'text' && field.dataset.allowLowercase !== 'true' && field.dataset.numericOnly !== 'true') {
+            newValue = String(value || '').toUpperCase();
+          }
+          if (field.type === 'email') {
+            newValue = String(value || '').toLowerCase();
+          }
+          if (field === nacionalidadeSelect) {
+            nacionalidadeSelect.dataset.prefill = newValue;
+          }
+          field.value = newValue;
+          field.dispatchEvent(new Event('change'));
+        });
+      } catch (err) {
+        console.error('Erro ao carregar rascunho', err);
+      }
+    };
+
+    const cepInput = document.getElementById('cep');
+    const addressFields = {
+      logradouro: document.getElementById('logradouro'),
+      bairro: document.getElementById('bairro'),
+      cidade: document.getElementById('cidade'),
+      uf: document.getElementById('endereco_uf'),
+    };
+
+    const clearAddressFields = () => {
+      Object.values(addressFields).forEach((field) => {
+        if (field) {
+          field.value = '';
+        }
+      });
+    };
+
+    const fillAddressFields = (data) => {
+      if (!data) return;
+      if (addressFields.logradouro) {
+        addressFields.logradouro.value = (data.street || '').toUpperCase();
+      }
+      if (addressFields.bairro) {
+        addressFields.bairro.value = (data.neighborhood || '').toUpperCase();
+      }
+      if (addressFields.cidade) {
+        addressFields.cidade.value = (data.city || '').toUpperCase();
+      }
+      if (addressFields.uf) {
+        addressFields.uf.value = (data.state || '').toUpperCase();
+      }
+    };
+
+    const handleCepInput = async () => {
+      if (!cepInput) return;
+      const cepValue = cepInput.value.replace(/\D+/g, '');
+      if (cepValue.length !== 8) {
+        if (cepValue.length < 8) {
+          clearAddressFields();
+        }
+        if (cepController) {
+          cepController.abort();
+          cepController = null;
+        }
+        return;
+      }
+      if (cepController) {
+        cepController.abort();
+      }
+      cepController = new AbortController();
+      try {
+        const response = await fetch(`https://brasilapi.com.br/api/cep/v2/${cepValue}`, { signal: cepController.signal });
+        if (!response.ok) {
+          throw new Error('CEP não encontrado');
+        }
+        const data = await response.json();
+        if (cepInput.value.replace(/\D+/g, '') !== cepValue) {
+          return;
+        }
+        fillAddressFields(data);
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          return;
+        }
+        clearAddressFields();
+      } finally {
+        cepController = null;
+      }
+    };
+
+    form.addEventListener(
+      'invalid',
+      (event) => {
+        const target = event.target;
+        if (!isValidatableElement(target)) return;
+        if (target.type === 'hidden') return;
+        target.classList.add('is-invalid');
+      },
+      true,
+    );
+
+    const onFieldInteraction = (event) => {
+      const target = event.target;
+      if (!isValidatableElement(target)) return;
+      if (target.type === 'hidden') return;
+      if (target instanceof HTMLInputElement && (target.type === 'radio' || target.type === 'checkbox')) {
+        const controls = target.form && target.name ? target.form.elements[target.name] : null;
+        if (target.type === 'radio' && isRadioGroup(controls)) {
+          Array.from(controls).forEach((control) => control.classList.remove('is-invalid'));
+        } else {
+          target.classList.remove('is-invalid');
+        }
+      } else {
+        handleValidityState(target);
+      }
+      if (target.id === 'email' || target.id === 'email_confirm') {
+        validateEmailsMatch();
+      }
+    };
+
+    form.addEventListener('input', onFieldInteraction);
+    form.addEventListener('change', onFieldInteraction);
+    document.querySelectorAll('[data-action="next"]').forEach((btn) => btn.addEventListener('click', goNext));
+    document.querySelectorAll('[data-action="prev"]').forEach((btn) => btn.addEventListener('click', goPrev));
+    document.querySelectorAll('[data-action="save-draft"]').forEach((btn) => btn.addEventListener('click', saveDraft));
+
+    wizardSteps.forEach((step) => {
+      const navigateToStep = () => {
+        const stepIndex = Number(step.dataset.step);
+        if (!Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex >= stepPanels.length) return;
+        if (stepIndex === currentStep) return;
+        markStepVisited(currentStep);
+        showStep(stepIndex);
+      };
+      step.addEventListener('click', navigateToStep);
+      step.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          navigateToStep();
+        }
+      });
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      validateEmailsMatch(false);
+      const pendingFields = collectInvalidFields(form, { ignoreVisibility: true });
+      if (pendingFields.length > 0) {
+        event.stopPropagation();
+        const firstInvalid = pendingFields[0]?.field || null;
+        if (firstInvalid) {
+          const targetStepIndex = stepPanels.findIndex((panel) => panel.contains(firstInvalid));
+          if (targetStepIndex >= 0 && targetStepIndex !== currentStep) {
+            showStep(targetStepIndex);
+          }
+        }
+        updateWizardStepStates();
+        const alertContent = buildMissingFieldsAlertContent(pendingFields);
+        showSubmissionSuspense(() => {
+          showFriendlyAlert(alertContent, { title: '❌ Aviso!', titleClass: 'text-danger' });
+          if (firstInvalid && typeof firstInvalid.reportValidity === 'function') {
+            firstInvalid.reportValidity();
+          }
+          if (firstInvalid && typeof firstInvalid.focus === 'function') {
+            setTimeout(() => firstInvalid.focus({ preventScroll: false }), 0);
+          }
+        });
+        return;
+      }
+      if (!validateCurrentStep()) {
+        event.stopPropagation();
+        return;
+      }
+      if (!validateEmailsMatch(true)) {
+        document.getElementById('email_confirm').reportValidity();
+        return;
+      }
+      const formData = buildFormData();
+      let authValue = formData.get('authorization');
+      authValue = typeof authValue === 'string' ? authValue.trim() : '';
+      if (!authValue) {
+        authValue = getAuthorizationValue();
+        formData.set('authorization', authValue);
+      }
+      if (authorizationField) {
+        authorizationField.value = authValue;
+      }
+      cachedAuthorization = authValue;
+      try {
+        void fetch(form.action, {
+          method: 'POST',
+          body: formData,
+        }).catch((error) => console.error('Erro ao enviar inscrição', error));
+      } catch (error) {
+        console.error('Erro ao enviar inscrição', error);
+      }
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      hasSubmitted = true;
+      showSuccessFeedback();
+    });
+
+    if (nivelSelect) {
+      nivelSelect.addEventListener('change', () => {
+        filterCargoOptions();
+        filterEspecialidadeOptions();
+      });
+    }
+    startCountdown();
+
+    try {
+      if (cargoSelect) {
+        cargoSelect.addEventListener('change', filterEspecialidadeOptions);
+      }
+      if (especialidadeSelect) {
+        especialidadeSelect.addEventListener('change', () => {
+          especialidadeSelect.dataset.currentValue = especialidadeSelect.value || '';
+        });
+      }
+      const generoInput = document.getElementById('genero');
+      const sexoInput = document.getElementById('sexo');
+      const pcdInput = document.getElementById('is_pcd');
+      if (generoInput) generoInput.addEventListener('change', updateGeneroOutro);
+      if (sexoInput) sexoInput.addEventListener('change', updateMilitar);
+      if (pcdInput) pcdInput.addEventListener('change', updatePCD);
+      document
+        .querySelectorAll('input[name="jurado_funcao"]')
+        .forEach((input) => input.addEventListener('change', updateJurado));
+      document
+        .querySelectorAll('input[name="vinculo_publico_opcao"]')
+        .forEach((input) => input.addEventListener('change', updateVinculo));
+      document
+        .querySelectorAll('input[name="condicao_especial"]')
+        .forEach((input) => input.addEventListener('change', updateNecessidade));
+      const cotasSelect = document.getElementById('cotasPPNI');
+      if (cotasSelect) cotasSelect.addEventListener('change', updatePPNI);
+      const emailInput = document.getElementById('email');
+      const emailConfirmInput = document.getElementById('email_confirm');
+      if (emailInput) emailInput.addEventListener('input', validateEmailsMatch);
+      if (emailConfirmInput) emailConfirmInput.addEventListener('input', validateEmailsMatch);
+      if (emailInput) {
+        emailInput.addEventListener('blur', () => {
+          if (emailConfirmInput?.value) {
+            validateEmailsMatch(true);
+          }
+        });
+      }
+      if (emailConfirmInput) {
+        emailConfirmInput.addEventListener('blur', () => validateEmailsMatch(true));
+      }
+      if (nacionalidadeSelect) {
+        nacionalidadeSelect.addEventListener('change', updateNacionalidadeRequirement);
+      }
+      if (naturalidadeUfSelect) {
+        naturalidadeUfSelect.addEventListener('change', handleNaturalidadeUfChange);
+      }
+      if (newSubmissionButton) {
+        newSubmissionButton.addEventListener('click', () => window.location.reload());
+      }
+      document.querySelectorAll('.upload-input').forEach((input) => {
+        updateUploadIndicator(input);
+        input.addEventListener('change', () => updateUploadIndicator(input));
+      });
+      if (cepInput) {
+        cepInput.addEventListener('input', handleCepInput);
+      }
+
+      applyLowercaseToEmails();
+      applyUppercaseTransform();
+      enforceNumericOnly();
+      populateUfSelects();
+      filterCargoOptions();
+      filterEspecialidadeOptions();
+      selectPrefills();
+      handleNaturalidadeUfChange();
+      void populateNacionalidades();
+      radioPrefills();
+      loadDraft();
+      filterEspecialidadeOptions();
+      updateGeneroOptions();
+      updateGeneroOutro();
+      updateMilitar();
+      updateJurado();
+      updateVinculoPublico();
+      updatePCD();
+      requestAnimationFrame(() => updatePCD());
+      updateCondicaoEspecial();
+      updatePPNI();
+      updateNacionalidadeRequirement();
+
+      // Força a busca pelo CEP para garantir o preenchimento da UF
+      if (cepInput && cepInput.value && cepInput.value.replace(/\D+/g, '').length === 8) {
+        handleCepInput();
+      }
+
+      validateEmailsMatch();
+      // Registration status check
+      const checkRegistrationStatusRobust = () => {
+        const now = new Date();
+
+        let isClosed = false;
+
+        if (isNaN(REGISTRATION_START.getTime())) {
+          isClosed = true;
+        } else if (now < REGISTRATION_START) {
+          isClosed = true;
+        }
+
+        if (isClosed) {
+          // AGGRESSIVE BLOCKING: Inject Global Styles
+          let blockStyle = document.getElementById('blocked-mode-style');
+          if (!blockStyle) {
+            blockStyle = document.createElement('style');
+            blockStyle.id = 'blocked-mode-style';
+            blockStyle.innerHTML = `
+                main.frame-card, header.site-header, .wizard-shell, .site-footer {
+                    filter: blur(8px) !important;
+                    pointer-events: none !important;
+                    user-select: none !important;
+                }
+                #countdownContainer {
+                    display: none !important;
+                }
+                body {
+                    overflow: hidden !important;
+                }
+            `;
+            document.head.appendChild(blockStyle);
+          }
+
+          // Force Modal Display
+          const modal = document.getElementById('preRegistrationModal');
+          if (modal) {
+            // Try Bootstrap
+            if (typeof bootstrap !== 'undefined' && bootstrap?.Modal) {
+              try {
+                const modalInstance = new bootstrap.Modal(modal, {
+                  backdrop: 'static',
+                  keyboard: false
+                });
+                modalInstance.show();
+              } catch (e) {
+                console.error('Bootstrap error:', e);
+                forceModalFallback(modal);
+              }
+            } else {
+              forceModalFallback(modal);
+            }
+
+            // Start Countdown
+            updatePreRegCountdown();
+            if (preRegCountdownInterval) clearInterval(preRegCountdownInterval);
+            preRegCountdownInterval = setInterval(updatePreRegCountdown, 1000);
+
+          } else {
+            console.error('Modal element #preRegistrationModal NOT FOUND');
+          }
+        } else {
+          console.log('Registration is OPEN (or ended).');
+          // Cleanup blocking styles
+          document.body.style.overflow = '';
+          const existingStyle = document.getElementById('blocked-mode-style');
+          if (existingStyle) existingStyle.remove();
+        }
+      };
+
+      const forceModalFallback = (modal) => {
+        console.warn('Using manual modal fallback');
+        modal.classList.add('show');
+        modal.style.display = 'block';
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('role', 'dialog');
+        document.body.classList.add('modal-open');
+
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+      };
+
+      checkRegistrationStatusRobust();
+      showStep(0);
+    } catch (error) {
+      console.error('Erro ao inicializar o formulário', error);
+    }
+  </script>
+</body>
+
+</html>
