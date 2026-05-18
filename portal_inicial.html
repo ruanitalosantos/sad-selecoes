@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selecione o certame desejado</title>
     <link rel="icon"
-        href="https://statics.recife.pe.gov.br/images/dynamics/conecta/icons/favicon.png?w=32&h=32&fit=fill&border=2,transparent,shrink" />
+        href="https://statics.recife.pe.gov.br/images/dynamics/logo_gestao_pcr.png?w=32&h=32&fit=fill&border=2,transparent,shrink" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
@@ -114,17 +114,33 @@
             margin-top: 0.2rem;
         }
 
-        .selection-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            background: var(--brand-primary);
+        .selection-btn.btn-andamento:hover {
+            background: #198754;
+            border-color: #198754;
             color: #ffffff !important;
-            border-color: var(--brand-primary);
         }
 
-        .selection-btn:hover .selection-tag {
+        .selection-btn.btn-concluido:hover {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff !important;
+        }
+
+        .selection-btn.btn-homologacao:hover {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #1b263b !important;
+        }
+
+        .selection-btn.btn-andamento:hover .selection-tag,
+        .selection-btn.btn-concluido:hover .selection-tag {
             background: rgba(255, 255, 255, 0.2);
             color: #ffffff;
+        }
+
+        .selection-btn.btn-homologacao:hover .selection-tag {
+            background: rgba(0, 0, 0, 0.08);
+            color: #1b263b;
         }
 
         /* Disabled selection styling */
@@ -132,11 +148,9 @@
             background: #f1f3f5;
             color: var(--text-muted) !important;
             border-color: rgba(0, 0, 0, 0.05);
-            cursor: not-allowed;
-            pointer-events: none;
-            opacity: 0.8;
+            cursor: pointer;
+            opacity: 0.7;
             box-shadow: none;
-            transform: none !important;
         }
 
         .selection-btn.disabled-selection .selection-tag {
@@ -163,25 +177,79 @@
             color: var(--text-muted);
             font-weight: 700;
         }
+
+        /* Search styling */
+        .search-container {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 3rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(0, 83, 164, 0.15);
+            background: #ffffff;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--brand-highlight);
+            box-shadow: 0 0 0 4px rgba(0, 163, 255, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.15rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Status Column Styling */
+        .status-column-header {
+            border-bottom: 3px solid #dee2e6;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem !important;
+            color: var(--text-strong) !important;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .status-column-header.andamento {
+            border-bottom-color: var(--brand-highlight);
+        }
+
+        .status-column-header.concluido {
+            border-bottom-color: #adb5bd;
+        }
+
+        .status-column-header.homologacao {
+            border-bottom-color: #ffc107;
+        }
     </style>
 </head>
 
 <body>
     <div class="bg-overlay"></div>
 
-    <!-- n8n Variables - To be populated by n8n -->
-    <div id="n8n-data" style="display: none;">
-        <input type="hidden" id="token" value="{{ $('Code in JavaScript12').item.json.token }}" />
-    </div>
+    <input type="hidden" id="authorization" value="{{ $json.authorization }}" />
+    <input type="hidden" id="cpf" value="{{ $json.cpf }}" />
+    <input type="hidden" id="cpfs_homologacao" value="{{ $json.cpfs_homologacao }}" />
 
     <div class="modal fade" id="selectionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="selectionModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="w-100">
                         <div class="modal-branding">
-                            <img src="https://statics.recife.pe.gov.br/images/dynamics/conecta/icons/favicon.png"
+                            <img src="https://statics.recife.pe.gov.br/images/dynamics/logo_gestao_pcr.png"
                                 alt="Logo Recife">
                             <span>Secretaria de Administração - SAD</span>
                         </div>
@@ -195,7 +263,39 @@
                         </div>
                         <p class="text-muted mt-2 small">Buscando processos seletivos...</p>
                     </div>
-                    <div id="selection-list" class="d-none"></div>
+
+                    <div id="selection-list" class="d-none">
+                        <div class="search-container">
+                            <span class="search-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-search">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                            <input type="text" id="certame-search" class="search-input"
+                                placeholder="Pesquisar certame por nome ou etapa...">
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <h6 class="text-uppercase small fw-bold status-column-header andamento">Em andamento
+                                </h6>
+                                <div id="list-andamento"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-uppercase small fw-bold status-column-header concluido">Concluídos
+                                </h6>
+                                <div id="list-concluidas"></div>
+                            </div>
+                            <div class="col-md-4 d-none" id="col-homologacao">
+                                <h6 class="text-uppercase small fw-bold status-column-header homologacao">Em
+                                    homologação</h6>
+                                <div id="list-homologacao"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
                 </div>
             </div>
@@ -230,41 +330,97 @@
                         return;
                     }
 
-                    data.forEach(item => {
-                        // Apenas status "Ativo"
-                        const status = (item.status || item.selecao || '').trim();
-                        if (status !== "Ativo") return;
+                    const cpfsHomologacaoRaw = document.getElementById('cpfs_homologacao')?.value || '';
+                    const allowedCPFs = cpfsHomologacaoRaw.split(',').map(c => c.replace(/\D+/g, '').trim()).filter(c => c !== "");
+                    const userCPF = (document.getElementById('cpf')?.value || '').replace(/\D+/g, '');
+                    const isPrivileged = allowedCPFs.includes(userCPF);
 
-                        // Oculta certames ainda sem edital publicado
+                    // Debugging (pode ser removido após teste)
+                    console.log('DEBUG - CPF Logado:', userCPF);
+                    console.log('DEBUG - Lista Autorizada:', allowedCPFs);
+                    console.log('DEBUG - É Privilegiado:', isPrivileged);
+
+                    if (isPrivileged) {
+                        const colHomol = document.getElementById('col-homologacao');
+                        if (colHomol) colHomol.classList.remove('d-none');
+                    }
+
+                    const listAndamento = document.getElementById('list-andamento');
+                    const listConcluidas = document.getElementById('list-concluidas');
+                    const listHomologacao = document.getElementById('list-homologacao');
+
+                    data.forEach(item => {
+                        const status = (item.status || item.selecao || '').trim();
+                        // Normaliza para remover acentos e facilitar comparação (ex: Homologação -> homologacao)
+                        const statusLower = status.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+                        const isConcluido = statusLower.includes('concluid') || statusLower.includes('finalizado') || statusLower.includes('encerrad');
+                        const isHomologacao = statusLower.includes('homologa');
+
+                        // Filtro de exibição (apenas Ativos, Homologação ou Concluídos)
+                        if (statusLower !== "ativo" && !isHomologacao && !isConcluido) return;
+
                         const stage = (item.etapa_atual || '').toLowerCase().trim();
-                        if (stage === "aguardando publicação de edital") return;
+                        const isWaiting = stage === "aguardando publicação de edital";
+
+                        // Certames concluídos ou aguardando edital aparecem com estilo diferenciado, mas permanecem clicáveis
+                        const isInactive = isWaiting || isConcluido;
 
                         const btn = document.createElement('a');
                         btn.href = '#';
                         btn.className = 'selection-btn';
+                        if (isInactive) btn.classList.add('disabled-selection');
 
-                        // Rótulo (Campo 'nome' conforme API real)
+                        const name = item.nome || item.selecao || "Seleção sem título";
                         const nameSpan = document.createElement('span');
                         nameSpan.className = 'selection-name';
-                        nameSpan.textContent = item.nome || item.selecao || "Seleção sem título";
+                        nameSpan.textContent = name;
                         btn.appendChild(nameSpan);
 
-                        // Tag da Etapa
+                        let etapaText = "";
                         if (item.etapa_atual) {
                             const tagSpan = document.createElement('span');
                             tagSpan.className = 'selection-tag';
-                            tagSpan.textContent = `Etapa atual: ${item.etapa_atual}`;
+                            etapaText = item.etapa_atual;
+                            tagSpan.textContent = `Etapa: ${etapaText}`;
                             btn.appendChild(tagSpan);
                         }
 
-                        if (!isWaiting) {
-                            btn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                handleRedirect(item.id);
-                            });
-                        }
+                        // Set data attributes for searching
+                        btn.dataset.search = `${name.toLowerCase()} ${etapaText.toLowerCase()}`;
 
-                        selectionList.appendChild(btn);
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            handleRedirect(item.id);
+                        });
+
+                        // Distribuição nas colunas e aplicação de classes de cor
+                        if (isHomologacao) {
+                            btn.classList.add('btn-homologacao');
+                            if (isPrivileged) listHomologacao.appendChild(btn);
+                        } else if (isConcluido) {
+                            btn.classList.add('btn-concluido');
+                            listConcluidas.appendChild(btn);
+                        } else {
+                            btn.classList.add('btn-andamento');
+                            listAndamento.appendChild(btn);
+                        }
+                    });
+
+                    // Search implementation
+                    const searchInput = document.getElementById('certame-search');
+                    searchInput.addEventListener('input', (e) => {
+                        const term = e.target.value.toLowerCase().trim();
+                        const btns = document.querySelectorAll('.selection-btn');
+
+                        btns.forEach(btn => {
+                            const content = btn.dataset.search || "";
+                            if (content.includes(term)) {
+                                btn.classList.remove('d-none');
+                            } else {
+                                btn.classList.add('d-none');
+                            }
+                        });
                     });
                 })
                 .catch(err => {
@@ -282,13 +438,14 @@
                     const params = new URLSearchParams();
                     params.set('id', id);
 
-                    const n8nInputs = document.querySelectorAll('#n8n-data input[type="hidden"]');
+                    const n8nInputs = document.querySelectorAll('input[type="hidden"]');
                     n8nInputs.forEach(input => {
                         const val = (input.value || "").trim();
+                        const id = input.id;
 
                         // Capture all non-empty values that are not raw n8n placeholders
-                        if (val && !val.startsWith('{{')) {
-                            params.set(input.id, val);
+                        if (val && !val.startsWith('{{') && id !== 'cpfs_homologacao') {
+                            params.set(id === 'authorization' ? 'token' : id, val);
                         }
                     });
 
