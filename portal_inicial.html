@@ -231,18 +231,17 @@
                     }
 
                     data.forEach(item => {
-                        // REQUISITO: Apenas status "Ativo" (campo 'selecao' ou 'status')
+                        // Apenas status "Ativo"
                         const status = (item.status || item.selecao || '').trim();
                         if (status !== "Ativo") return;
 
-                        // REQUISITO: Se etapa_atual for "aguardando publicação de edital", não clicável
+                        // Oculta certames ainda sem edital publicado
                         const stage = (item.etapa_atual || '').toLowerCase().trim();
-                        const isWaiting = stage === "aguardando publicação de edital";
+                        if (stage === "aguardando publicação de edital") return;
 
-                        const btn = document.createElement(isWaiting ? 'div' : 'a');
-                        if (!isWaiting) btn.href = '#';
+                        const btn = document.createElement('a');
+                        btn.href = '#';
                         btn.className = 'selection-btn';
-                        if (isWaiting) btn.classList.add('disabled-selection');
 
                         // Rótulo (Campo 'nome' conforme API real)
                         const nameSpan = document.createElement('span');
