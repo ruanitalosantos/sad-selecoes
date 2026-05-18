@@ -1312,6 +1312,32 @@
         </div>
     </div>
 
+    <!-- ========== MODAL: CONFIRMAR EXCLUSÃO DE SELEÇÃO ========== -->
+    <div class="modal fade" id="modalExcluirSelecao" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Excluir Seleção</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger mb-3">
+                        <i class="fas fa-trash-alt me-2"></i><strong>Atenção: esta ação é permanente e irreversível.</strong>
+                    </div>
+                    <p class="mb-1">Você está prestes a excluir definitivamente a seleção:</p>
+                    <p class="fw-bold fs-6 mb-3" id="excluir-selecao-nome"></p>
+                    <p class="text-muted small mb-0">Todos os dados vinculados — cronograma, comunicados, formulários e portal — também serão removidos do banco de dados e <strong>não poderão ser recuperados</strong>.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarExcluirSelecao">
+                        <i class="fas fa-trash-alt me-2"></i>Excluir definitivamente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ========== TOAST ========== -->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
         <div id="toast" class="toast align-items-center text-bg-success border-0" role="alert">
@@ -1796,6 +1822,16 @@
                     method: 'POST',
                     body: { query: delSql }
                 });
+            },
+
+            async deleteSelecao(id) {
+                await Promise.all([
+                    this.request(CONFIG.WEBHOOKS.comunicados, { method: 'POST', body: { query: `DELETE FROM "sad-selecoes".comunicados WHERE id_selecao = ${id}` } }),
+                    this.request(CONFIG.WEBHOOKS.cronogramas,  { method: 'POST', body: { query: `DELETE FROM "sad-selecoes".cronograma WHERE id_selecao = ${id}` } }),
+                    this.request(CONFIG.WEBHOOKS.forms,        { method: 'POST', body: { query: `DELETE FROM "sad-selecoes".estrutura_html_forms WHERE id_selecao = ${id}` } }),
+                    this.request(CONFIG.WEBHOOKS.portais,      { method: 'POST', body: { query: `DELETE FROM "sad-selecoes".estrutura_html_portais WHERE id_selecao = ${id}` } }),
+                ]);
+                await this.request(CONFIG.WEBHOOKS.selecoes, { method: 'POST', body: { query: `DELETE FROM "sad-selecoes".selecoes_cadastradas WHERE id = ${id}` } });
             }
         };
 
@@ -2229,6 +2265,9 @@
                                 </a>
                                 <a href="#" class="action-btn flex-fill justify-content-center" title="Preview" onclick="previewSelecao(${s.id})">
                                     <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="#" class="action-btn flex-fill justify-content-center" title="Excluir seleção" onclick="deleteSelecao(${s.id}, ${JSON.stringify(s.nome)})" style="color:#dc3545;">
+                                    <i class="fas fa-trash-alt"></i>
                                 </a>
                             </div>
                         </div>
@@ -2926,6 +2965,28 @@
             } catch (e) {
                 showToast('Erro ao salvar comunicado: ' + e.message, 'danger');
             }
+        }
+
+        async function deleteSelecao(id, nome) {
+            document.getElementById('excluir-selecao-nome').textContent = `"${nome}"`;
+
+            const modal = new bootstrap.Modal(document.getElementById('modalExcluirSelecao'));
+
+            document.getElementById('btnConfirmarExcluirSelecao').onclick = async () => {
+                modal.hide();
+                try {
+                    await api.deleteSelecao(id);
+                    showToast('Seleção excluída com sucesso.');
+                    await fetchSelecoes();
+                    renderHome();
+                    populateSelects();
+                } catch (e) {
+                    showToast('Erro ao excluir seleção: ' + e.message, 'danger');
+                    console.error(e);
+                }
+            };
+
+            modal.show();
         }
 
         async function deleteComunicado(id) {
