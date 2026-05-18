@@ -1,0 +1,2770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Secretaria de Administração • SAD — Seleção Simplificada {{ $json.selecao }}</title>
+  <link rel="icon"
+    href="https://statics.recife.pe.gov.br/images/dynamics/logo_gestao_pcr.png?w=32&h=32&fit=fill&border=2,transparent,shrink" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --brand-primary: #0053a4;
+      --brand-secondary: #003a73;
+      --brand-highlight: #00a3ff;
+      --surface: #f4f7fb;
+      --surface-strong: #ffffff;
+      --border-color: #d0d7e2;
+      --text-strong: #1b263b;
+      --text-muted: #5b6c8c;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Public Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--surface);
+      color: var(--text-strong);
+      min-height: 100vh;
+    }
+
+    header.site-header {
+      background: url("https://statics.recife.pe.gov.br/images/dynamics/automacao/header.png?w=3000") center/cover no-repeat;
+      color: #ffffff;
+      padding: 3.5rem 0 2.75rem;
+    }
+
+    header .lead {
+      color: rgba(255, 255, 255, 0.82);
+      max-width: 100%;
+      font-size: 1rem;
+      line-height: 1.65;
+      text-align: justify;
+    }
+
+    .badge-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      background-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .user-greeting {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(0, 83, 164, 0.09), rgba(0, 163, 255, 0.12));
+      color: var(--text-strong);
+      box-shadow: 0 10px 30px rgba(0, 45, 98, 0.08);
+    }
+
+    .user-greeting::before {
+      content: "👋";
+      font-size: 1.4rem;
+    }
+
+    .minhas-inscricoes-grid {
+      margin-top: 1rem;
+    }
+
+    .minhas-inscricao-card {
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      border: 1px solid rgba(0, 83, 164, 0.12);
+      border-radius: 4px;
+    }
+
+    .minhas-inscricao-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 45, 98, 0.12);
+    }
+
+    .minhas-inscricao-card.is-loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .minhas-inscricoes-placeholder {
+      padding: 1.25rem;
+      border-radius: 4px;
+      background: rgba(0, 83, 164, 0.05);
+      border: 1px dashed rgba(0, 83, 164, 0.2);
+      color: var(--text-muted);
+    }
+
+    .resumo-inscricao-list dt {
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .resumo-inscricao-list dd {
+      font-weight: 600;
+      color: var(--text-strong);
+    }
+
+    .resumo-inscricao-pre {
+      background: rgba(0, 83, 164, 0.06);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      white-space: pre-wrap;
+      font-size: 0.85rem;
+      margin-bottom: 0;
+    }
+
+    .card {
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .rounded-4 {
+      border-radius: 4px !important;
+    }
+
+    .collapsible-form {
+      border: 1px solid rgba(0, 83, 164, 0.15);
+      border-radius: 4px;
+      background: rgba(0, 83, 164, 0.05);
+      padding: 1rem 1.25rem;
+    }
+
+    .collapsible-form summary {
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      list-style: none;
+    }
+
+    .collapsible-form summary::marker {
+      display: none;
+    }
+
+    .collapsible-form summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .collapsible-form summary::before {
+      content: "➕";
+      font-size: 0.9rem;
+      transition: transform 0.2s ease;
+    }
+
+    .collapsible-form[open] summary::before {
+      transform: rotate(45deg);
+    }
+
+    .collapsible-form .form-label {
+      font-weight: 600;
+      color: var(--text-strong);
+    }
+
+    .collapsible-form .form-text {
+      color: var(--text-muted);
+    }
+
+    .feedback-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(27, 38, 59, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 1050;
+    }
+
+    .feedback-modal-backdrop.active {
+      display: flex;
+    }
+
+    .feedback-modal {
+      background: #ffffff;
+      border-radius: 1rem;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+      padding: 1.75rem;
+      margin: 0 auto;
+    }
+
+    .feedback-modal.feedback-modal--wide {
+      max-width: 860px;
+    }
+
+    .feedback-modal-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-strong);
+    }
+
+    .feedback-modal-message {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-strong);
+      max-height: 60vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      word-break: break-word;
+    }
+
+    .feedback-modal-message> :last-child {
+      margin-bottom: 0;
+    }
+
+    .feedback-modal button {
+      border-radius: 999px;
+      padding-inline: 1.5rem;
+      font-weight: 600;
+    }
+
+    .attention-modal-title {
+      color: #c53030;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .attention-modal-title .emoji {
+      font-size: 1.4rem;
+    }
+
+    #publicacoes-list time {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--brand-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.02em;
+      color: var(--text-strong);
+    }
+
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 32px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--brand-highlight);
+    }
+
+    .card-programa {
+      border: 1px solid rgba(0, 83, 164, 0.08);
+      border-radius: 4px;
+      background: var(--surface-strong);
+      box-shadow: 0 16px 34px rgba(0, 45, 98, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      height: 100%;
+    }
+
+    .card-programa:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 38px rgba(0, 45, 98, 0.12);
+    }
+
+    .card-programa .card-header {
+      border-bottom: 1px solid rgba(0, 83, 164, 0.08);
+      background: linear-gradient(180deg, #ffffff 0%, #f5f8fc 100%);
+      padding: 1.5rem 1.6rem 1.1rem;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .card-programa .card-body {
+      padding: 1.6rem 1.6rem 1.75rem;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .card-programa .badge {
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .card-programa ul {
+      padding-left: 1.25rem;
+      margin-bottom: 1.25rem;
+      color: var(--text-muted);
+    }
+
+    .card-programa .btn {
+      border-radius: 999px;
+      padding-inline: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .downloads-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .download-card {
+      border: 1px solid var(--border-color);
+      background: var(--surface-strong);
+      border-radius: 4px;
+      padding: 1.35rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      min-height: 170px;
+    }
+
+    .publicacoes-panel,
+    .updates-panel {
+      border-radius: 4px;
+    }
+
+    .download-card strong {
+      font-size: 1rem;
+      color: var(--text-strong);
+    }
+
+    .download-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .download-card a {
+      font-weight: 600;
+    }
+
+    #publicacoes-list li+li {
+      margin-top: 0.75rem;
+    }
+
+    .publicacoes-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .publicacoes-item-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+    }
+
+    .publicacoes-item-icon {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      flex-shrink: 0;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+
+    .publicacoes-item-icon--pdf {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23d32f2f' d='M6 2h7l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ef5350' d='M13 2v5h5'/%3E%3Ctext x='12' y='17' text-anchor='middle' font-family='Arial, sans-serif' font-size='7' font-weight='700' fill='%23fff'%3EPDF%3C/text%3E%3C/svg%3E");
+    }
+
+    .publicacoes-item-icon--image {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='4' width='18' height='16' rx='2' fill='%23215695'/%3E%3Crect x='4.5' y='5.5' width='15' height='13' rx='1.2' fill='%233968c8'/%3E%3Ccircle cx='9' cy='11' r='2.2' fill='%23fff59d'/%3E%3Cpath fill='%23c5cae9' d='M6 18l4.2-4.6 2.7 3.2 2.6-3L18 18z'/%3E%3C/svg%3E");
+    }
+
+    .publicacoes-item-icon--generic {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%233f51b5' d='M7 2h7l5 5v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%235c6bc0' d='M14 2v5h5'/%3E%3Crect x='8.5' y='12' width='7' height='1.5' rx='.75' fill='%23c5cae9'/%3E%3Crect x='8.5' y='15' width='5' height='1.5' rx='.75' fill='%23c5cae9'/%3E%3C/svg%3E");
+    }
+
+    .publicacoes-item time {
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 576px) {
+      .publicacoes-item {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .publicacoes-item-link {
+        align-items: flex-start;
+      }
+    }
+
+    .updates-panel {
+      border-left: 3px solid var(--brand-highlight);
+      padding-left: 1.2rem;
+      color: var(--text-muted);
+    }
+
+    .updates-panel time {
+      font-size: 0.85rem;
+      color: var(--brand-secondary);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    footer {
+      color: var(--text-muted);
+      padding: 2.5rem 0 2rem;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      header.site-header {
+        padding: 2.5rem 0 2rem;
+      }
+
+      .badge-open {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .section-title {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <input type="hidden" id="authorization" value="{{ $json.authorization }}" />
+  <input type="hidden" id="cpf" value="{{ $json.cpf }}" />
+  <input type="hidden" id="email" value="{{ $json.email }}" />
+  <input type="hidden" id="telefone" value="{{ $json.telefone }}" />
+  <input type="hidden" id="cep" value="{{ $json.cep }}" />
+  <input type="hidden" id="logradouro" value="{{ $json.logradouro }}" />
+  <input type="hidden" id="numero" value="{{ $json.numero }}" />
+  <input type="hidden" id="complemento" value="{{ $json.complemento }}" />
+  <input type="hidden" id="bairro" value="{{ $json.bairro }}" />
+  <input type="hidden" id="cidade" value="{{ $json.cidade }}" />
+  <input type="hidden" id="uf" value="{{ $json.uf }}" />
+  <input type="hidden" id="inicio_recurso_avaliacao_curricular"
+    value="{{ $json.inicio_recurso_avaliacao_curricular }}" />
+  <input type="hidden" id="termino_recurso_avaliacao_curricular"
+    value="{{ $json.termino_recurso_avaliacao_curricular }}" />
+  <input type="hidden" id="inicio_recurso_pcd" value="{{ $json.inicio_recurso_pcd }}" />
+  <input type="hidden" id="termino_recurso_pcd" value="{{ $json.termino_recurso_pcd }}" />
+  <input type="hidden" id="inicio_recurso_ppni" value="{{ $json.inicio_recurso_ppni }}" />
+  <input type="hidden" id="termino_recurso_ppni" value="{{ $json.termino_recurso_ppni }}" />
+  <input type="hidden" id="inicio_inscricoes" value="{{ $json.inicio_inscricoes }}" />
+  <input type="hidden" id="termino_inscricoes" value="{{ $json.termino_inscricoes }}" />
+  <input type="hidden" id="id_selecao" value="{{ $json.id_selecao }}" />
+  <input type="hidden" id="updated_at" value="{{ $json.updated_at }}" />
+  <header class="site-header">
+    <div class="container">
+      <span class="badge-open">Secretaria de Administração - SAD • Prefeitura do Recife</span>
+      <h1 class="display-6 fw-semibold mt-3">Seleção Simplificada {{ $json.selecao }}</h1>
+      <p class="lead mt-2">
+        {{ $json.conteudo }}
+      </p>
+    </div>
+  </header>
+
+  <main class="container my-5">
+    <p class="user-greeting">Olá, {{ $json.given_name }}! Que bom ter você aqui.</p>
+    <section class="mb-5">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <h2 class="section-title mb-0">Inscrições em andamento</h2>
+        <div class="text-muted small">
+          Última atualização em <strong id="last-update-text">16 de novembro de 2025 às 10:49:58</strong> • Horário
+          oficial do Recife (GMT-3)
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <article class="card card-programa">
+            <div class="card-header">
+              <span class="badge text-bg-light text-uppercase text-primary">Seleção simplificada</span>
+              <h3 class="h5 mt-3 mb-1">{{ $json.selecao }}</h3>
+              <p class="mb-0 text-muted">{{ $json.descricao }}</p>
+            </div>
+            <div class="card-body">
+              <ul class="mb-0">
+                <li id="inscricao-periodo-texto">Período de inscrição: 00:00:00 do dia 17 de novembro de 2025 a 23:59:59
+                  do dia 26 de novembro de
+                  2025.</li>
+                <li>Envio de documentos comprobatórios em formato PDF.</li>
+                <li>Etapas conduzidas no Sistema SAD Seleções.</li>
+              </ul>
+              <div class="mt-4 d-flex flex-column gap-2">
+                <div class="d-flex flex-wrap gap-2">
+                  <button class="btn btn-primary px-4 py-2" id="btn-preencher-inscricao" type="button"
+                    data-endpoint="https://sad.recife.pe.gov.br/formulario-inscricao">
+                    Área do candidato
+                  </button>
+                </div>
+                <p class="text-muted small mb-0" id="inscricao-btn-status"></p>
+              </div>
+              <!--
+              <div class="mt-4 pt-3 border-top">
+                <h4 class="h6 text-uppercase text-secondary mb-2">Interposição de recursos</h4>
+                <p class="text-muted small mb-3">
+                  Informe o número da inscrição no formato <strong>{{ $json.mascara_inscricao }}</strong>, selecione os
+                  anexos
+                  pertinentes (até 10&nbsp;MB cada) e envie para registro do recurso.
+                </p>
+                <details class="collapsible-form mt-3">
+                  <summary>Preparar envio do recurso</summary>
+                  <div class="mt-3">
+                    <label class="form-label" for="recurso-numero-input">Número da inscrição</label>
+                    <input class="form-control" type="text" id="recurso-numero-input" name="numeroInscricao"
+                      placeholder="{{ $json.mascara_inscricao }}" autocomplete="off" inputmode="text" maxlength="15"
+                      required />
+                    <div class="form-text">Siga o formato da máscara: {{ $json.mascara_inscricao }}.</div>
+                  </div>
+                  <div class="mt-3">
+                    <label class="form-label" for="recurso-arquivo-curricular">Recurso administrativo em face do
+                      resultado preliminar da Análise Curricular</label>
+                    <input class="form-control" type="file" id="recurso-arquivo-curricular"
+                      name="arquivoRecursoCurricular" accept=".pdf" data-tipo="analiseCurricular"
+                      data-legenda="Recurso administrativo em face do resultado preliminar da Análise Curricular"
+                      disabled />
+                    <div class="form-text">Anexe o documento referente à etapa de análise curricular (formato PDF,
+                      até 10&nbsp;MB).</div>
+                  </div>
+                  <div class="mt-3">
+                    <label class="form-label" for="recurso-arquivo-laudo">Recurso administrativo em face do resultado
+                      preliminar de deferimento das inscrições para pessoa com deficiência</label>
+
+                    <input class="form-control" type="file" id="recurso-arquivo-laudo" name="arquivoRecursoLaudo"
+                      accept=".pdf" data-tipo="laudoMedicoPcd"
+                      data-legenda="Recurso administrativo em face do resultado preliminar de deferimento das inscrições para pessoa com deficiência"
+                      disabled />
+                    <div class="form-text">Utilize este campo para anexar o laudo médico PcD (formato PDF,
+                      até 10&nbsp;MB).</div>
+                  </div>
+                  <div class="mt-3">
+                    <label class="form-label" for="recurso-arquivo-autodeclaracao">Recurso administrativo em face do
+                      resultado preliminar da avaliação biopsicossocial</label>
+
+                    <input class="form-control" type="file" id="recurso-arquivo-autodeclaracao"
+                      name="arquivoRecursoAutodeclaracao" accept=".pdf" data-tipo="autodeclaracaoNegros"
+                      data-legenda="Recurso administrativo em face do resultado preliminar da avaliação biopsicossocial"
+                      disabled />
+                    <div class="form-text">Anexe o documento de autodeclaração para candidatos negros (formato PDF,
+                      até 10&nbsp;MB).</div>
+                  </div>
+                  <div class="mt-3 text-muted small">Selecione apenas os arquivos necessários para o seu recurso. Pelo
+                    menos um anexo deve ser informado.</div>
+                </details>
+                <button class="btn btn-outline-primary mt-3" id="btn-enviar-recurso" type="button"
+                  data-endpoint="{{ $json.url_recurso }}" disabled>Enviar recurso</button>
+              </div>
+              -->
+            </div>
+          </article>
+        </div>
+
+        <div class="col-lg-6 d-flex flex-column gap-4">
+          <section class="publicacoes-panel bg-white rounded-4 border shadow-sm p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h6 text-uppercase text-secondary mb-0">Publicações</h3>
+              <span class="badge text-bg-light text-primary">Atualizado automaticamente</span>
+            </div>
+            <ul class="list-unstyled mb-0" id="publicacoes-list">
+              <li class="text-muted">Carregando publicações...</li>
+            </ul>
+          </section>
+          <article class="card card-programa">
+            <div class="card-header">
+              <span class="badge text-bg-light text-uppercase text-primary">Atualização cadastral</span>
+              <h3 class="h5 mt-3 mb-1">{{ $json.selecao }} — Cadastro de Reservas</h3>
+              <p class="mb-0 text-muted">Atualize exclusivamente e-mail, telefone e endereço para manter o cadastro
+                atualizado.</p>
+            </div>
+            <div class="card-body">
+              <ul class="mb-0">
+                <li>Revise e confirme os dados antes de enviar a atualização.</li>
+                <li>As informações serão atualizadas em seu cadastro.</li>
+              </ul>
+              <details class="collapsible-form mt-3">
+                <summary>Atualizar dados de contato</summary>
+                <div class="mt-3">
+                  <label class="form-label" for="email-input">E-mail</label>
+                  <input class="form-control" type="email" id="email-input" name="email" value="{{ $json.email }}"
+                    placeholder="nome@exemplo.com" autocomplete="email" required />
+                  <div class="form-text">Informe o endereço eletrônico que receberá os comunicados oficiais.</div>
+                </div>
+                <div class="mt-3">
+                  <label class="form-label" for="email-confirm-input">Confirmar e-mail</label>
+                  <input class="form-control" type="email" id="email-confirm-input" name="emailConfirm" value=""
+                    placeholder="Confirme seu e-mail" autocomplete="email" required />
+                  <div class="form-text">Digite novamente para validar o endereço informado.</div>
+                </div>
+                <div class="mt-3">
+                  <label class="form-label" for="telefone-input">Telefone</label>
+                  <input class="form-control" type="tel" id="telefone-input" name="telefone"
+                    value="{{ $json.telefone }}" placeholder="DDD + número" inputmode="numeric" maxlength="11"
+                    required />
+                  <div class="form-text">Informe 11 dígitos numéricos (ex.: 81999999999) para contato preferencial.
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <label class="form-label" for="cep-input">CEP</label>
+                  <input class="form-control" type="text" id="cep-input" name="cep" value="{{ $json.cep }}"
+                    placeholder="00000000" inputmode="numeric" maxlength="8" required />
+                  <div class="form-text">Informe o CEP com 8 dígitos.</div>
+                </div>
+                <div class="row g-3 mt-3">
+                  <div class="col-md-8">
+                    <label class="form-label" for="logradouro-input">Logradouro</label>
+                    <input class="form-control" type="text" id="logradouro-input" name="logradouro"
+                      value="{{ $json.logradouro }}" placeholder="Rua, avenida, travessa..." required />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label" for="numero-input">Número</label>
+                    <input class="form-control" type="text" id="numero-input" name="numero" value="{{ $json.numero }}"
+                      placeholder="000" required />
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <label class="form-label" for="complemento-input">Complemento</label>
+                  <input class="form-control" type="text" id="complemento-input" name="complemento"
+                    value="{{ $json.complemento }}" placeholder="Apartamento, bloco, referência" required />
+                </div>
+                <div class="row g-3 mt-3">
+                  <div class="col-md-6">
+                    <label class="form-label" for="bairro-input">Bairro</label>
+                    <input class="form-control" type="text" id="bairro-input" name="bairro" value="{{ $json.bairro }}"
+                      placeholder="Nome do bairro" required />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label" for="cidade-input">Cidade</label>
+                    <input class="form-control" type="text" id="cidade-input" name="cidade" value="{{ $json.cidade }}"
+                      placeholder="Município" required />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label" for="uf-input">UF</label>
+                    <input class="form-control text-uppercase is-invalid" type="text" id="uf-input" name="uf" value=""
+                      placeholder="UF" maxlength="2" required />
+                  </div>
+                </div>
+              </details>
+              <button class="btn btn-outline-primary mt-3" id="btn-atualizar-cadastro" type="button" disabled>Enviar
+                atualização de contato</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!--
+    <section class="mb-5" id="minhas-inscricoes-section">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+        <h2 class="section-title mb-0">Minhas inscrições</h2>
+        <p class="text-muted small mb-0">Selecione uma inscrição para visualizar o resumo cadastral.</p>
+      </div>
+      <div id="minhas-inscricoes-loading" class="minhas-inscricoes-placeholder">
+        Carregando inscrições vinculadas ao CPF informado...
+      </div>
+      <div id="minhas-inscricoes-empty" class="minhas-inscricoes-placeholder d-none">
+        Nenhuma inscrição encontrada para o CPF informado.
+      </div>
+      <div id="minhas-inscricoes-cards"
+        class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 minhas-inscricoes-grid d-none"></div>
+    </section>
+    -->
+
+    <!--
+      <section class="mb-5">
+        <h2 class="section-title mb-3">Documentos obrigatórios e modelos</h2>
+        <p class="text-muted mb-4">
+          Utilize os modelos oficiais disponibilizados abaixo. Todos os anexos devem ser assinados, digitalizados em alta
+          resolução e enviados em formato PDF conforme orientações do edital.
+        </p>
+
+        <div class="downloads-grid">
+          <article class="download-card">
+            <strong>Modelo de Laudo Médico para Pessoas com Deficiência</strong>
+            <p>Documento comprobatório exigido para candidatos que solicitam reserva de vagas PcD.</p>
+            <a
+              class="link-primary"
+              href="FORM%20MODELO%20DE%20LAUDO%20MÉDICO%20PARA%20PESSOAS%20COM%20DEFICIÊNCIA.pdf"
+              download="FORM MODELO DE LAUDO MÉDICO PARA PESSOAS COM DEFICIÊNCIA.pdf"
+              data-open-external="true"
+              data-force-download="true"
+              data-preview-label="Modelo de Laudo Médico para Pessoas com Deficiência"
+              >Baixar modelo em PDF</a
+            >
+          </article>
+
+          <article class="download-card">
+            <strong>Termo de Autodeclaração — Candidatos Negros (Preto e Pardo)</strong>
+            <p>Assinatura obrigatória para candidatos que optarem pela reserva de vagas para pessoas negras.</p>
+            <a
+              class="link-primary"
+              href="FORM%20TERMO%20DE%20AUTODECLARAÇÃO%20DE%20CANDIDATOS%20NEGROS%20(PRETO%20E%20PARDO).pdf"
+              download="FORM TERMO DE AUTODECLARAÇÃO DE CANDIDATOS NEGROS (PRETO E PARDO).pdf"
+              data-open-external="true"
+              data-force-download="true"
+              data-preview-label="Termo de Autodeclaração — Candidatos Negros"
+              >Baixar termo em PDF</a
+            >
+          </article>
+
+          <article class="download-card">
+            <strong>Termo de Autodeclaração de Identidade Indígena (TADII)</strong>
+            <p>Documento exigido para autodeclaração de pertencimento a povos indígenas.</p>
+            <a
+              class="link-primary"
+              href="FORM%20TERMO%20DE%20AUTODECLARAÇÃO%20DE%20IDENTIDADE%20INDÍGENA%20-%20TADII.pdf"
+              download="FORM TERMO DE AUTODECLARAÇÃO DE IDENTIDADE INDÍGENA - TADII.pdf"
+              data-open-external="true"
+              data-force-download="true"
+              data-preview-label="Termo de Autodeclaração de Identidade Indígena"
+              >Baixar termo em PDF</a
+            >
+          </article>
+        </div>
+      </section>
+      -->
+
+    <section class="row g-4 align-items-start mb-5">
+      <div class="col-lg-7">
+        <h2 class="section-title mb-3">Orientações para inscrição</h2>
+        <ol class="list-group list-group-numbered shadow-sm">
+          <li class="list-group-item">
+            Leia atentamente o edital e verifique os requisitos de participação, prazos e critérios de classificação.
+          </li>
+          <li class="list-group-item">
+            Separe toda a documentação obrigatória em formato PDF, com tamanho máximo de 10&nbsp;MB por arquivo.
+          </li>
+          <li class="list-group-item">
+            Utilize o formulário eletrônico para preencher seus dados pessoais, profissionais e anexar a documentação.
+          </li>
+          <li class="list-group-item">
+            Após o envio, acompanhe o e-mail cadastrado e o portal oficial para publicações de listas e comunicados.
+          </li>
+        </ol>
+      </div>
+      <div class="col-lg-5">
+        <div class="updates-panel bg-white rounded-4 p-4 shadow-sm">
+          <h3 class="h6 text-uppercase text-secondary fw-bold mb-3">Orientações adicionais</h3>
+          <p class="mb-2">Mantenha seus dados de contato atualizados para receber comunicados oficiais sobre o andamento
+            do certame.</p>
+          <p class="mb-0">As publicações com listas, retificações e convocações serão disponibilizadas automaticamente
+            na área "Publicações" acima.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-5">
+      <h2 class="section-title mb-3">Canais de suporte</h2>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="p-4 bg-white rounded-4 border shadow-sm h-100">
+            <h3 class="h6 text-uppercase text-secondary">Atendimento eletrônico</h3>
+            <p class="mb-1 fw-semibold">gggest.sad@recife.pe.gov.br</p>
+            <p class="mb-0 text-muted">Resposta em até 2 dias úteis.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-white border-top">
+    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+      <span>Secretaria de Administração - SAD — Prefeitura do Recife</span>
+      <span class="text-muted">© 2025 • Coordenadoria de Processos Seletivos</span>
+    </div>
+  </footer>
+  <div class="feedback-modal-backdrop" id="attention-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="feedback-modal">
+      <h4 class="feedback-modal-title attention-modal-title" id="attention-modal-title">
+        <span class="emoji" aria-hidden="true">⚠️</span>
+        <span>Atenção, Candidato!</span>
+      </h4>
+      <div class="feedback-modal-message" id="attention-modal-message">
+        <p class="mb-0">Leia atentamente o Edital! Recomendamos que a inscrição seja realizada, preferencialmente, por meio de um computador.</p>
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-outline-secondary" data-attention-close>Fechar</button>
+      </div>
+    </div>
+  </div>
+  <div class="feedback-modal-backdrop" id="feedback-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="feedback-modal">
+      <h4 class="feedback-modal-title" id="feedback-modal-title"></h4>
+      <div class="feedback-modal-message" id="feedback-modal-message"></div>
+      <button type="button" class="btn btn-primary mt-4" id="feedback-modal-close">Fechar</button>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Limpeza da URL comentada para evitar perda de parâmetros necessários em caso de reload
+      /*
+      if (window.history.replaceState) {
+        var cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: cleanUrl }, "", cleanUrl);
+      }
+      */
+
+      var button = document.getElementById("btn-preencher-inscricao");
+      var authorizationField = document.getElementById("authorization");
+      var endpointDefault = "https://sad.recife.pe.gov.br/formulario-inscricao";
+      var inscricaoStatusText = document.getElementById("inscricao-btn-status");
+      var updateButton = document.getElementById("btn-atualizar-cadastro");
+      var emailInput = document.getElementById("email-input");
+      var emailConfirmInput = document.getElementById("email-confirm-input");
+      var telefoneInput = document.getElementById("telefone-input");
+      var cepInput = document.getElementById("cep-input");
+      var logradouroInput = document.getElementById("logradouro-input");
+      var numeroInput = document.getElementById("numero-input");
+      var complementoInput = document.getElementById("complemento-input");
+      var bairroInput = document.getElementById("bairro-input");
+      var cidadeInput = document.getElementById("cidade-input");
+      var ufInput = document.getElementById("uf-input");
+      var emailHidden = document.getElementById("email");
+      var telefoneHidden = document.getElementById("telefone");
+      var cepHidden = document.getElementById("cep");
+      var logradouroHidden = document.getElementById("logradouro");
+      var numeroHidden = document.getElementById("numero");
+      var complementoHidden = document.getElementById("complemento");
+      var bairroHidden = document.getElementById("bairro");
+      var cidadeHidden = document.getElementById("cidade");
+      var ufHidden = document.getElementById("uf");
+      var recursoButton = document.getElementById("btn-enviar-recurso");
+      var recursoNumeroInput = document.getElementById("recurso-numero-input");
+      var recursoArquivoInputs = [
+        { input: document.getElementById("recurso-arquivo-curricular"), tipo: "analiseCurricular" },
+        { input: document.getElementById("recurso-arquivo-laudo"), tipo: "laudoMedicoPcd" },
+        { input: document.getElementById("recurso-arquivo-autodeclaracao"), tipo: "autodeclaracaoNegros" },
+      ];
+      var recursoEndpoint = recursoButton ? recursoButton.getAttribute("data-endpoint") : "";
+      var recursoMaxFileSize = 10 * 1024 * 1024;
+      var recursoMimeTypesPermitidos = ["application/pdf"];
+      var recursoExtensoesPermitidas = [".pdf"];
+      var recursoMask = "{{ $json.mascara_inscricao }}";
+      var recursoPrefix = recursoMask.replace(/X/g, "");
+      var recursoDigits = (recursoMask.match(/X/g) || []).length;
+      var recursoPattern = new RegExp("^" + recursoPrefix + "\\d{" + recursoDigits + "}$");
+      var recursoAlgumInputHabilitado = false;
+
+      // Função auxiliar para formatar data com horário
+      function formatarDataComHorario(dataLimpa, ehTermino) {
+        if (!dataLimpa) return null;
+        var horario = ehTermino ? "T23:59:59-03:00" : "T00:00:00-03:00";
+        return new Date(dataLimpa + horario);
+      }
+
+      // Obter valores das variáveis de data
+      var inicioRecursoAvaliacaoCurricular = document.getElementById("inicio_recurso_avaliacao_curricular")?.value;
+      var terminoRecursoAvaliacaoCurricular = document.getElementById("termino_recurso_avaliacao_curricular")?.value;
+      var inicioRecursoPcd = document.getElementById("inicio_recurso_pcd")?.value;
+      var terminoRecursoPcd = document.getElementById("termino_recurso_pcd")?.value;
+      var inicioRecursoPpni = document.getElementById("inicio_recurso_ppni")?.value;
+      var terminoRecursoPpni = document.getElementById("termino_recurso_ppni")?.value;
+      var inicioInscricoes = document.getElementById("inicio_inscricoes")?.value;
+      var terminoInscricoes = document.getElementById("termino_inscricoes")?.value;
+
+      // Configurar janelas de recursos dinamicamente
+      window.recursoJanelas = {
+        analiseCurricular: [
+          {
+            start: formatarDataComHorario(inicioRecursoAvaliacaoCurricular, false),
+            end: formatarDataComHorario(terminoRecursoAvaliacaoCurricular, true)
+          },
+        ].filter(function (janela) { return janela.start && janela.end; }),
+        laudoMedicoPcd: [
+          {
+            start: formatarDataComHorario(inicioRecursoPcd, false),
+            end: formatarDataComHorario(terminoRecursoPcd, true)
+          },
+        ].filter(function (janela) { return janela.start && janela.end; }),
+        autodeclaracaoNegros: [
+          {
+            start: formatarDataComHorario(inicioRecursoPpni, false),
+            end: formatarDataComHorario(terminoRecursoPpni, true)
+          },
+        ].filter(function (janela) { return janela.start && janela.end; }),
+      };
+      var modalBackdrop = document.getElementById("feedback-modal");
+      var modalTitle = document.getElementById("feedback-modal-title");
+      var modalMessage = document.getElementById("feedback-modal-message");
+      var modalClose = document.getElementById("feedback-modal-close");
+      var modalContainer = modalBackdrop ? modalBackdrop.querySelector(".feedback-modal") : null;
+      var attentionModal = document.getElementById("attention-modal");
+      var attentionCloseButtons = attentionModal ? attentionModal.querySelectorAll("[data-attention-close]") : [];
+      var popupCloseHandler = null;
+      var lastCepConsulted = "";
+      var minhasInscricoesSection = document.getElementById("minhas-inscricoes-section");
+      var minhasInscricoesList = document.getElementById("minhas-inscricoes-cards");
+      var minhasInscricoesLoading = document.getElementById("minhas-inscricoes-loading");
+      var minhasInscricoesEmpty = document.getElementById("minhas-inscricoes-empty");
+      var inscricoesListEndpoint = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/d9a52f68-88ee-44af-b8e5-335131a9ba31";
+      var inscricoesResumoEndpoint = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-sesuite";
+      var minhasInscricoesEmptyDefault = minhasInscricoesEmpty ? minhasInscricoesEmpty.textContent.trim() : "";
+      var minhasInscricoesLoadingDefault = minhasInscricoesLoading ? minhasInscricoesLoading.textContent.trim() : "";
+
+      // Função para formatar data em português
+      function formatarDataPorExtenso(dataString) {
+        if (!dataString) return "";
+        var data = new Date(dataString + "T00:00:00-03:00");
+        var dia = data.getDate();
+        var meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
+          "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+        var mes = meses[data.getMonth()];
+        var ano = data.getFullYear();
+        return dia + " de " + mes + " de " + ano;
+      }
+
+      // Atualizar texto do período de inscrição dinamicamente
+      var inscricaoPeriodoTexto = document.getElementById("inscricao-periodo-texto");
+      if (inscricaoPeriodoTexto && inicioInscricoes && terminoInscricoes) {
+        var textoInicio = formatarDataPorExtenso(inicioInscricoes);
+        var textoTermino = formatarDataPorExtenso(terminoInscricoes);
+        inscricaoPeriodoTexto.textContent = "Período de inscrição: 00:00:00 do dia " + textoInicio +
+          " a 23:59:59 do dia " + textoTermino + ".";
+      }
+
+      // Função para formatar data e hora por extenso (última atualização)
+      function formatarDataHoraCompleta(dataString) {
+        if (!dataString) return "";
+        var data = new Date(dataString);
+        if (isNaN(data.getTime())) return dataString;
+
+        var dia = data.getDate();
+        var meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
+          "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+        var mes = meses[data.getMonth()];
+        var ano = data.getFullYear();
+
+        var hora = String(data.getHours()).padStart(2, '0');
+        var min = String(data.getMinutes()).padStart(2, '0');
+        var seg = String(data.getSeconds()).padStart(2, '0');
+
+        return dia + " de " + mes + " de " + ano + " às " + hora + ":" + min + ":" + seg;
+      }
+
+      // Atualizar informação da última atualização dinamicamente
+      var updatedAtValue = document.getElementById("updated_at")?.value;
+      var lastUpdateElement = document.getElementById("last-update-text");
+
+      if (lastUpdateElement && updatedAtValue && !updatedAtValue.startsWith("{{")) {
+        lastUpdateElement.textContent = formatarDataHoraCompleta(updatedAtValue);
+      }
+
+      if (inscricaoStatusText) {
+        inscricaoStatusText.textContent = "O formulário de inscrição está disponível para preenchimento.";
+        inscricaoStatusText.classList.remove("text-danger");
+      }
+      function getPublicationIcon(mimeType, extension, url) {
+        var normalizedExtension = "";
+        var normalizedMime = "";
+
+        if (mimeType) {
+          normalizedMime = String(mimeType).toLowerCase().trim();
+        }
+
+        if (extension) {
+          normalizedExtension = String(extension).toLowerCase().trim();
+        }
+
+        if (normalizedExtension.startsWith(".")) {
+          normalizedExtension = normalizedExtension.slice(1);
+        }
+
+        if (!normalizedExtension && url) {
+          var guessed = String(url).split("?")[0].split("#")[0];
+          var parts = guessed.split(".");
+          normalizedExtension = parts.length > 1 ? parts.pop().toLowerCase() : "";
+        }
+
+        if (normalizedMime) {
+          if (normalizedMime === "application/pdf" || normalizedMime === "application/x-pdf") {
+            return "pdf";
+          }
+
+          if (normalizedMime.indexOf("image/") === 0) {
+            return "image";
+          }
+        }
+
+        if (normalizedExtension === "pdf") {
+          return "pdf";
+        }
+
+        var imageExtensions = {
+          jpg: true,
+          jpeg: true,
+          png: true,
+          gif: true,
+          bmp: true,
+          svg: true,
+          webp: true,
+          tif: true,
+          tiff: true,
+          heic: true,
+        };
+
+        if (normalizedExtension && imageExtensions[normalizedExtension]) {
+          return "image";
+        }
+
+        return "generic";
+      }
+
+      function sanitizeDigits(value) {
+        return (value || "").replace(/\D/g, "");
+      }
+
+      function normalizeInscricao(value) {
+        var raw = (value || "").toString().toUpperCase();
+        var digitsPart;
+
+        if (raw.startsWith(recursoPrefix)) {
+          digitsPart = raw.slice(recursoPrefix.length).replace(/\D/g, "");
+        } else {
+          digitsPart = raw.replace(/\D/g, "");
+        }
+
+        return recursoPrefix + digitsPart.slice(0, recursoDigits);
+      }
+
+      function determineToneFromContent(message, data) {
+        var normalizedMessage = (message || "").toLowerCase();
+        var statusField = "";
+
+        if (data && typeof data === "object" && !Array.isArray(data)) {
+          if (data.status) {
+            statusField = String(data.status).toLowerCase();
+          } else if (data.result) {
+            statusField = String(data.result).toLowerCase();
+          } else if (data.type) {
+            statusField = String(data.type).toLowerCase();
+          } else if (data.title) {
+            statusField = String(data.title).toLowerCase();
+          }
+        }
+
+        if (statusField.includes("sucesso") || statusField === "success" || statusField === "ok") {
+          return "success";
+        }
+        if (statusField.includes("erro") || statusField.includes("error") || statusField.includes("falha") || statusField.includes("fail")) {
+          return "error";
+        }
+
+        if (normalizedMessage.includes("sucesso") || normalizedMessage.includes("atualiz")) {
+          return "success";
+        }
+        if (
+          normalizedMessage.includes("erro") ||
+          normalizedMessage.includes("falha") ||
+          normalizedMessage.includes("inválid") ||
+          normalizedMessage.includes("não foi possível")
+        ) {
+          return "error";
+        }
+        if (
+          normalizedMessage.includes("atenção") ||
+          normalizedMessage.includes("aguarde") ||
+          normalizedMessage.includes("verifique") ||
+          normalizedMessage.includes("pendente")
+        ) {
+          return "warning";
+        }
+        return null;
+      }
+
+      function applyModalVariant(variant) {
+        if (!modalContainer) {
+          return;
+        }
+
+        modalContainer.classList.remove("feedback-modal--wide");
+
+        if (!variant) {
+          return;
+        }
+
+        if (variant === "wide") {
+          modalContainer.classList.add("feedback-modal--wide");
+        }
+      }
+
+      function openAttentionModal() {
+        if (!attentionModal) {
+          return;
+        }
+
+        attentionModal.classList.add("active");
+        attentionModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeAttentionModal() {
+        if (!attentionModal) {
+          return;
+        }
+
+        attentionModal.classList.remove("active");
+        attentionModal.setAttribute("aria-hidden", "true");
+      }
+
+      function showPopup(message, options) {
+        var msg = message === undefined || message === null ? "" : String(message);
+        var toneHint = options && options.tone;
+        var tone = toneHint || determineToneFromContent(msg, options && options.data);
+        var title;
+
+        applyModalVariant(options && options.size);
+
+        if (options && options.title) {
+          title = String(options.title);
+        } else {
+          switch (tone) {
+            case "success":
+              title = "✅ Sucesso";
+              break;
+            case "error":
+              title = "❌ Erro";
+              break;
+            case "warning":
+              title = "⚠️ Atenção";
+              break;
+            default:
+              title = "ℹ️ Informativo";
+              break;
+          }
+        }
+
+        if (modalTitle) {
+          modalTitle.textContent = title;
+        }
+        if (modalMessage) {
+          var trimmedMessage = msg.trim();
+          var complementoAviso = "Atualize também as suas informações cadastrais no ConectaRecife.";
+          var appendReminder = options && Object.prototype.hasOwnProperty.call(options, "appendReminder")
+            ? options.appendReminder !== false
+            : true;
+
+          if (options && options.htmlContent) {
+            var htmlContent = String(options.htmlContent || "");
+            modalMessage.innerHTML = appendReminder
+              ? htmlContent + '<p class="mt-3 small text-muted">' + complementoAviso + "</p>"
+              : htmlContent;
+          } else {
+            var finalMessage = trimmedMessage ? trimmedMessage + " " + complementoAviso : complementoAviso;
+            modalMessage.textContent = finalMessage;
+          }
+        }
+        if (modalBackdrop) {
+          modalBackdrop.classList.add("active");
+          modalBackdrop.setAttribute("aria-hidden", "false");
+        }
+        if (modalClose) {
+          modalClose.focus();
+        }
+        popupCloseHandler = options && typeof options.onClose === "function" ? options.onClose : null;
+      }
+
+      function hidePopup() {
+        if (modalBackdrop) {
+          modalBackdrop.classList.remove("active");
+          modalBackdrop.setAttribute("aria-hidden", "true");
+        }
+        popupCloseHandler = null;
+      }
+
+      if (modalClose) {
+        modalClose.addEventListener("click", function () {
+          if (typeof popupCloseHandler === "function") {
+            var handler = popupCloseHandler;
+            popupCloseHandler = null;
+            handler();
+          }
+          hidePopup();
+        });
+      }
+      if (modalBackdrop) {
+        modalBackdrop.addEventListener("click", function (event) {
+          if (event.target === modalBackdrop) {
+            hidePopup();
+          }
+        });
+      }
+
+      if (attentionModal) {
+        openAttentionModal();
+
+        attentionCloseButtons.forEach(function (buttonEl) {
+          buttonEl.addEventListener("click", closeAttentionModal);
+        });
+      }
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          hidePopup();
+        }
+      });
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatResumoLabel(label) {
+        return String(label || "")
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .replace(/[_-]+/g, " ")
+          .trim()
+          .split(/\s+/)
+          .map(function (word) {
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+          })
+          .join(" ");
+      }
+
+      function isPlainObject(value) {
+        return Object.prototype.toString.call(value) === "[object Object]";
+      }
+
+      function buildDefinitionListFromObject(obj) {
+        if (!isPlainObject(obj)) {
+          return "";
+        }
+
+        var keys = Object.keys(obj);
+        if (!keys.length) {
+          return '<p class="mb-0 text-muted">Nenhum dado retornado.</p>';
+        }
+
+        var rows = keys
+          .map(function (key) {
+            var value = obj[key];
+            if (value === undefined || value === null || value === "") {
+              return "";
+            }
+
+            var label = formatResumoLabel(key);
+            var valueHtml;
+
+            if (Array.isArray(value) || isPlainObject(value)) {
+              valueHtml = '<pre class="resumo-inscricao-pre">' + escapeHtml(JSON.stringify(value, null, 2)) + "</pre>";
+            } else {
+              valueHtml = '<span>' + escapeHtml(value) + "</span>";
+            }
+
+            return (
+              '<dt class="col-sm-4">' +
+              escapeHtml(label) +
+              '</dt><dd class="col-sm-8">' +
+              valueHtml +
+              "</dd>"
+            );
+          })
+          .filter(function (row) {
+            return !!row;
+          })
+          .join("");
+
+        if (!rows) {
+          return '<p class="mb-0 text-muted">Nenhum dado retornado.</p>';
+        }
+
+        return '<dl class="row g-2 resumo-inscricao-list mb-0">' + rows + "</dl>";
+      }
+
+      function buildResumoHtml(data, numero) {
+        var header = numero ? '<h5 class="fw-semibold mb-3">Inscrição ' + escapeHtml(numero) + "</h5>" : "";
+
+        if (data === undefined || data === null) {
+          return header + '<p class="mb-0 text-muted">Nenhuma informação retornada pelo serviço.</p>';
+        }
+
+        if (Array.isArray(data)) {
+          if (!data.length) {
+            return header + '<p class="mb-0 text-muted">Nenhum registro retornado para esta inscrição.</p>';
+          }
+
+          var blocks = data
+            .map(function (item, index) {
+              var titulo = data.length > 1 ? '<h6 class="fw-semibold mt-3 mb-2">Registro ' + (index + 1) + "</h6>" : "";
+              if (isPlainObject(item)) {
+                return titulo + buildDefinitionListFromObject(item);
+              }
+              return titulo + '<pre class="resumo-inscricao-pre">' + escapeHtml(JSON.stringify(item, null, 2)) + "</pre>";
+            })
+            .join("");
+
+          return header + blocks;
+        }
+
+        if (isPlainObject(data)) {
+          return header + buildDefinitionListFromObject(data);
+        }
+
+        return header + '<p class="mb-0">' + escapeHtml(String(data)) + "</p>";
+      }
+
+      function setMinhasInscricoesState(state) {
+        if (minhasInscricoesLoading) {
+          if (!minhasInscricoesLoadingDefault) {
+            minhasInscricoesLoadingDefault = "Carregando inscrições vinculadas ao CPF informado...";
+          }
+          minhasInscricoesLoading.classList.toggle("d-none", state !== "loading");
+        }
+        if (minhasInscricoesEmpty) {
+          if (!minhasInscricoesEmptyDefault) {
+            minhasInscricoesEmptyDefault = "Nenhuma inscrição encontrada para o CPF informado.";
+          }
+          minhasInscricoesEmpty.classList.toggle("d-none", state !== "empty");
+        }
+        if (minhasInscricoesList) {
+          minhasInscricoesList.classList.toggle("d-none", state !== "ready");
+        }
+        if (minhasInscricoesSection) {
+          minhasInscricoesSection.classList.toggle("d-none", state === "hidden");
+        }
+      }
+
+      function normalizeMinhasInscricoes(data) {
+        if (!data) {
+          return [];
+        }
+
+        var entries;
+        if (Array.isArray(data)) {
+          entries = data;
+        } else if (Array.isArray(data.inscricoes)) {
+          entries = data.inscricoes;
+        } else if (Array.isArray(data.items)) {
+          entries = data.items;
+        } else if (Array.isArray(data.result)) {
+          entries = data.result;
+        } else if (Array.isArray(data.data)) {
+          entries = data.data;
+        } else if (isPlainObject(data)) {
+          entries = [data];
+        } else {
+          entries = [];
+        }
+
+        return entries
+          .map(function (item) {
+            if (!item) {
+              return null;
+            }
+
+            var numero =
+              item.numeroInscricao || item.inscricao || item.numero || item.codigo || item.id || item.registrationNumber;
+            if (numero) {
+              numero = String(numero).trim();
+            }
+
+            if (!numero) {
+              return null;
+            }
+
+            var cargo =
+              item.cargo ||
+              item.descricaoCargo ||
+              item.funcao ||
+              item.descricao ||
+              item.titulo ||
+              item.nomeCargo ||
+              "Cargo não informado";
+
+            cargo = cargo ? String(cargo).trim() : "Cargo não informado";
+
+            var especialidade =
+              item.especialidade ||
+              item.areaEspecialidade ||
+              item.area ||
+              item.funcaoDetalhada ||
+              item.disciplina ||
+              "";
+
+            especialidade = especialidade ? String(especialidade).trim() : "";
+
+            return {
+              numero: numero,
+              cargo: cargo,
+              especialidade: especialidade,
+            };
+          })
+          .filter(function (entry) {
+            return entry !== null;
+          });
+      }
+
+      function renderMinhasInscricoes(entries) {
+        if (!minhasInscricoesList) {
+          return;
+        }
+
+        minhasInscricoesList.innerHTML = "";
+
+        entries.forEach(function (entry) {
+          var col = document.createElement("div");
+          col.className = "col";
+
+          var card = document.createElement("article");
+          card.className = "card h-100 shadow-sm minhas-inscricao-card";
+          card.setAttribute("role", "button");
+          card.setAttribute("tabindex", "0");
+          var ariaLabel = "Consultar detalhes da inscrição " + entry.numero;
+          if (entry.cargo) {
+            ariaLabel += ", " + entry.cargo;
+          }
+          if (entry.especialidade) {
+            ariaLabel += ", especialidade " + entry.especialidade;
+          }
+          card.setAttribute("aria-label", ariaLabel);
+
+          var cardBody = document.createElement("div");
+          cardBody.className = "card-body";
+
+          var title = document.createElement("h3");
+          title.className = "h6 fw-semibold text-primary mb-1";
+          title.textContent = entry.numero;
+
+          var cargoEl = document.createElement("p");
+          cargoEl.className = "text-muted mb-1";
+          cargoEl.textContent = entry.cargo || "Cargo não informado";
+
+          cardBody.appendChild(title);
+          cardBody.appendChild(cargoEl);
+
+          var especialidadeEl = document.createElement("p");
+          especialidadeEl.className = "text-muted small mb-0";
+          especialidadeEl.textContent = entry.especialidade ? entry.especialidade : "Especialidade não informada";
+          cardBody.appendChild(especialidadeEl);
+          card.appendChild(cardBody);
+
+          card.addEventListener("click", function () {
+            consultarResumoInscricao(entry.numero, card);
+          });
+
+          card.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              consultarResumoInscricao(entry.numero, card);
+            }
+          });
+
+          col.appendChild(card);
+          minhasInscricoesList.appendChild(col);
+        });
+
+        setMinhasInscricoesState(entries.length ? "ready" : "empty");
+      }
+
+      function consultarResumoInscricao(numero, sourceElement) {
+        if (!numero) {
+          showPopup("Não foi possível identificar o número da inscrição selecionada.", { tone: "warning" });
+          return;
+        }
+
+        if (sourceElement) {
+          sourceElement.classList.add("is-loading");
+          sourceElement.setAttribute("aria-busy", "true");
+        }
+
+        var cpfField = document.getElementById("cpf");
+        var cpfValue = cpfField ? cpfField.value : "";
+        var payload = {
+          numeroInscricao: numero,
+          inscricao: numero,
+          numero: numero,
+        };
+
+        if (cpfValue) {
+          payload.cpf = cpfValue;
+        }
+
+        fetch(inscricoesResumoEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        })
+          .then(function (response) {
+            return response
+              .clone()
+              .json()
+              .catch(function () {
+                return response.text();
+              })
+              .then(function (parsed) {
+                return { parsed: parsed, ok: response.ok, status: response.status };
+              });
+          })
+          .then(function (result) {
+            var data = result.parsed;
+            var isSuccess = !!result.ok;
+
+            if (typeof data === "string") {
+              var toneFromMessage = determineToneFromContent(data, null);
+              if (!toneFromMessage && isSuccess) {
+                toneFromMessage = "success";
+              }
+              showPopup(data, { tone: toneFromMessage || (isSuccess ? "success" : "error") });
+              return;
+            }
+
+            var tone = determineToneFromContent("", data);
+            if (!tone && isSuccess) {
+              tone = "success";
+            }
+
+            var htmlContent = buildResumoHtml(data, numero);
+            showPopup("", {
+              data: data,
+              tone: tone,
+              htmlContent: htmlContent,
+              appendReminder: false,
+              title: "📄 Resumo da inscrição",
+              size: "wide",
+            });
+          })
+          .catch(function (error) {
+            console.error("Falha ao consultar inscrição:", error);
+            showPopup("Não foi possível consultar os detalhes da inscrição no momento.", { tone: "error" });
+          })
+          .finally(function () {
+            if (sourceElement) {
+              sourceElement.classList.remove("is-loading");
+              sourceElement.removeAttribute("aria-busy");
+            }
+          });
+      }
+
+      function carregarMinhasInscricoes() {
+        if (!minhasInscricoesList) {
+          return;
+        }
+
+        if (minhasInscricoesLoading && minhasInscricoesLoadingDefault) {
+          minhasInscricoesLoading.textContent = minhasInscricoesLoadingDefault;
+        }
+        if (minhasInscricoesEmpty && minhasInscricoesEmptyDefault) {
+          minhasInscricoesEmpty.textContent = minhasInscricoesEmptyDefault;
+        }
+
+        var cpfField = document.getElementById("cpf");
+        var cpfValue = cpfField ? cpfField.value : "";
+
+        if (!cpfValue) {
+          if (minhasInscricoesEmpty) {
+            minhasInscricoesEmpty.textContent = "Não foi possível localizar o CPF para consultar as inscrições.";
+          }
+          setMinhasInscricoesState("empty");
+          return;
+        }
+
+        setMinhasInscricoesState("loading");
+
+        fetch(inscricoesListEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cpf: cpfValue }),
+        })
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error("Resposta inválida ao buscar inscrições");
+            }
+            return response.json();
+          })
+          .then(function (data) {
+            var entries = normalizeMinhasInscricoes(data);
+
+            if (!entries.length) {
+              setMinhasInscricoesState("empty");
+              return;
+            }
+
+            renderMinhasInscricoes(entries);
+          })
+          .catch(function (error) {
+            console.error("Falha ao carregar inscrições:", error);
+            if (minhasInscricoesEmpty) {
+              minhasInscricoesEmpty.textContent = "Não foi possível carregar suas inscrições. Tente novamente mais tarde.";
+            }
+            setMinhasInscricoesState("empty");
+          });
+      }
+
+      function cleanupUpdateForm() {
+        [
+          emailInput,
+          emailConfirmInput,
+          telefoneInput,
+          cepInput,
+          logradouroInput,
+          numeroInput,
+          complementoInput,
+          bairroInput,
+          cidadeInput,
+          ufInput,
+        ].forEach(function (input) {
+          if (input) {
+            input.value = "";
+            input.classList.remove("is-invalid");
+          }
+        });
+
+        lastCepConsulted = "";
+        handleInputChange();
+      }
+
+      function cleanupRecursoForm() {
+        if (recursoNumeroInput) {
+          recursoNumeroInput.value = "";
+          recursoNumeroInput.classList.remove("is-invalid");
+          delete recursoNumeroInput.dataset.touched;
+        }
+        recursoArquivoInputs.forEach(function (entry) {
+          if (entry.input) {
+            entry.input.value = "";
+            entry.input.classList.remove("is-invalid");
+            delete entry.input.dataset.touched;
+          }
+        });
+        atualizarFeedbackRecurso(false);
+      }
+
+      function collectUpdateValues() {
+        var cpfField = document.getElementById("cpf");
+        var emailValue = emailInput ? emailInput.value.trim().toLowerCase() : "";
+        var emailConfirmValue = emailConfirmInput ? emailConfirmInput.value.trim().toLowerCase() : "";
+        var telefoneValue = telefoneInput ? sanitizeDigits(telefoneInput.value) : "";
+        var cepValue = cepInput ? sanitizeDigits(cepInput.value) : "";
+        var logradouroValue = logradouroInput ? logradouroInput.value.trim().toUpperCase() : "";
+        var numeroValue = numeroInput ? numeroInput.value.trim().toUpperCase() : "";
+        var complementoValue = complementoInput ? complementoInput.value.trim().toUpperCase() : "";
+        var bairroValue = bairroInput ? bairroInput.value.trim().toUpperCase() : "";
+        var cidadeValue = cidadeInput ? cidadeInput.value.trim().toUpperCase() : "";
+        var ufValue = ufInput ? String(ufInput.value || "").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() : "";
+
+        if (emailInput && emailInput.value !== emailValue) {
+          emailInput.value = emailValue;
+        }
+        if (emailConfirmInput && emailConfirmInput.value !== emailConfirmValue) {
+          emailConfirmInput.value = emailConfirmValue;
+        }
+        if (telefoneInput && telefoneInput.value !== telefoneValue) {
+          telefoneInput.value = telefoneValue;
+        }
+        if (cepInput && cepInput.value !== cepValue) {
+          cepInput.value = cepValue;
+        }
+        if (logradouroInput && logradouroInput.value !== logradouroValue) {
+          logradouroInput.value = logradouroValue;
+        }
+        if (numeroInput && numeroInput.value !== numeroValue) {
+          numeroInput.value = numeroValue;
+        }
+        if (complementoInput && complementoInput.value !== complementoValue) {
+          complementoInput.value = complementoValue;
+        }
+        if (bairroInput && bairroInput.value !== bairroValue) {
+          bairroInput.value = bairroValue;
+        }
+        if (cidadeInput && cidadeInput.value !== cidadeValue) {
+          cidadeInput.value = cidadeValue;
+        }
+        if (ufInput && ufInput.value !== ufValue) {
+          ufInput.value = ufValue;
+        }
+
+        return {
+          cpf: cpfField ? cpfField.value : "",
+          email: emailValue,
+          emailConfirm: emailConfirmValue,
+          telefone: telefoneValue,
+          cep: cepValue,
+          logradouro: logradouroValue,
+          numero: numeroValue,
+          complemento: complementoValue,
+          bairro: bairroValue,
+          cidade: cidadeValue,
+          uf: ufValue,
+        };
+      }
+
+      function syncHiddenValues(values) {
+        if (!values) {
+          return;
+        }
+        if (emailHidden) {
+          emailHidden.value = values.email || "";
+        }
+        if (telefoneHidden) {
+          telefoneHidden.value = values.telefone || "";
+        }
+        if (cepHidden) {
+          cepHidden.value = values.cep || "";
+        }
+        if (logradouroHidden) {
+          logradouroHidden.value = values.logradouro || "";
+        }
+        if (numeroHidden) {
+          numeroHidden.value = values.numero || "";
+        }
+        if (complementoHidden) {
+          complementoHidden.value = values.complemento || "";
+        }
+        if (bairroHidden) {
+          bairroHidden.value = values.bairro || "";
+        }
+        if (cidadeHidden) {
+          cidadeHidden.value = values.cidade || "";
+        }
+        if (ufHidden) {
+          ufHidden.value = values.uf || "";
+        }
+      }
+
+      function computeValidationState(values) {
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var state = {
+          emailValid: emailPattern.test(values.email),
+          emailConfirmValid: emailPattern.test(values.emailConfirm),
+          emailsMatch: !!values.email && values.email === values.emailConfirm,
+          telefoneValid: /^\d{11}$/.test(values.telefone),
+          cepValid: /^\d{8}$/.test(values.cep),
+          logradouroValid: !!values.logradouro,
+          numeroValid: !!values.numero,
+          complementoValid: !!values.complemento,
+          bairroValid: !!values.bairro,
+          cidadeValid: !!values.cidade,
+          ufValid: /^[A-Z]{2}$/.test(values.uf),
+        };
+
+        state.allFieldsFilled =
+          !!values.email &&
+          !!values.emailConfirm &&
+          !!values.telefone &&
+          !!values.cep &&
+          !!values.logradouro &&
+          !!values.numero &&
+          !!values.complemento &&
+          !!values.bairro &&
+          !!values.cidade &&
+          !!values.uf;
+
+        state.isValid =
+          state.emailValid &&
+          state.emailConfirmValid &&
+          state.emailsMatch &&
+          state.telefoneValid &&
+          state.cepValid &&
+          state.logradouroValid &&
+          state.numeroValid &&
+          state.complementoValid &&
+          state.bairroValid &&
+          state.cidadeValid &&
+          state.ufValid;
+
+        return state;
+      }
+
+      function updateValidationFeedback(state, forceHighlight) {
+        if (!state) {
+          return;
+        }
+
+        if (emailInput) {
+          emailInput.classList.toggle("is-invalid", !state.emailValid || !state.emailsMatch);
+        }
+        if (emailConfirmInput) {
+          emailConfirmInput.classList.toggle("is-invalid", !state.emailConfirmValid || !state.emailsMatch);
+        }
+
+        var validityMap = [
+          [telefoneInput, state.telefoneValid, false],
+          [cepInput, state.cepValid, false],
+          [logradouroInput, state.logradouroValid, false],
+          [numeroInput, state.numeroValid, false],
+          [complementoInput, state.complementoValid, false],
+          [bairroInput, state.bairroValid, false],
+          [cidadeInput, state.cidadeValid, false],
+          [ufInput, state.ufValid, true],
+        ];
+
+        var shouldHighlight = forceHighlight || state.allFieldsFilled;
+
+        validityMap.forEach(function (entry) {
+          var field = entry[0];
+          var valid = entry[1];
+          var alwaysHighlight = entry[2];
+          if (field) {
+            var highlight = shouldHighlight || alwaysHighlight;
+            field.classList.toggle("is-invalid", highlight && !valid);
+          }
+        });
+      }
+
+      function updateSubmitButton(state) {
+        if (updateButton) {
+          updateButton.disabled = !state || !state.isValid;
+        }
+      }
+
+      function validateUpdateData(values) {
+        var state = computeValidationState(values);
+        var messages = [];
+
+        if (!state.emailValid) {
+          messages.push("Informe um e-mail válido.");
+        }
+        if (!state.emailConfirmValid) {
+          messages.push("Confirme o e-mail com um endereço válido.");
+        }
+        if (state.emailValid && state.emailConfirmValid && !state.emailsMatch) {
+          messages.push("Os campos de e-mail devem ser idênticos.");
+        }
+        if (!state.telefoneValid) {
+          messages.push("O telefone deve conter exatamente 11 dígitos numéricos.");
+        }
+        if (!state.cepValid) {
+          messages.push("Informe um CEP com 8 dígitos.");
+        }
+        if (!state.logradouroValid) {
+          messages.push("Preencha o logradouro.");
+        }
+        if (!state.numeroValid) {
+          messages.push("Informe o número do endereço.");
+        }
+        if (!state.complementoValid) {
+          messages.push("Informe o complemento do endereço.");
+        }
+        if (!state.bairroValid) {
+          messages.push("Preencha o bairro.");
+        }
+        if (!state.cidadeValid) {
+          messages.push("Informe a cidade.");
+        }
+        if (!state.ufValid) {
+          messages.push("Informe a UF com duas letras.");
+        }
+
+        messages.state = state;
+        return messages;
+      }
+
+      function obterExtensaoArquivo(nomeArquivo) {
+        if (!nomeArquivo || typeof nomeArquivo !== "string") {
+          return "";
+        }
+        var lastDot = nomeArquivo.lastIndexOf(".");
+        if (lastDot === -1) {
+          return "";
+        }
+        return nomeArquivo.slice(lastDot).toLowerCase();
+      }
+
+      function arquivoTemTipoPermitido(file) {
+        if (!file) {
+          return false;
+        }
+        var mime = (file.type || "").toLowerCase();
+        if (mime && recursoMimeTypesPermitidos.indexOf(mime) !== -1) {
+          return true;
+        }
+        var extensao = obterExtensaoArquivo(file.name || "");
+        if (extensao && recursoExtensoesPermitidas.indexOf(extensao) !== -1) {
+          return true;
+        }
+        return false;
+      }
+
+      function getRecifeNow() {
+        return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Recife" }));
+      }
+
+      function isWithinRange(now, range) {
+        if (!(now instanceof Date) || isNaN(now.getTime()) || !range || !(range.start instanceof Date) || !(range.end instanceof Date)) {
+          return false;
+        }
+        return now.getTime() >= range.start.getTime() && now.getTime() <= range.end.getTime();
+      }
+
+      window.verificarJanelasRecurso = function atualizarDisponibilidadeRecursos() {
+        var agoraRecife = getRecifeNow();
+        recursoAlgumInputHabilitado = false;
+
+        recursoArquivoInputs.forEach(function (entry) {
+          if (!entry.input) {
+            return;
+          }
+
+          var ranges = recursoJanelas[entry.tipo] || [];
+          var habilitado = ranges.some(function (range) {
+            return isWithinRange(agoraRecife, range);
+          });
+
+          entry.input.disabled = !habilitado;
+          if (!habilitado) {
+            entry.input.value = "";
+          } else {
+            recursoAlgumInputHabilitado = true;
+          }
+        });
+
+        atualizarFeedbackRecurso(false);
+      }
+
+      function collectResourceValues() {
+        var numero = "";
+        if (recursoNumeroInput) {
+          numero = normalizeInscricao(recursoNumeroInput.value);
+          if (recursoNumeroInput.value !== numero) {
+            recursoNumeroInput.value = numero;
+          }
+        }
+
+        var numeroValido = recursoPattern.test(numero);
+        var arquivosInvalidos = [];
+        var arquivosSelecionados = recursoArquivoInputs
+          .map(function (entry) {
+            if (!entry.input || !entry.input.files || !entry.input.files[0]) {
+              return null;
+            }
+            var arquivo = entry.input.files[0];
+            if (!arquivoTemTipoPermitido(arquivo)) {
+              arquivosInvalidos.push({ input: entry.input, tipo: entry.tipo, file: arquivo });
+              return null;
+            }
+            return {
+              input: entry.input,
+              tipo: entry.tipo,
+              file: arquivo,
+            };
+          })
+          .filter(function (item) {
+            return item !== null;
+          });
+
+        return {
+          numero: numero,
+          numeroValido: numeroValido,
+          arquivos: arquivosSelecionados,
+          arquivosInvalidos: arquivosInvalidos,
+          algumInputHabilitado: recursoAlgumInputHabilitado,
+          pronto:
+            numeroValido &&
+            recursoAlgumInputHabilitado &&
+            arquivosSelecionados.length > 0 &&
+            arquivosInvalidos.length === 0,
+        };
+      }
+
+      function atualizarFeedbackRecurso(forceHighlight) {
+        var state = collectResourceValues();
+        var highlightNumero = forceHighlight || (recursoNumeroInput && recursoNumeroInput.dataset.touched === "true");
+        var algumArquivoSelecionado =
+          state.arquivos.length > 0 || (state.arquivosInvalidos && state.arquivosInvalidos.length > 0);
+
+        if (recursoNumeroInput) {
+          recursoNumeroInput.classList.toggle("is-invalid", highlightNumero && !state.numeroValido);
+        }
+
+        recursoArquivoInputs.forEach(function (entry) {
+          if (!entry.input) {
+            return;
+          }
+          var input = entry.input;
+          var touched = forceHighlight || input.dataset.touched === "true";
+          var possuiArquivo = input.files && input.files[0];
+          var arquivoInvalido = (state.arquivosInvalidos || []).some(function (item) {
+            return item.input === input;
+          });
+          var deveDestacar = touched && ((!possuiArquivo && !algumArquivoSelecionado) || arquivoInvalido);
+          input.classList.toggle("is-invalid", deveDestacar);
+        });
+
+        if (recursoButton) {
+          var isSending = recursoButton.dataset.sending === "true";
+          var algumArquivoSelecionado = state.arquivos.length > 0;
+          recursoButton.disabled = isSending || !state.algumInputHabilitado || !algumArquivoSelecionado;
+        }
+
+        return state;
+      }
+
+      function lerArquivoComoBase64(file) {
+        return new Promise(function (resolve, reject) {
+          if (!file) {
+            reject(new Error("Arquivo inválido"));
+            return;
+          }
+
+          var reader = new FileReader();
+          reader.onload = function (event) {
+            var result = event && event.target ? event.target.result : reader.result;
+            if (typeof result !== "string") {
+              reject(new Error("Não foi possível processar o arquivo"));
+              return;
+            }
+
+            var base64 = result.split(",").pop() || "";
+            resolve(base64);
+          };
+          reader.onerror = function () {
+            reject(new Error("Erro ao ler o arquivo"));
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function handleCepLookup() {
+        if (!cepInput) {
+          return;
+        }
+
+        var cepValue = sanitizeDigits(cepInput.value);
+        if (cepValue.length !== 8) {
+          lastCepConsulted = "";
+          return;
+        }
+
+        if (cepValue === lastCepConsulted) {
+          return;
+        }
+
+        lastCepConsulted = cepValue;
+
+        fetch("https://brasilapi.com.br/api/cep/v1/" + cepValue)
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error("CEP não encontrado");
+            }
+            return response.json();
+          })
+          .then(function (data) {
+            if (data) {
+              if (logradouroInput && data.street) {
+                logradouroInput.value = String(data.street).toUpperCase();
+              }
+              if (bairroInput && data.neighborhood) {
+                bairroInput.value = String(data.neighborhood).toUpperCase();
+              }
+              if (cidadeInput && data.city) {
+                cidadeInput.value = String(data.city).toUpperCase();
+              }
+              if (ufInput && data.state) {
+                ufInput.value = String(data.state).toUpperCase();
+              }
+            }
+            handleInputChange();
+          })
+          .catch(function (error) {
+            lastCepConsulted = "";
+            console.error("Erro ao consultar CEP:", error);
+            showPopup("Não encontramos informações para o CEP informado. Você pode preencher os campos manualmente.", { tone: "warning" });
+          });
+      }
+
+      function handleInputChange() {
+        var values = collectUpdateValues();
+        syncHiddenValues(values);
+        var state = computeValidationState(values);
+        updateValidationFeedback(state, false);
+        updateSubmitButton(state);
+      }
+
+      if (telefoneInput) {
+        telefoneInput.addEventListener("input", function () {
+          var sanitized = sanitizeDigits(telefoneInput.value).slice(0, 11);
+          if (telefoneInput.value !== sanitized) {
+            telefoneInput.value = sanitized;
+          }
+          handleInputChange();
+        });
+        telefoneInput.value = sanitizeDigits(telefoneInput.value).slice(0, 11);
+      }
+
+      if (cepInput) {
+        cepInput.addEventListener("input", function () {
+          var sanitized = sanitizeDigits(cepInput.value).slice(0, 8);
+          if (cepInput.value !== sanitized) {
+            cepInput.value = sanitized;
+          }
+          handleInputChange();
+        });
+        cepInput.addEventListener("keyup", handleCepLookup);
+        cepInput.addEventListener("change", handleCepLookup);
+        cepInput.addEventListener("blur", handleCepLookup);
+        cepInput.value = sanitizeDigits(cepInput.value).slice(0, 8);
+      }
+
+      if (cepInput && ufInput) {
+        (function attemptInitialCepLookup(attempt) {
+          if (!cepInput || !ufInput) {
+            return;
+          }
+
+          var cepValue = sanitizeDigits(cepInput.value);
+          var ufValue = String(ufInput.value || "").trim().toUpperCase();
+          var shouldLookup = cepValue.length === 8 && (!ufValue || ufValue === "UN");
+
+          if (shouldLookup) {
+            lastCepConsulted = "";
+            handleCepLookup();
+            return;
+          }
+
+          var needsRetry = (!ufValue || ufValue === "UN") && attempt < 5;
+          if (needsRetry) {
+            window.setTimeout(function () {
+              attemptInitialCepLookup(attempt + 1);
+            }, 200);
+          }
+        })(0);
+      }
+
+      if (ufInput) {
+        ufInput.addEventListener("input", function () {
+          var sanitized = String(ufInput.value || "").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase();
+          if (ufInput.value !== sanitized) {
+            ufInput.value = sanitized;
+          }
+          handleInputChange();
+        });
+        ufInput.value = String(ufInput.value || "").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase();
+      }
+
+      if (recursoNumeroInput) {
+        recursoNumeroInput.addEventListener("input", function () {
+          var normalized = normalizeInscricao(recursoNumeroInput.value);
+          if (recursoNumeroInput.value !== normalized) {
+            recursoNumeroInput.value = normalized;
+          }
+          atualizarFeedbackRecurso(false);
+        });
+        recursoNumeroInput.addEventListener("focus", function () {
+          if (!recursoNumeroInput.value) {
+            recursoNumeroInput.value = recursoPrefix;
+          }
+        });
+        recursoNumeroInput.addEventListener("blur", function () {
+          recursoNumeroInput.dataset.touched = "true";
+          atualizarFeedbackRecurso(false);
+        });
+      }
+
+      recursoArquivoInputs.forEach(function (entry) {
+        if (!entry.input) {
+          return;
+        }
+        entry.input.addEventListener("change", function () {
+          entry.input.dataset.touched = "true";
+          var arquivoSelecionado = entry.input.files && entry.input.files[0];
+          if (arquivoSelecionado && !arquivoTemTipoPermitido(arquivoSelecionado)) {
+            entry.input.value = "";
+            entry.input.classList.add("is-invalid");
+            showPopup("Selecione apenas arquivos no formato PDF.", {
+              tone: "warning",
+              appendReminder: false,
+            });
+          }
+          atualizarFeedbackRecurso(false);
+        });
+        entry.input.addEventListener("blur", function () {
+          entry.input.dataset.touched = "true";
+          atualizarFeedbackRecurso(false);
+        });
+      });
+
+      [emailInput, emailConfirmInput, telefoneInput, cepInput, logradouroInput, numeroInput, complementoInput, bairroInput, cidadeInput, ufInput]
+        .filter(function (input) {
+          return !!input;
+        })
+        .forEach(function (input) {
+          input.addEventListener("input", handleInputChange);
+          input.addEventListener("blur", handleInputChange);
+        });
+
+      // Função para verificar se está dentro de uma janela de tempo
+      function estaEmJanela(janelas) {
+        if (!janelas || !Array.isArray(janelas) || janelas.length === 0) {
+          return false;
+        }
+        var agora = new Date();
+        for (var i = 0; i < janelas.length; i++) {
+          var janela = janelas[i];
+          if (janela.start && janela.end && agora >= janela.start && agora <= janela.end) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // Função para atualizar disponibilidade dos recursos e botão de inscrição
+      function atualizarDisponibilidadeRecursos() {
+        // Controlar disponibilidade dos inputs de recurso
+        recursoArquivoInputs.forEach(function (entry) {
+          if (!entry.input) return;
+          var tipo = entry.tipo;
+          var janelas = window.recursoJanelas[tipo];
+          var disponivel = estaEmJanela(janelas);
+          entry.input.disabled = !disponivel;
+        });
+
+        // Controlar disponibilidade do botão de inscrição (Sempre habilitado agora como Área do Candidato)
+        if (button) {
+          button.disabled = false;
+          if (inscricaoStatusText) {
+            inscricaoStatusText.textContent = "";
+          }
+        }
+      }
+
+      if (typeof window.verificarJanelasRecurso === "function") {
+        window.verificarJanelasRecurso();
+      }
+      atualizarDisponibilidadeRecursos();
+      handleInputChange();
+      atualizarFeedbackRecurso(false);
+      // carregarMinhasInscricoes();
+
+      setInterval(function () {
+        if (typeof window.verificarJanelasRecurso === "function") {
+          window.verificarJanelasRecurso();
+        }
+        atualizarDisponibilidadeRecursos();
+      }, 60 * 1000);
+
+      function parseDate(raw) {
+        if (!raw || typeof raw !== "string") {
+          return null;
+        }
+
+        var normalized = raw.trim();
+        var directDate = new Date(normalized);
+        if (!isNaN(directDate.getTime())) {
+          return directDate;
+        }
+
+        var brPattern = /^([0-3]?\d)\/([0-1]?\d)\/(\d{4})$/;
+        var match = normalized.match(brPattern);
+        if (match) {
+          var day = parseInt(match[1], 10);
+          var month = parseInt(match[2], 10) - 1;
+          var year = parseInt(match[3], 10);
+          var parsed = new Date(year, month, day);
+          return isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        return null;
+      }
+
+      function formatDate(dateObj) {
+        if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+          return "";
+        }
+        return dateObj.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+      }
+
+      var idSelecaoVal = document.getElementById("id_selecao") ? document.getElementById("id_selecao").value : "";
+      var endpointPublicacoes = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/7b3f9046-f11b-4cc3-b570-c3e586748f6c";
+      if (idSelecaoVal) {
+        endpointPublicacoes += (endpointPublicacoes.indexOf("?") === -1 ? "?" : "&") + "id_selecao=" + encodeURIComponent(idSelecaoVal);
+      }
+
+      fetch(endpointPublicacoes)
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("Falha ao carregar publicações");
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          var list = document.getElementById("publicacoes-list");
+          if (!list) {
+            return;
+          }
+
+          list.innerHTML = "";
+
+          var entries = [];
+
+          if (Array.isArray(data)) {
+            entries = data;
+          } else if (data && Array.isArray(data.items)) {
+            entries = data.items;
+          }
+
+          if (!Array.isArray(entries) || entries.length === 0) {
+            list.innerHTML = '<li class="text-muted">Nenhuma publicação disponível no momento.</li>';
+            return;
+          }
+
+          var processedEntries = entries
+            .map(function (item) {
+              if (!item || !item.url) {
+                return null;
+              }
+
+              var description = item.description || item.descricao || item.title || item.titulo;
+              if (!description) {
+                return null;
+              }
+
+              description = String(description).trim();
+              if (!description) {
+                return null;
+              }
+
+              var rawDate = item.date || item.data || item.dt || item.createdAt;
+              var dateObj = parseDate(rawDate);
+
+              var extension =
+                item.extension ||
+                item.extensao ||
+                item.fileExtension ||
+                item.tipoArquivo ||
+                "";
+
+              return {
+                url: item.url,
+                description: description,
+                dateObj: dateObj,
+                rawDate: rawDate,
+                mimetype:
+                  item.mimetype ||
+                  item.mimeType ||
+                  item.contentType ||
+                  item.tipoMime ||
+                  "",
+                extension: extension,
+              };
+            })
+            .filter(function (entry) {
+              return entry !== null;
+            });
+
+          if (!processedEntries.length) {
+            list.innerHTML = '<li class="text-muted">Nenhuma publicação disponível no momento.</li>';
+            return;
+          }
+
+          processedEntries
+            .sort(function (a, b) {
+              var timeA = a.dateObj ? a.dateObj.getTime() : 0;
+              var timeB = b.dateObj ? b.dateObj.getTime() : 0;
+              return timeB - timeA;
+            })
+            .forEach(function (entry) {
+              var icon = getPublicationIcon(entry.mimetype, entry.extension, entry.url);
+              var formattedDate = formatDate(entry.dateObj);
+              var listItem = document.createElement("li");
+              listItem.className = "publicacoes-item";
+
+              var normalizedUrl = entry.url;
+              try {
+                normalizedUrl = new URL(entry.url, window.location.href).href;
+              } catch (error) {
+                normalizedUrl = entry.url;
+              }
+
+              var linkEl = document.createElement("a");
+              linkEl.className = "publicacoes-item-link link-primary";
+              linkEl.href = normalizedUrl;
+              linkEl.title = entry.description;
+
+              var downloadName = "";
+              try {
+                var urlObject = new URL(normalizedUrl, window.location.href);
+                downloadName = urlObject.pathname.split("/").pop() || "";
+                if (downloadName) {
+                  downloadName = decodeURIComponent(downloadName);
+                }
+              } catch (error) {
+                var fallbackPath = normalizedUrl.split("?")[0].split("#")[0];
+                downloadName = fallbackPath.split("/").pop() || "";
+              }
+
+              if (downloadName) {
+                linkEl.setAttribute("download", downloadName);
+              } else {
+                linkEl.setAttribute("download", "");
+              }
+
+              var iconSpan = document.createElement("span");
+              var iconType = icon || "generic";
+              iconSpan.className = "publicacoes-item-icon publicacoes-item-icon--" + iconType;
+              iconSpan.setAttribute("aria-hidden", "true");
+
+              var textSpan = document.createElement("span");
+              textSpan.textContent = entry.description;
+
+              linkEl.appendChild(iconSpan);
+              linkEl.appendChild(textSpan);
+
+              listItem.appendChild(linkEl);
+
+              if (formattedDate) {
+                var timeEl = document.createElement("time");
+                timeEl.textContent = formattedDate;
+                timeEl.dateTime = entry.dateObj ? entry.dateObj.toISOString() : entry.rawDate || "";
+                listItem.appendChild(timeEl);
+              }
+
+              list.appendChild(listItem);
+            });
+        })
+        .catch(function (error) {
+          console.error(error);
+          var list = document.getElementById("publicacoes-list");
+          if (list) {
+            list.innerHTML = '<li class="text-muted">Não foi possível carregar as publicações.</li>';
+          }
+        });
+
+      function getInscricaoEndpoint() {
+        if (!button) {
+          return "";
+        }
+
+        var endpoint = button.getAttribute("data-endpoint") || "";
+        endpoint = endpoint.trim();
+
+        if (endpoint) {
+          return endpoint;
+        }
+
+        return endpointDefault;
+      }
+
+      function appendAuthorizationParam(endpoint, authorization) {
+        if (!endpoint || !authorization) {
+          return endpoint;
+        }
+
+        try {
+          var url = new URL(endpoint);
+          url.searchParams.set("authorization", authorization);
+          return url.toString();
+        } catch (error) {
+          var hashIndex = endpoint.indexOf("#");
+          var base = hashIndex === -1 ? endpoint : endpoint.slice(0, hashIndex);
+          var hash = hashIndex === -1 ? "" : endpoint.slice(hashIndex);
+          var separator = base.indexOf("?") === -1 ? "?" : "&";
+
+          return base + separator + "authorization=" + encodeURIComponent(authorization) + hash;
+        }
+      }
+
+      function redirectToInscricao(endpoint) {
+        if (!endpoint) {
+          return;
+        }
+
+        window.location.href = endpoint;
+      }
+
+      if (button) {
+        button.addEventListener("click", function (event) {
+          var authorization = authorizationField ? authorizationField.value : "";
+          var idSelecaoField = document.getElementById("id_selecao");
+          var idSelecao = idSelecaoField ? idSelecaoField.value : "";
+
+          var endpoint = appendAuthorizationParam(getInscricaoEndpoint(), authorization);
+
+          if (idSelecao) {
+            try {
+              var url = new URL(endpoint);
+              url.searchParams.set("id_selecao", idSelecao);
+              endpoint = url.toString();
+            } catch (e) {
+              var hashIndex = endpoint.indexOf("#");
+              var base = hashIndex === -1 ? endpoint : endpoint.slice(0, hashIndex);
+              var hash = hashIndex === -1 ? "" : endpoint.slice(hashIndex);
+              var separator = base.indexOf("?") === -1 ? "?" : "&";
+              endpoint = base + separator + "id_selecao=" + encodeURIComponent(idSelecao) + hash;
+            }
+          }
+
+          if (!endpoint) {
+            showPopup("Não foi possível identificar o endereço do formulário de inscrição.", { tone: "error" });
+            return;
+          }
+
+          redirectToInscricao(endpoint);
+        });
+      }
+
+      if (updateButton) {
+        updateButton.addEventListener("click", function () {
+          var values = collectUpdateValues();
+          syncHiddenValues(values);
+
+          var validationErrors = validateUpdateData(values);
+          var state = validationErrors.state || computeValidationState(values);
+          updateValidationFeedback(state, true);
+          updateSubmitButton(state);
+
+          if (validationErrors.length) {
+            showPopup(validationErrors.join("\n"), { tone: "warning", data: { status: "warning" } });
+            return;
+          }
+
+          var payload = {
+            cpf: values.cpf,
+            email: values.email,
+            emailConfirm: values.emailConfirm,
+            telefone: values.telefone,
+            cep: values.cep,
+            logradouro: values.logradouro,
+            numero: values.numero,
+            complemento: values.complemento,
+            bairro: values.bairro,
+            cidade: values.cidade,
+            uf: values.uf,
+          };
+
+          fetch("https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/204c8f95-ccdd-41e6-8ccf-40b7795a01fb", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          })
+            .then(function (response) {
+              return response
+                .clone()
+                .json()
+                .catch(function () {
+                  return response.text();
+                })
+                .then(function (parsed) {
+                  return { parsed: parsed, ok: response.ok, status: response.status };
+                });
+            })
+            .then(function (result) {
+              var data = result.parsed;
+              var isSuccess = !!result.ok;
+              var message;
+              var tone;
+
+              if (typeof data === "string") {
+                message = data;
+                tone = determineToneFromContent(message, null);
+              } else {
+                var payloadMessage = data && (data.message || data.detail || data.statusText || data.title);
+                message = payloadMessage || JSON.stringify(data);
+                tone = determineToneFromContent(message, data);
+
+                if (data && typeof data.success === "boolean") {
+                  isSuccess = data.success;
+                } else if (data && typeof data.status === "string") {
+                  var normalizedStatus = data.status.toLowerCase();
+                  if (normalizedStatus === "success" || normalizedStatus === "sucesso" || normalizedStatus === "ok") {
+                    isSuccess = true;
+                  }
+                  if (normalizedStatus === "erro" || normalizedStatus === "error" || normalizedStatus === "falha") {
+                    isSuccess = false;
+                  }
+                }
+              }
+
+              if (tone === "error" || tone === "warning") {
+                isSuccess = false;
+              }
+
+              if (!tone && isSuccess) {
+                tone = "success";
+              }
+
+              showPopup(message, {
+                data: typeof data === "string" ? null : data,
+                tone: tone,
+                onClose: isSuccess ? cleanupUpdateForm : null,
+              });
+            })
+            .catch(function (error) {
+              console.error("Falha ao enviar atualização cadastral:", error);
+              showPopup("Não foi possível enviar a atualização cadastral. Tente novamente em instantes.", { tone: "error" });
+            });
+        });
+      }
+
+      if (recursoButton) {
+        recursoButton.addEventListener("click", function () {
+          if (recursoNumeroInput) {
+            recursoNumeroInput.dataset.touched = "true";
+          }
+          recursoArquivoInputs.forEach(function (entry) {
+            if (entry.input) {
+              entry.input.dataset.touched = "true";
+            }
+          });
+          var state = atualizarFeedbackRecurso(true);
+          if (!state.pronto) {
+            var erros = [];
+            if (!state.numeroValido) {
+              erros.push("Informe o número da inscrição no formato {{ $json.mascara_inscricao }}.");
+            }
+            if (state.arquivos.length === 0) {
+              erros.push("Selecione ao menos um arquivo de recurso para prosseguir.");
+            }
+            if (state.arquivosInvalidos && state.arquivosInvalidos.length > 0) {
+              erros.push("Envie apenas arquivos no formato PDF.");
+            }
+            showPopup(erros.join(" "), { tone: "warning", data: { status: "warning" } });
+            return;
+          }
+
+          if (!recursoEndpoint) {
+            showPopup("Não foi possível enviar o recurso porque o endpoint não está configurado.", { tone: "error" });
+            return;
+          }
+
+          var arquivoExcedido = state.arquivos.find(function (item) {
+            return item.file && item.file.size > recursoMaxFileSize;
+          });
+          if (arquivoExcedido) {
+            var legendaArquivo = arquivoExcedido.input ? arquivoExcedido.input.getAttribute("data-legenda") : "arquivo do recurso";
+            if (arquivoExcedido.input) {
+              arquivoExcedido.input.classList.add("is-invalid");
+            }
+            showPopup("O anexo \"" + legendaArquivo + "\" deve ter no máximo 10 MB.", { tone: "warning", data: { status: "warning" } });
+            return;
+          }
+
+          recursoButton.setAttribute("data-original-text", recursoButton.textContent || "Enviar recurso");
+          recursoButton.dataset.sending = "true";
+          recursoButton.textContent = "Enviando...";
+          recursoButton.disabled = true;
+
+          var cpfField = document.getElementById("cpf");
+
+          var formData = new FormData();
+          formData.append("numeroInscricao", state.numero);
+          if (cpfField) {
+            formData.append("cpf", cpfField.value || "");
+          }
+
+          state.arquivos.forEach(function (item) {
+            var input = item.input;
+            var legenda = input ? input.getAttribute("data-legenda") : "";
+            var fieldName = item.tipo ? "arquivo_" + item.tipo : "arquivo";
+            var nomeComInscricao = state.numero + "_" + item.file.name;
+
+            formData.append(fieldName, item.file, nomeComInscricao);
+            if (legenda || item.tipo) {
+              formData.append(fieldName + "_legenda", legenda || item.tipo);
+            }
+          });
+
+          fetch(recursoEndpoint, {
+            method: "POST",
+            body: formData,
+          })
+            .then(function (response) {
+              return response
+                .clone()
+                .json()
+                .catch(function () {
+                  return response.text();
+                })
+                .then(function (parsed) {
+                  return { parsed: parsed, ok: response.ok, status: response.status };
+                });
+            })
+            .then(function (result) {
+              var data = result.parsed;
+              var isSuccess = !!result.ok;
+              var message;
+              var tone;
+
+              if (typeof data === "string") {
+                message = data;
+                tone = determineToneFromContent(message, null);
+              } else {
+                var payloadMessage = data && (data.message || data.detail || data.statusText || data.title);
+                message = payloadMessage || JSON.stringify(data);
+                tone = determineToneFromContent(message, data);
+
+                if (data && typeof data.success === "boolean") {
+                  isSuccess = data.success;
+                } else if (data && typeof data.status === "string") {
+                  var normalizedStatus = data.status.toLowerCase();
+                  if (normalizedStatus === "success" || normalizedStatus === "sucesso" || normalizedStatus === "ok") {
+                    isSuccess = true;
+                  }
+                  if (normalizedStatus === "erro" || normalizedStatus === "error" || normalizedStatus === "falha") {
+                    isSuccess = false;
+                  }
+                }
+              }
+
+              if (tone === "error" || tone === "warning") {
+                isSuccess = false;
+              }
+
+              if (!tone && isSuccess) {
+                tone = "success";
+              }
+
+              var popupOptions = {
+                data: typeof data === "string" ? null : data,
+                tone: tone,
+                onClose: isSuccess ? cleanupRecursoForm : null,
+              };
+
+              if (isSuccess) {
+                message =
+                  "Recurso enviado com sucesso. Se desejar, aproveite a seção de atualização cadastral para manter seus dados atualizados!";
+                popupOptions.appendReminder = false;
+              }
+
+              showPopup(message, popupOptions);
+            })
+            .catch(function (error) {
+              console.error("Falha ao enviar recurso:", error);
+              showPopup("Não foi possível enviar o recurso. Tente novamente em instantes.", { tone: "error" });
+            })
+            .finally(function () {
+              var originalLabel = recursoButton.getAttribute("data-original-text") || "Enviar recurso";
+              recursoButton.textContent = originalLabel;
+              delete recursoButton.dataset.sending;
+              atualizarFeedbackRecurso(false);
+            });
+        });
+      }
+    });
+  </script>
+
+</body>
+
+</html>
