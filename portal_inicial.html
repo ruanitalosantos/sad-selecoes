@@ -361,10 +361,12 @@
                         if (statusLower !== "ativo" && !isHomologacao && !isConcluido) return;
 
                         const stage = (item.etapa_atual || '').toLowerCase().trim();
-                        const isWaiting = stage === "aguardando publicação de edital";
 
-                        // Certames concluídos ou aguardando edital aparecem com estilo diferenciado, mas permanecem clicáveis
-                        const isInactive = isWaiting || isConcluido;
+                        // Ativos sem edital publicado não aparecem na listagem
+                        if (statusLower === "ativo" && stage === "aguardando publicação de edital") return;
+
+                        // Certames concluídos aparecem com estilo diferenciado mas clicáveis
+                        const isInactive = isConcluido;
 
                         const btn = document.createElement('a');
                         btn.href = '#';
