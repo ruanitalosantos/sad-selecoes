@@ -1573,7 +1573,7 @@
 
                     const selecaoSql =
                         `UPDATE "sad-selecoes".selecoes_cadastradas` +
-                        ` SET nome = ${sql.escape(data.nome)}, status = ${sql.escape(data.status)}` +
+                        ` SET nome = ${sql.escape(data.nome)}, status = ${sql.escape(data.status)}, inserido_por = ${sql.escape(auth.getUser().nome)}` +
                         ` WHERE id = ${selecaoId}` +
                         ` RETURNING id`;
 
@@ -1617,8 +1617,8 @@
                 } else {
                     // ── CRIAÇÃO: INSERT nas 3 tabelas ─────────────────────────
                     const selecaoSql =
-                        `INSERT INTO "sad-selecoes".selecoes_cadastradas (nome, status, hash_drive)` +
-                        ` VALUES (${sql.escape(data.nome)}, ${sql.escape(data.status)}, ${sql.escape(data.hash_drive)})` +
+                        `INSERT INTO "sad-selecoes".selecoes_cadastradas (nome, status, hash_drive, inserido_por)` +
+                        ` VALUES (${sql.escape(data.nome)}, ${sql.escape(data.status)}, ${sql.escape(data.hash_drive)}, ${sql.escape(auth.getUser().nome)})` +
                         ` RETURNING id`;
 
                     const selecaoResponse = await this.request(CONFIG.WEBHOOKS.selecoes, {
