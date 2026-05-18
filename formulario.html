@@ -2636,6 +2636,38 @@
         return combined;
     };
 
+    const filterNivelOptions = () => {
+      if (!nivelSelect) return;
+      const dynamicLevelsMap = parseDynamicCargos();
+
+      // Sem dados dinâmicos ou tudo em 'TODOS' → mostra todas as opções
+      if (dynamicLevelsMap.size === 0) return;
+
+      const availableKeys = new Set(
+        Array.from(dynamicLevelsMap.keys()).filter(k => k !== 'TODOS')
+      );
+
+      // Se só existe 'TODOS', qualquer nível é válido
+      if (availableKeys.size === 0) return;
+
+      let selectionHidden = false;
+      Array.from(nivelSelect.options).forEach((opt) => {
+        if (!opt.value) return; // preserva o placeholder
+        const norm = normalizeCargoValue(opt.value);
+        const visible = Array.from(availableKeys).some(
+          k => k === norm || k.includes(norm) || norm.includes(k)
+        );
+        opt.hidden = !visible;
+        opt.disabled = !visible;
+        if (!visible && nivelSelect.value === opt.value) selectionHidden = true;
+      });
+
+      if (selectionHidden) {
+        nivelSelect.value = '';
+        nivelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    };
+
     const filterCargoOptions = () => {
       if (!cargoSelect) return;
       const dynamicLevelsMap = parseDynamicCargos();
@@ -4006,6 +4038,7 @@
       applyUppercaseTransform();
       enforceNumericOnly();
       populateUfSelects();
+      filterNivelOptions();
       filterCargoOptions();
       filterEspecialidadeOptions();
       selectPrefills();
