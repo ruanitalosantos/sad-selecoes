@@ -2426,10 +2426,7 @@
                             <option value="Fundamental" ${cargoData.nivel === 'Fundamental' ? 'selected' : ''}>Fundamental</option>
                             <option value="Médio" ${(cargoData.nivel === 'Médio' || cargoData.nivel === 'Medio') ? 'selected' : ''}>Médio</option>
                             <option value="Técnico" ${(cargoData.nivel === 'Técnico' || cargoData.nivel === 'Tecnico') ? 'selected' : ''}>Técnico</option>
-                            <option value="Graduação" ${cargoData.nivel === 'Graduação' ? 'selected' : ''}>Graduação</option>
-                            <option value="Pós-graduação" ${cargoData.nivel === 'Pós-graduação' ? 'selected' : ''}>Pós-graduação</option>
-                            <option value="Mestrado" ${cargoData.nivel === 'Mestrado' ? 'selected' : ''}>Mestrado</option>
-                            <option value="Doutorado" ${cargoData.nivel === 'Doutorado' ? 'selected' : ''}>Doutorado</option>
+                            <option value="Superior" ${(cargoData.nivel === 'Superior' || cargoData.nivel === 'Graduação') ? 'selected' : ''}>Superior</option>
                         </select>
                     </div>
                     <div class="col-md-4">

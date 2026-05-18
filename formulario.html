@@ -698,6 +698,51 @@
         }
 
         .hidden { display: none !important; }
+
+        /* Nacionalidade picker */
+        .nac-combo {
+            cursor: pointer;
+            user-select: none;
+        }
+        .nac-combo:focus {
+            border-color: var(--brand-highlight);
+            box-shadow: 0 0 0 0.25rem rgba(0, 163, 255, 0.15);
+            outline: none;
+        }
+        .nac-panel {
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 0.6rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            max-height: 280px;
+            overflow: hidden;
+        }
+        .nac-panel[hidden] { display: none; }
+        .nac-list {
+            list-style: none;
+            margin: 0;
+            padding: 0.25rem 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .nac-list li {
+            padding: 0.45rem 1rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .nac-list li:hover,
+        .nac-list li.nac-focused {
+            background: #e9f4ff;
+            color: var(--brand-primary);
+        }
+        .nac-list li.nac-hidden { display: none; }
     </style>
 
 </head>
@@ -834,9 +879,25 @@
                   readonly />
               </div>
               <div class="col-md-4">
-                <label for="nacionalidade" class="form-label required">Nacionalidade</label>
-                <select id="nacionalidade" name="nacionalidade" class="form-select"
-                  data-prefill="{{ $json.nacionalidade }}" data-nacionalidade required>
+                <label for="nac-combo" class="form-label required">Nacionalidade</label>
+                <div class="position-relative">
+                  <div class="form-select nac-combo d-flex align-items-center justify-content-between"
+                       id="nac-combo" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="nac-panel">
+                    <span id="nac-display" class="text-muted">Selecione...</span>
+                    <i class="fas fa-chevron-down text-muted" style="font-size:0.72rem;"></i>
+                  </div>
+                  <div class="nac-panel" id="nac-panel" hidden role="listbox">
+                    <div class="px-2 pt-2 pb-1">
+                      <input type="text" id="nac-search" class="form-control form-control-sm"
+                             placeholder="Pesquisar nacionalidade..." autocomplete="off">
+                    </div>
+                    <ul class="nac-list" id="nac-list"></ul>
+                  </div>
+                </div>
+                <!-- select oculto — mantém valor para validação, JS e envio do formulário -->
+                <select id="nacionalidade" name="nacionalidade"
+                  data-prefill="{{ $json.nacionalidade }}" data-nacionalidade required
+                  style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;">
                   <option value="">Selecione...</option>
                   <option value="BRASILEIRA">BRASILEIRA</option>
                 </select>
@@ -1073,10 +1134,7 @@
                   <option value="">Selecione...</option>
                   <option value="Médio">Médio</option>
                   <option value="Técnico">Técnico</option>
-                  <option value="Graduação">Graduação</option>
-                  <option value="Pós-graduação">Pós-graduação</option>
-                  <option value="Mestrado">Mestrado</option>
-                  <option value="Doutorado">Doutorado</option>
+                  <option value="Superior">Superior</option>
                 </select>
               </div>
               <div class="col-md-4">
@@ -2166,12 +2224,7 @@
     const getNivelTier = (value) => {
       const normalized = normalizeSimpleValue(value);
       if (!normalized) return 'all';
-      if (
-        normalized === 'graduacao' ||
-        normalized === 'posgraduacao' ||
-        normalized === 'mestrado' ||
-        normalized === 'doutorado'
-      ) {
+      if (normalized === 'superior') {
         return 'graduacao';
       }
       if (normalized === 'tecnico') {
@@ -3232,6 +3285,116 @@
       );
     };
 
+    const setupNacionalidadeSearch = () => {
+      const select  = nacionalidadeSelect;
+      const combo   = document.getElementById('nac-combo');
+      const display = document.getElementById('nac-display');
+      const panel   = document.getElementById('nac-panel');
+      const search  = document.getElementById('nac-search');
+      const list    = document.getElementById('nac-list');
+      if (!select || !combo || !panel || !search || !list) return;
+
+      let focusedIdx = -1;
+
+      const buildList = () => {
+        list.innerHTML = '';
+        Array.from(select.options).forEach((opt) => {
+          if (!opt.value) return;
+          const li = document.createElement('li');
+          li.textContent = opt.text;
+          li.dataset.value = opt.value;
+          li.setAttribute('role', 'option');
+          li.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            pick(opt.value, opt.text);
+            close();
+          });
+          list.appendChild(li);
+        });
+      };
+
+      const filter = (q) => {
+        const term = q.toUpperCase().trim();
+        focusedIdx = -1;
+        Array.from(list.children).forEach((li) => {
+          li.classList.toggle('nac-hidden', !!(term && !li.dataset.value.includes(term) && !li.textContent.toUpperCase().includes(term)));
+          li.classList.remove('nac-focused');
+        });
+      };
+
+      const pick = (value, label) => {
+        select.value = value;
+        display.textContent = label || 'Selecione...';
+        display.classList.toggle('text-muted', !value);
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+
+      const open = () => {
+        buildList();
+        panel.hidden = false;
+        combo.setAttribute('aria-expanded', 'true');
+        search.value = '';
+        filter('');
+        search.focus();
+      };
+
+      const close = () => {
+        panel.hidden = true;
+        combo.setAttribute('aria-expanded', 'false');
+        focusedIdx = -1;
+      };
+
+      combo.addEventListener('click', () => panel.hidden ? open() : close());
+      combo.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
+
+      search.addEventListener('input', () => filter(search.value));
+      search.addEventListener('keydown', (e) => {
+        const visible = Array.from(list.children).filter((li) => !li.classList.contains('nac-hidden'));
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          focusedIdx = Math.min(focusedIdx + 1, visible.length - 1);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          focusedIdx = Math.max(focusedIdx - 1, 0);
+        } else if (e.key === 'Enter' && focusedIdx >= 0) {
+          e.preventDefault();
+          const li = visible[focusedIdx];
+          pick(li.dataset.value, li.textContent);
+          close();
+          return;
+        } else if (e.key === 'Escape') {
+          close(); combo.focus(); return;
+        }
+        visible.forEach((li, i) => li.classList.toggle('nac-focused', i === focusedIdx));
+        if (focusedIdx >= 0) visible[focusedIdx].scrollIntoView({ block: 'nearest' });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!combo.closest('.position-relative').contains(e.target)) close();
+      });
+
+      // Sincroniza display quando o select muda via código externo (ex: prefill)
+      select.addEventListener('change', () => {
+        const opt = select.options[select.selectedIndex];
+        if (opt?.value) {
+          display.textContent = opt.text;
+          display.classList.remove('text-muted');
+        } else {
+          display.textContent = 'Selecione...';
+          display.classList.add('text-muted');
+        }
+      });
+
+      // Aplica valor já preenchido no select no momento da inicialização
+      if (select.value) {
+        const opt = select.options[select.selectedIndex];
+        display.textContent = opt.text;
+        display.classList.remove('text-muted');
+      }
+    };
+
     const populateNacionalidades = async () => {
       if (!nacionalidadeSelect) return;
       const fallback = [
@@ -3847,7 +4010,7 @@
       filterEspecialidadeOptions();
       selectPrefills();
       handleNaturalidadeUfChange();
-      void populateNacionalidades();
+      populateNacionalidades().then(setupNacionalidadeSearch);
       radioPrefills();
       loadDraft();
       filterEspecialidadeOptions();
