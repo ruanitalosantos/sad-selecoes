@@ -1656,17 +1656,100 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="px-4 py-3">Evento</th>
-                                <th class="px-4 py-3">Data Prevista</th>
+                                <th class="px-4 py-3" style="white-space:nowrap;">Data Prevista</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
+                        <tbody id="cronograma-tbody">
+                            <tr data-crono-row>
                                 <td class="px-4 py-3">Início das Inscrições</td>
-                                <td class="px-4 py-3">01/01/2026</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_inscricoes }}</td>
                             </tr>
-                            <tr>
+                            <tr data-crono-row>
                                 <td class="px-4 py-3">Término das Inscrições</td>
-                                <td class="px-4 py-3">15/01/2026</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_inscricoes }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Início da Publicação das respostas às impugnações ao Edital</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_impugnacao }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Término da Publicação das respostas às impugnações ao Edital</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_impugnacao }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Publicação da Concorrência por função</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.publicacao_concorrencia }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Publicação do resultado preliminar quanto ao deferimento das inscrições para pessoa com deficiência</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_preliminar_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Início do período de envio de recurso administrativo em face do resultado preliminar de deferimento das inscrições para pessoa com deficiência</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_recurso_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Término do período de envio de recurso administrativo em face do resultado preliminar de deferimento das inscrições para pessoa com deficiência</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_recurso_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Resultado Definitivo quanto ao deferimento das inscrições para pessoa com deficiência</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_definitivo_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Publicação do resultado preliminar da Análise Curricular</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_preliminar_analise_curricular }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Publicação do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_preliminar_ppni }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Início do período de envio de recurso administrativo em face do resultado preliminar da Análise Curricular</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_recurso_avaliacao_curricular }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Término do período de envio de recurso administrativo em face do resultado preliminar da Análise Curricular</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_recurso_avaliacao_curricular }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Início do período de envio de recurso administrativo em face do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_recurso_ppni }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Término do período de envio de recurso administrativo em face do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_recurso_ppni }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Convocação dos candidatos com deficiência para avaliação biopsicossocial — FASE NÃO OBRIGATÓRIA</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.convocacao_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Início da Realização da avaliação biopsicossocial para os candidatos com deficiência — FASE NÃO OBRIGATÓRIA</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_avaliacao_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Término da Realização da avaliação biopsicossocial para os candidatos com deficiência — FASE NÃO OBRIGATÓRIA</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_avaliacao_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Publicação do resultado preliminar da avaliação biopsicossocial</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.publicacao_resultado_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Início do período de envio de recurso administrativo em face do resultado preliminar da avaliação biopsicossocial</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_recurso_resultado_preliminar_avaliacao_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Término do período de envio de recurso administrativo em face do resultado preliminar da avaliação biopsicossocial</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_recurso_resultado_preliminar_avaliacao_pcd }}</td>
+                            </tr>
+                            <tr data-crono-row>
+                                <td class="px-4 py-3">Publicação do resultado final da Seleção Pública Simplificada</td>
+                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_final }}</td>
+                            </tr>
+                            <tr id="cronograma-vazio" class="hidden">
+                                <td colspan="2" class="px-4 py-4 text-center text-muted">Cronograma ainda não disponível.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -2634,6 +2717,36 @@
             });
         }
         return combined;
+    };
+
+    const renderCronograma = () => {
+      const rows = document.querySelectorAll('[data-crono-row]');
+      let visibleCount = 0;
+
+      rows.forEach((row) => {
+        const cell = row.querySelector('[data-crono-date]');
+        if (!cell) return;
+
+        const raw = cell.textContent.trim();
+        const isPlaceholder = !raw || raw.startsWith('{{') || raw === 'null' || raw === 'undefined';
+
+        if (isPlaceholder) {
+          row.classList.add('hidden');
+          return;
+        }
+
+        // Tenta formatar como DD/MM/YYYY
+        const d = new Date(raw);
+        if (!isNaN(d.getTime())) {
+          cell.textContent = d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        }
+
+        row.classList.remove('hidden');
+        visibleCount++;
+      });
+
+      const empty = document.getElementById('cronograma-vazio');
+      if (empty) empty.classList.toggle('hidden', visibleCount > 0);
     };
 
     const filterNivelOptions = () => {
@@ -4038,6 +4151,7 @@
       applyUppercaseTransform();
       enforceNumericOnly();
       populateUfSelects();
+      renderCronograma();
       filterNivelOptions();
       filterCargoOptions();
       filterEspecialidadeOptions();
