@@ -1107,8 +1107,9 @@
               </div>
               <div class="col-md-2">
                 <label for="endereco_uf" class="form-label required">UF</label>
-                <input type="text" class="form-control" id="endereco_uf" name="uf" maxlength="2" value="{{ $json.uf }}"
-                  required />
+                <select id="endereco_uf" name="uf" class="form-select" data-prefill="{{ $json.uf }}" data-uf-select required>
+                  <option value="">Selecione...</option>
+                </select>
               </div>
             </div>
           </div>
