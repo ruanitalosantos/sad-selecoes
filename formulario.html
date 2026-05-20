@@ -743,6 +743,80 @@
             color: var(--brand-primary);
         }
         .nac-list li.nac-hidden { display: none; }
+
+        /* ── Cronograma Timeline ── */
+        .cronograma-container { max-width: 860px; margin: 0 auto; }
+        .progress-card {
+            background: white; border-radius: 16px; padding: 1.5rem 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,.05); border: 1px solid var(--border-color);
+            margin-bottom: 3rem;
+        }
+        .progress-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+        .progress-card-title {
+            font-size: .85rem; font-weight: 700; color: var(--brand-primary);
+            text-transform: uppercase; display: flex; align-items: center; gap: .75rem; letter-spacing: .5px;
+        }
+        .progress-percent-badge {
+            background: var(--brand-primary); color: #fff;
+            padding: 4px 12px; border-radius: 12px; font-size: .8rem; font-weight: 700;
+        }
+        .progress-container { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+        .progress-bar-indicator {
+            height: 100%; background: var(--brand-primary);
+            width: 0%; transition: width 1s cubic-bezier(.4,0,.2,1);
+        }
+        .new-timeline { position: relative; padding-left: 80px; }
+        .new-timeline::before {
+            content: ''; position: absolute; left: 35px; top: 0; bottom: 0;
+            width: 2px; background: #e2e8f0;
+        }
+        .timeline-step { position: relative; margin-bottom: 2rem; }
+        .timeline-step.hidden { display: none; }
+        .timeline-step-icon {
+            position: absolute; left: -80px; top: 20px;
+            width: 70px; height: 70px; background: white;
+            border: 2px solid #e2e8f0; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2; color: #94a3b8; font-size: 1.4rem;
+            transition: all .4s cubic-bezier(.4,0,.2,1);
+        }
+        .timeline-step.active .timeline-step-icon {
+            border-color: var(--brand-primary); color: var(--brand-primary);
+            box-shadow: 0 0 0 5px rgba(0,83,164,.1); background: white;
+        }
+        .timeline-step.completed .timeline-step-icon {
+            border-color: var(--brand-primary); background: var(--brand-primary); color: white;
+        }
+        .timeline-step-card {
+            background: white; border-radius: 16px; padding: 1.5rem 1.75rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,.05); transition: all .3s ease;
+        }
+        .timeline-step.active .timeline-step-card {
+            border-left: 4px solid var(--brand-primary);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,.08); transform: translateX(5px);
+        }
+        .timeline-step-date {
+            font-size: .85rem; font-weight: 700; color: var(--brand-primary);
+            text-transform: uppercase; margin-bottom: .6rem; display: block; letter-spacing: .5px;
+        }
+        .timeline-step-title { font-size: 1rem; font-weight: 600; color: var(--text-main); line-height: 1.4; margin-bottom: .75rem; }
+        .timeline-status-badge {
+            display: inline-flex; align-items: center; gap: .5rem;
+            padding: 5px 14px; border-radius: 24px; font-size: .75rem;
+            font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+        }
+        .status-waiting  { background: #f8f9fa; color: #64748b; border: 1px solid #e2e8f0; }
+        .status-ongoing  {
+            background: rgba(0,83,164,.08); color: var(--brand-primary);
+            border: 1px solid rgba(0,83,164,.15); animation: pulse-ongoing 2s infinite;
+        }
+        .status-completed { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        @keyframes pulse-ongoing {
+            0%   { box-shadow: 0 0 0 0   rgba(0,83,164,.2); }
+            70%  { box-shadow: 0 0 0 10px rgba(0,83,164,0); }
+            100% { box-shadow: 0 0 0 0   rgba(0,83,164,0); }
+        }
     </style>
 
 </head>
@@ -1638,115 +1712,200 @@
 
         <!-- Tab: Cronograma -->
         <section id="cronograma" class="tab-content">
-            <div class="section-header">
-                <h2 class="section-title">Cronograma da Seleção</h2>
-                <p class="text-muted">Fique atento às datas importantes do certame.</p>
+          <div class="cronograma-container">
+            <div class="section-header mb-4">
+              <h2 class="section-title">Cronograma da Seleção</h2>
+              <p class="text-muted">Fique atento às datas importantes do certame.</p>
             </div>
-            <div class="card">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="px-4 py-3">Evento</th>
-                                <th class="px-4 py-3" style="white-space:nowrap;">Data Prevista</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cronograma-tbody">
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Início das Inscrições</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_inscricoes }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Término das Inscrições</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_inscricoes }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Início da Publicação das respostas às impugnações ao Edital</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_impugnacao }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Término da Publicação das respostas às impugnações ao Edital</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_impugnacao }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Publicação da Concorrência por função</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.publicacao_concorrencia }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Publicação do resultado preliminar quanto ao deferimento das inscrições para pessoa com deficiência</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_preliminar_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Início do período de envio de recurso administrativo em face do resultado preliminar de deferimento das inscrições para pessoa com deficiência</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_recurso_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Término do período de envio de recurso administrativo em face do resultado preliminar de deferimento das inscrições para pessoa com deficiência</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_recurso_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Resultado Definitivo quanto ao deferimento das inscrições para pessoa com deficiência</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_definitivo_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Publicação do resultado preliminar da Análise Curricular</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_preliminar_analise_curricular }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Publicação do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_preliminar_ppni }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Início do período de envio de recurso administrativo em face do resultado preliminar da Análise Curricular</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_recurso_avaliacao_curricular }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Término do período de envio de recurso administrativo em face do resultado preliminar da Análise Curricular</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_recurso_avaliacao_curricular }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Início do período de envio de recurso administrativo em face do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_recurso_ppni }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Término do período de envio de recurso administrativo em face do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_recurso_ppni }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Convocação dos candidatos com deficiência para avaliação biopsicossocial — FASE NÃO OBRIGATÓRIA</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.convocacao_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Início da Realização da avaliação biopsicossocial para os candidatos com deficiência — FASE NÃO OBRIGATÓRIA</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_avaliacao_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Término da Realização da avaliação biopsicossocial para os candidatos com deficiência — FASE NÃO OBRIGATÓRIA</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_avaliacao_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Publicação do resultado preliminar da avaliação biopsicossocial</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.publicacao_resultado_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Início do período de envio de recurso administrativo em face do resultado preliminar da avaliação biopsicossocial</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.inicio_recurso_resultado_preliminar_avaliacao_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Término do período de envio de recurso administrativo em face do resultado preliminar da avaliação biopsicossocial</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.termino_recurso_resultado_preliminar_avaliacao_pcd }}</td>
-                            </tr>
-                            <tr data-crono-row>
-                                <td class="px-4 py-3">Publicação do resultado final da Seleção Pública Simplificada</td>
-                                <td class="px-4 py-3" data-crono-date>{{ $json.resultado_final }}</td>
-                            </tr>
-                            <tr id="cronograma-vazio" class="hidden">
-                                <td colspan="2" class="px-4 py-4 text-center text-muted">Cronograma ainda não disponível.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="progress-card">
+              <div class="progress-card-header">
+                <div class="progress-card-title"><i class="fas fa-chart-line"></i> Progresso da Seleção</div>
+                <div class="progress-percent-badge" id="crono-progress-percent">0%</div>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar-indicator" id="crono-main-progress"></div>
+              </div>
+            </div>
+            <div class="new-timeline">
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-edit"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.inicio_inscricoes }}</span>
+                  <div class="timeline-step-title">Início das Inscrições</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
                 </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.termino_inscricoes }}</span>
+                  <div class="timeline-step-title">Término das Inscrições</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.inicio_impugnacao }}</span>
+                  <div class="timeline-step-title">Início da Publicação das respostas às impugnações ao Edital</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.termino_impugnacao }}</span>
+                  <div class="timeline-step-title">Término da Publicação das respostas às impugnações ao Edital</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.publicacao_concorrencia }}</span>
+                  <div class="timeline-step-title">Publicação da Concorrência por função</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-wheelchair"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.resultado_preliminar_pcd }}</span>
+                  <div class="timeline-step-title">Publicação do resultado preliminar quanto ao deferimento das inscrições para pessoa com deficiência</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-gavel"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.inicio_recurso_pcd }}</span>
+                  <div class="timeline-step-title">Início do período de envio de recurso administrativo em face do resultado preliminar de deferimento das inscrições para pessoa com deficiência</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-gavel"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.termino_recurso_pcd }}</span>
+                  <div class="timeline-step-title">Término do período de envio de recurso administrativo em face do resultado preliminar de deferimento das inscrições para pessoa com deficiência</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-check-double"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.resultado_definitivo_pcd }}</span>
+                  <div class="timeline-step-title">Resultado Definitivo quanto ao deferimento das inscrições para pessoa com deficiência</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-poll"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.resultado_preliminar_analise_curricular }}</span>
+                  <div class="timeline-step-title">Publicação do resultado preliminar da Análise Curricular</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-users"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.resultado_preliminar_ppni }}</span>
+                  <div class="timeline-step-title">Publicação do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-gavel"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.inicio_recurso_avaliacao_curricular }}</span>
+                  <div class="timeline-step-title">Início do período de envio de recurso administrativo em face do resultado preliminar da Análise Curricular</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-gavel"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.termino_recurso_avaliacao_curricular }}</span>
+                  <div class="timeline-step-title">Término do período de envio de recurso administrativo em face do resultado preliminar da Análise Curricular</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-gavel"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.inicio_recurso_ppni }}</span>
+                  <div class="timeline-step-title">Início do período de envio de recurso administrativo em face do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-gavel"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.termino_recurso_ppni }}</span>
+                  <div class="timeline-step-title">Término do período de envio de recurso administrativo em face do resultado preliminar da heteroidentificação dos candidatos negros e indígenas</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-bell"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.convocacao_pcd }}</span>
+                  <div class="timeline-step-title">Convocação dos candidatos com deficiência para avaliação biopsicossocial — FASE NÃO OBRIGATÓRIA</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-clipboard-check"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.inicio_avaliacao_pcd }}</span>
+                  <div class="timeline-step-title">Início da Realização da avaliação biopsicossocial para os candidatos com deficiência — FASE NÃO OBRIGATÓRIA</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-clipboard-check"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.termino_avaliacao_pcd }}</span>
+                  <div class="timeline-step-title">Término da Realização da avaliação biopsicossocial para os candidatos com deficiência — FASE NÃO OBRIGATÓRIA</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-poll"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.publicacao_resultado_pcd }}</span>
+                  <div class="timeline-step-title">Publicação do resultado preliminar da avaliação biopsicossocial</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-gavel"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.inicio_recurso_resultado_preliminar_avaliacao_pcd }}</span>
+                  <div class="timeline-step-title">Início do período de envio de recurso administrativo em face do resultado preliminar da avaliação biopsicossocial</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-gavel"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.termino_recurso_resultado_preliminar_avaliacao_pcd }}</span>
+                  <div class="timeline-step-title">Término do período de envio de recurso administrativo em face do resultado preliminar da avaliação biopsicossocial</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
+              <div class="timeline-step" data-crono-row>
+                <div class="timeline-step-icon"><i class="fas fa-trophy"></i></div>
+                <div class="timeline-step-card">
+                  <span class="timeline-step-date" data-crono-date>{{ $json.resultado_final }}</span>
+                  <div class="timeline-step-title">Publicação do resultado final da Seleção Pública Simplificada</div>
+                  <span class="timeline-status-badge status-waiting"><i class="fas fa-clock"></i> Aguardando</span>
+                </div>
+              </div>
             </div>
+            <p id="cronograma-vazio" class="hidden text-center text-muted py-4">Cronograma ainda não disponível.</p>
+          </div>
         </section>
     </main>
   <div class="pattern-bottom"></div>
@@ -2720,7 +2879,10 @@
 
     const renderCronograma = () => {
       const rows = document.querySelectorAll('[data-crono-row]');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       let visibleCount = 0;
+      let completedCount = 0;
 
       rows.forEach((row) => {
         const cell = row.querySelector('[data-crono-date]');
@@ -2734,18 +2896,45 @@
           return;
         }
 
-        // Tenta formatar como DD/MM/YYYY
-        const d = new Date(raw);
-        if (!isNaN(d.getTime())) {
-          cell.textContent = d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        const d = new Date(raw + (raw.includes('T') ? '' : 'T00:00:00'));
+        if (isNaN(d.getTime())) {
+          row.classList.add('hidden');
+          return;
         }
 
+        cell.textContent = d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
         row.classList.remove('hidden');
         visibleCount++;
+
+        const stepDay = new Date(raw + 'T00:00:00');
+        stepDay.setHours(0, 0, 0, 0);
+        const badge = row.querySelector('.timeline-status-badge');
+
+        if (stepDay < today) {
+          row.classList.add('completed');
+          row.classList.remove('active');
+          completedCount++;
+          if (badge) { badge.className = 'timeline-status-badge status-completed'; badge.innerHTML = '<i class="fas fa-check-circle"></i> Concluído'; }
+        } else if (stepDay.getTime() === today.getTime()) {
+          row.classList.add('active');
+          row.classList.remove('completed');
+          if (badge) { badge.className = 'timeline-status-badge status-ongoing'; badge.innerHTML = '<i class="fas fa-circle"></i> Em andamento'; }
+        } else {
+          row.classList.remove('active', 'completed');
+          if (badge) { badge.className = 'timeline-status-badge status-waiting'; badge.innerHTML = '<i class="fas fa-clock"></i> Aguardando'; }
+        }
       });
 
       const empty = document.getElementById('cronograma-vazio');
       if (empty) empty.classList.toggle('hidden', visibleCount > 0);
+
+      if (visibleCount > 0) {
+        const percent = Math.round((completedCount / visibleCount) * 100);
+        const bar = document.getElementById('crono-main-progress');
+        const label = document.getElementById('crono-progress-percent');
+        if (bar) setTimeout(() => { bar.style.width = percent + '%'; }, 150);
+        if (label) label.textContent = percent + '%';
+      }
     };
 
     const filterNivelOptions = () => {
