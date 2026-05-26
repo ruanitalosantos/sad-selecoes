@@ -4173,11 +4173,39 @@
           'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-dados-raps',
           { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf }) }
         );
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        const items = Array.isArray(data) ? data : (data && typeof data === 'object' ? [data] : []);
 
         if (loadingEl) loadingEl.classList.add('hidden');
+
+        const rawText = await response.text();
+
+        if (!response.ok) {
+          const serverMsg = rawText?.trim();
+          const displayMsg = serverMsg && !serverMsg.startsWith('<') && serverMsg.length < 300
+            ? serverMsg
+            : 'Não foi possível carregar as inscrições. Tente novamente.';
+          if (errorEl) {
+            document.getElementById('resumoErrorMsg').textContent = displayMsg;
+            errorEl.classList.remove('hidden');
+          }
+          return;
+        }
+
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (_) {
+          const serverMsg = rawText?.trim();
+          const displayMsg = serverMsg && !serverMsg.startsWith('<') && serverMsg.length < 300
+            ? serverMsg
+            : 'Resposta inválida do servidor.';
+          if (errorEl) {
+            document.getElementById('resumoErrorMsg').textContent = displayMsg;
+            errorEl.classList.remove('hidden');
+          }
+          return;
+        }
+
+        const items = Array.isArray(data) ? data : (data && typeof data === 'object' ? [data] : []);
 
         if (!items.length) {
           if (emptyEl) emptyEl.classList.remove('hidden');
