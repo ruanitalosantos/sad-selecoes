@@ -1,0 +1,107 @@
+﻿Ordem,Nome,Tipo do Campo,Identificador
+1,Nome social,Texto (Inferido),nomesocial
+2,avaliarpm,Texto / Booleano (Inferido),avaliarpm
+3,Cidade,Texto / Seleção (Inferido),cidade
+4,Data de nascimento,Data (Inferido),nascdata
+5,Nota Especialização,Número (Decimal) (Inferido),nespecializacao
+6,Gênero,Seleção (Inferido),genero
+7,analisepcd,Texto (Inferido),analisepcd
+8,UF,Seleção (Inferido),naturalidadeuf
+9,Título de Eleitor,Texto (Inferido),titulo
+10,Justificativa análise curricular,Texto Longo (Inferido),justcurricular
+11,Possui algum outro vínculo com o serviço público?,Seleção (Booleano) (Inferido),vinculopublicoop
+12,nprovatitulospr,Número (Inferido),nprovatitulospr
+13,Complemento,Texto (Inferido),complemento
+14,Número,Texto / Número (Inferido),alistamentonum
+15,Nível,Seleção / Texto (Inferido),nivel
+16,UF,Seleção (Inferido),rguf
+17,Nota final,Número (Decimal) (Inferido),novanota
+18,Justificativa julgamento de recursos,Texto Longo (Inferido),justrecursos
+19,cpf,Texto (Inferido),cpf
+20,(sem rótulo visível),Seleção / Texto (Inferido),vinculopublico
+21,Órgão emissor,Texto / Seleção (Inferido),alistamentoorgao
+22,Serviço militar obrigatório quitado?,Seleção (Booleano) (Inferido),militar
+23,Telefone 1,Texto (Telefone) (Inferido),tel1
+24,Doutorado,Texto / Seleção / Arquivo (Inferido),doutorado
+25,Logradouro,Texto (Inferido),logradouro
+26,possuirecurso,Seleção (Booleano) (Inferido),possuirecurso
+27,Justificativa recursos curricular,Texto Longo (Inferido),justreccurriculo
+28,notaexperienciapr,Número (Inferido),notaexperienciap
+29,Informe o gênero,Texto (Inferido),generooutro
+30,Julgamento de recursos PCD,Texto Longo (Inferido),julpcd
+31,Conclusão de residência,Seleção / Data / Arquivo (Inferido),concresidencia
+32,NIS,Texto (Inferido),nis
+33,Nota Certificado de residência,Número (Decimal) (Inferido),nconcresid
+34,(sem rótulo visível),Seleção (Booleano) (Inferido),foijurado
+35,Ano de conclusão,Número (Ano) (Inferido),anoconclusao
+36,Data de emissão,Data (Inferido),dtalistamento
+37,Especialidade (quando houver),Texto / Seleção (Inferido),especialidade
+38,Data de emissão,Data (Inferido),alistamentodata
+39,Estado civil,Seleção (Inferido),estadocivil
+40,Já atuou como jurado(a)?,Seleção (Booleano) (Inferido),juradofuncao
+41,Nome da mãe,Texto (Inferido),mae
+42,Nome completo,Texto (Inferido),nome
+43,Justificativa análise cotas,Texto Longo (Inferido),justcotas
+44,Seção,Texto / Número (Inferido),secao
+45,Confirme o e-mail,Texto (E-mail) (Inferido),emailconfirm
+46,"Diploma ou Declaração de Conclusão de Curso de Residência em Psiquiatria da Infância e da Adolescência, credenciada pela Comissão Nacion...",Arquivo / Texto (Inferido),especializacao
+47,Nota Mestrado,Número (Decimal) (Inferido),nmestrado
+48,Curso,Texto (Inferido),curso
+49,RG,Texto (Inferido),rgnumero
+50,Qual vínculo?,Texto (Inferido),qualvinculo
+51,Julgamento de recursos curricular,Texto Longo (Inferido),julcurricular
+52,Expedição,Data (Inferido),rgdata
+53,Informações sobre atuação como jurado(a),Texto Longo (Inferido),juradoperiodo
+54,Nota final,Número (Decimal) (Inferido),nota
+55,Instituição,Texto (Inferido),ies
+56,Órgão emissor,Texto / Seleção (Inferido),rgorgao
+57,Justificativa análise PCD,Texto Longo (Inferido),justpcd
+58,analisecurricular,Texto (Inferido),analisecurricula
+59,Necessita de condição especial?,Seleção (Booleano) (Inferido),condicaoespecial
+60,nconcresidpr,Número (Inferido),nconcresidpr
+61,Nacionalidade,Seleção / Texto (Inferido),nacionalidade
+62,Cor/Raça,Seleção (Inferido),raca
+63,E-mail,Texto (E-mail) (Inferido),email
+64,Número,Texto / Número (Inferido),numero
+65,id-ativ,Texto / Identificador (Inferido),atividadehabilit
+66,Nota doutorado,Número (Decimal) (Inferido),ndoutorado
+67,Tipo de deficiência,Seleção (Inferido),tipopcd
+68,result_prazo_rec_inscricao,Texto (Inferido),resultprzorecins
+69,CID (se houver),Texto (Inferido),pcdcid
+70,Bairro,Texto (Inferido),bairro
+71,Nível,Seleção / Texto (Inferido),nivel1
+72,Tem parentesco com agentes políticos?,Seleção (Booleano) (Inferido),politicos
+73,Justificativa julgamento de recursos COTAS,Texto Longo (Inferido),justreccotas
+74,É PCD?,Seleção (Booleano) (Inferido),ispcd
+75,Nota experiência,Número (Decimal) (Inferido),notaexperiencia
+76,Justificativa recursos PCD,Texto Longo (Inferido),justrecpcd
+77,nespecializacaopr,Número (Inferido),nespecializacaop
+78,Função pretendida,Seleção (Inferido),cargo
+79,Mestrado,Texto / Seleção / Arquivo (Inferido),mestrado
+80,Naturalidade,Texto (Inferido),naturalidadecidade
+81,Cargo,Seleção / Texto (Inferido),vinculocargo
+82,analisecotas,Texto (Inferido),analisecotas
+83,Julgamento de recursos cotas,Texto Longo (Inferido),julcotas
+84,Data de nascimento,Data (Inferido),nasc
+85,Sexo,Seleção (Inferido),sexo
+86,CEP,Texto (Inferido),cep
+87,Órgão,Texto / Seleção (Inferido),vinculoorgao
+88,Média de notas (PROVA DE TÍTULOS),Número (Decimal) (Inferido),nprovatitulos
+89,UF,Seleção (Inferido),uf
+90,RG Expedição,Data (Inferido),rgdataex
+91,resultado_pericia,Texto (Inferido),resultadopericia
+92,Inscrição,Texto / Número (Inferido)['],inscricao
+93,Zona,Texto / Número (Inferido),zona
+94,Tempo de serviço,Texto / Número (Inferido),vinculotemposerv
+95,nmestradopr,Número (Inferido),nmestradopr
+96,Telefone 2,Texto (Telefone) (Inferido),tel2
+101,ndoutoradopr,Número longo,ndoutoradopr
+102,É PPNI?,Texto (255),criisppni
+103,É PCD?,Texto (255),criispcd
+104,notaformacao,Número longo,notaformacao
+105,descricaoformacao,Texto (255),descricaoformacao
+106,nota_exp1,Número longo,nota_exp1
+107,Nota experiência profissional (até 20),Número longo,notaexp2
+108,Nota Formação (Pós recurso),Número longo,notaformacaopr
+109,descformpr,Texto (255),descformr
+110,notaformpr,Número longo,notaformpr

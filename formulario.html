@@ -1707,15 +1707,29 @@
 
         <!-- Tab: Resumo -->
         <section id="resumo" class="tab-content">
-            <div class="section-header">
-                <h2 class="section-title">Resumo da Participação</h2>
-                <p class="text-muted">Confira o status e detalhes das suas inscrições ativas.</p>
+            <div class="section-header d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="section-title">Resumo da Participação</h2>
+                    <p class="text-muted mb-0">Confira o status e detalhes das suas inscrições.</p>
+                </div>
+                <button type="button" class="btn btn-outline-primary mt-3 mt-md-0" id="btnRefreshResumo">
+                    <i class="fas fa-sync-alt me-2"></i>Atualizar
+                </button>
             </div>
-            <div class="card p-5 text-center">
+            <div id="resumoLoading" class="text-center py-5 hidden">
+                <div class="spinner-border text-primary mb-3" role="status"><span class="visually-hidden">Carregando...</span></div>
+                <p class="text-muted">Carregando suas inscrições...</p>
+            </div>
+            <div id="resumoError" class="alert alert-danger hidden" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="resumoErrorMsg">Erro ao carregar inscrições.</span>
+            </div>
+            <div id="resumoEmpty" class="card p-5 text-center hidden">
                 <i class="fas fa-clipboard-list fa-4x text-muted mb-3 opacity-25"></i>
-                <h3 class="text-muted">Sem inscrições finalizadas</h3>
-                <p class="text-muted">Utilize a aba "Inscrição" para participar da seleção.</p>
+                <h3 class="text-muted">Nenhuma inscrição encontrada</h3>
+                <p class="text-muted">Nenhuma inscrição foi encontrada para este candidato.</p>
             </div>
+            <div id="resumoResults"></div>
         </section>
 
         <!-- Tab: Recursos -->
@@ -2047,7 +2061,14 @@
 
         if (targetTab) targetTab.classList.add('active');
         if (targetLink) targetLink.classList.add('active');
-        
+
+        if (tabId === 'resumo') {
+            const resultsEl = document.getElementById('resumoResults');
+            if (resultsEl && !resultsEl.children.length) {
+                loadResumoInscricoes();
+            }
+        }
+
         // Hide sidebar on mobile after click
         if (window.innerWidth < 992 && sidebar) {
             sidebar.classList.remove('show');
@@ -3941,6 +3962,227 @@
       });
     };
 
+    // ── Resumo: dicionário de campos ──
+    const RESUMO_FIELD_DICT = {
+      inscricao:           { label: 'Nº da Inscrição',              group: 'Identificação' },
+      nome:                { label: 'Nome completo',                group: 'Identificação' },
+      nomesocial:          { label: 'Nome social',                  group: 'Identificação' },
+      cpf:                 { label: 'CPF',                          group: 'Identificação' },
+      nascdata:            { label: 'Data de nascimento',           group: 'Identificação', type: 'date' },
+      nasc:                { label: 'Data de nascimento',           group: 'Identificação', type: 'date' },
+      sexo:                { label: 'Sexo',                         group: 'Identificação' },
+      genero:              { label: 'Gênero',                       group: 'Identificação' },
+      generooutro:         { label: 'Gênero (outro)',               group: 'Identificação' },
+      estadocivil:         { label: 'Estado civil',                 group: 'Identificação' },
+      raca:                { label: 'Cor/Raça',                     group: 'Identificação' },
+      nacionalidade:       { label: 'Nacionalidade',                group: 'Identificação' },
+      naturalidadecidade:  { label: 'Naturalidade',                 group: 'Identificação' },
+      naturalcidade:       { label: 'Naturalidade',                 group: 'Identificação' },
+      naturalidadeuf:      { label: 'UF de naturalidade',          group: 'Identificação' },
+      mae:                 { label: 'Nome da mãe',                  group: 'Identificação' },
+      pai:                 { label: 'Nome do pai',                  group: 'Identificação' },
+      nis:                 { label: 'PIS/PASEP/NIT',                group: 'Identificação' },
+
+      rgnumero:            { label: 'RG',                           group: 'Documentos' },
+      rgorgao:             { label: 'Órgão emissor (RG)',          group: 'Documentos' },
+      rguf:                { label: 'UF (RG)',                      group: 'Documentos' },
+      rgdata:              { label: 'Expedição (RG)',               group: 'Documentos', type: 'date' },
+      rgdataex:            { label: 'Expedição (RG)',               group: 'Documentos', type: 'date' },
+      titulo:              { label: 'Título de eleitor',            group: 'Documentos' },
+      zona:                { label: 'Zona',                         group: 'Documentos' },
+      secao:               { label: 'Seção',                        group: 'Documentos' },
+      militar:             { label: 'Serviço militar quitado?',     group: 'Documentos' },
+      alistamentonum:      { label: 'Nº certif. militar',           group: 'Documentos' },
+      alistamentoorgao:    { label: 'Órgão certif. militar',        group: 'Documentos' },
+      alistamentodata:     { label: 'Data certif. militar',         group: 'Documentos', type: 'date' },
+
+      email:               { label: 'E-mail',                       group: 'Contato e Endereço' },
+      tel1:                { label: 'Telefone 1',                   group: 'Contato e Endereço' },
+      tel2:                { label: 'Telefone 2',                   group: 'Contato e Endereço' },
+      cep:                 { label: 'CEP',                          group: 'Contato e Endereço' },
+      logradouro:          { label: 'Logradouro',                   group: 'Contato e Endereço' },
+      numero:              { label: 'Número',                       group: 'Contato e Endereço' },
+      complemento:         { label: 'Complemento',                  group: 'Contato e Endereço' },
+      bairro:              { label: 'Bairro',                       group: 'Contato e Endereço' },
+      cidade:              { label: 'Cidade',                       group: 'Contato e Endereço' },
+      uf:                  { label: 'UF',                           group: 'Contato e Endereço' },
+
+      cargo:               { label: 'Função pretendida',            group: 'Profissional' },
+      nivel:               { label: 'Nível',                        group: 'Profissional' },
+      especialidade:       { label: 'Especialidade',                group: 'Profissional' },
+      ies:                 { label: 'Instituição',                  group: 'Profissional' },
+      curso:               { label: 'Curso',                        group: 'Profissional' },
+      anoconclusao:        { label: 'Ano de conclusão',             group: 'Profissional' },
+      juradofuncao:        { label: 'Já atuou como jurado(a)?',     group: 'Profissional' },
+      foijurado:           { label: 'Já atuou como jurado(a)?',     group: 'Profissional' },
+      juradoperiodo:       { label: 'Período como jurado(a)',       group: 'Profissional' },
+      vinculopublico:      { label: 'Vínculo público',              group: 'Profissional' },
+      vinculopublicoop:    { label: 'Possui vínculo público?',      group: 'Profissional' },
+      qualvinculo:         { label: 'Qual vínculo',                 group: 'Profissional' },
+      vinculocargo:        { label: 'Cargo (vínculo)',              group: 'Profissional' },
+      vinculoorgao:        { label: 'Órgão (vínculo)',              group: 'Profissional' },
+      vinculotemposerv:    { label: 'Tempo de serviço',             group: 'Profissional' },
+
+      criisppni:           { label: 'Concorre às vagas PPNI',       group: 'Inclusão' },
+      criispcd:            { label: 'Concorre às vagas PCD',        group: 'Inclusão' },
+      ispcd:               { label: 'É PCD',                        group: 'Inclusão' },
+      tipopcd:             { label: 'Tipo de deficiência',          group: 'Inclusão' },
+      pcdcid:              { label: 'CID',                          group: 'Inclusão' },
+      condicaoespecial:    { label: 'Condição especial',            group: 'Inclusão' },
+      necessidade:         { label: 'Necessidade especial',         group: 'Inclusão' },
+
+      nota:                { label: 'Nota final',                   group: 'Avaliação', type: 'number' },
+      novanota:            { label: 'Nota final (revisada)',        group: 'Avaliação', type: 'number' },
+      notaexperiencia:     { label: 'Nota experiência',             group: 'Avaliação', type: 'number' },
+      notaexp1:            { label: 'Nota experiência 1',           group: 'Avaliação', type: 'number' },
+      notaexp2:            { label: 'Nota exp. profissional',       group: 'Avaliação', type: 'number' },
+      notaformacao:        { label: 'Nota formação',                group: 'Avaliação', type: 'number' },
+      notaformacaopr:      { label: 'Nota formação (pós recurso)', group: 'Avaliação', type: 'number' },
+      nmestrado:           { label: 'Nota mestrado',                group: 'Avaliação', type: 'number' },
+      ndoutorado:          { label: 'Nota doutorado',               group: 'Avaliação', type: 'number' },
+      nespecializacao:     { label: 'Nota especialização',          group: 'Avaliação', type: 'number' },
+      analisecurricula:    { label: 'Análise curricular',           group: 'Avaliação' },
+      analisecotas:        { label: 'Análise cotas',                group: 'Avaliação' },
+      analisepcd:          { label: 'Análise PCD',                  group: 'Avaliação' },
+      resultadopericia:    { label: 'Resultado perícia',            group: 'Avaliação' },
+      descricaoformacao:   { label: 'Descrição formação',           group: 'Avaliação' },
+      descricaoformaca:    { label: 'Descrição formação',           group: 'Avaliação' },
+    };
+
+    const RESUMO_GROUP_ORDER = ['Identificação', 'Documentos', 'Contato e Endereço', 'Profissional', 'Inclusão', 'Avaliação'];
+
+    const formatResumoValue = (value, type) => {
+      if (value === null || value === undefined) return null;
+      if (type === 'number') {
+        const num = Number(value);
+        if (value === '' || isNaN(num)) return null;
+        return String(num);
+      }
+      const str = String(value).trim();
+      if (!str || str === '0') return null;
+      if (type === 'date') {
+        const d = new Date(str + (str.includes('T') ? '' : 'T00:00:00'));
+        if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+      }
+      return str;
+    };
+
+    const buildResumoCard = (item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card mb-4';
+
+      const header = document.createElement('div');
+      header.className = 'card-header';
+      const notaBadge = (item.nota != null && item.nota !== '') ? `<span class="badge bg-primary fs-6 ms-2">Nota: ${item.nota}</span>` : '';
+      header.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div>
+            <h5 class="mb-1 fw-bold text-primary">${item.inscricao || `Inscrição ${index + 1}`}${notaBadge}</h5>
+            <div class="text-muted small">${item.cargo || '—'} ${item.especialidade ? '— ' + item.especialidade : ''}</div>
+          </div>
+        </div>`;
+      card.appendChild(header);
+
+      const body = document.createElement('div');
+      body.className = 'card-body';
+
+      const grouped = {};
+      RESUMO_GROUP_ORDER.forEach((g) => { grouped[g] = []; });
+
+      const seen = new Set();
+      Object.entries(item).forEach(([key, value]) => {
+        const def = RESUMO_FIELD_DICT[key];
+        if (!def) return;
+        const formatted = formatResumoValue(value, def.type);
+        if (!formatted) return;
+        const dedupKey = def.group + ':' + def.label;
+        if (seen.has(dedupKey)) return;
+        seen.add(dedupKey);
+        if (!grouped[def.group]) grouped[def.group] = [];
+        grouped[def.group].push({ label: def.label, value: formatted });
+      });
+
+      RESUMO_GROUP_ORDER.forEach((groupName) => {
+        const fields = grouped[groupName];
+        if (!fields || !fields.length) return;
+        const section = document.createElement('div');
+        section.className = 'summary-section';
+        const heading = document.createElement('h3');
+        heading.textContent = groupName;
+        section.appendChild(heading);
+        const table = document.createElement('table');
+        table.className = 'summary-table';
+        fields.forEach(({ label, value }) => {
+          const row = document.createElement('tr');
+          const th = document.createElement('th');
+          th.textContent = label;
+          const td = document.createElement('td');
+          td.textContent = value;
+          row.appendChild(th);
+          row.appendChild(td);
+          table.appendChild(row);
+        });
+        section.appendChild(table);
+        body.appendChild(section);
+      });
+
+      card.appendChild(body);
+      return card;
+    };
+
+    const loadResumoInscricoes = async () => {
+      const cpf = document.getElementById('cpf')?.value?.trim();
+      const resultsEl = document.getElementById('resumoResults');
+      const loadingEl = document.getElementById('resumoLoading');
+      const errorEl = document.getElementById('resumoError');
+      const emptyEl = document.getElementById('resumoEmpty');
+
+      [errorEl, emptyEl].forEach((el) => el?.classList.add('hidden'));
+      if (resultsEl) resultsEl.innerHTML = '';
+      if (loadingEl) loadingEl.classList.remove('hidden');
+
+      if (!cpf) {
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (errorEl) {
+          document.getElementById('resumoErrorMsg').textContent = 'CPF não disponível. Acesse o portal com seu CPF.';
+          errorEl.classList.remove('hidden');
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-dados-raps',
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf }) }
+        );
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const items = Array.isArray(data) ? data : (data && typeof data === 'object' ? [data] : []);
+
+        if (loadingEl) loadingEl.classList.add('hidden');
+
+        if (!items.length) {
+          if (emptyEl) emptyEl.classList.remove('hidden');
+          return;
+        }
+
+        if (resultsEl) {
+          const count = document.createElement('p');
+          count.className = 'text-muted mb-3';
+          count.textContent = `${items.length} inscrição(ões) encontrada(s).`;
+          resultsEl.appendChild(count);
+          items.forEach((item, i) => resultsEl.appendChild(buildResumoCard(item, i)));
+        }
+      } catch (error) {
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (errorEl) {
+          document.getElementById('resumoErrorMsg').textContent = 'Não foi possível carregar as inscrições. Tente novamente.';
+          errorEl.classList.remove('hidden');
+        }
+        console.error('Erro ao consultar inscrições:', error);
+      }
+    };
+
     const buildReview = () => {
       const summary = document.getElementById('reviewSummary');
       summary.innerHTML = '';
@@ -4413,6 +4655,14 @@
       }
       if (newSubmissionButton) {
         newSubmissionButton.addEventListener('click', () => window.location.reload());
+      const btnRefreshResumo = document.getElementById('btnRefreshResumo');
+      if (btnRefreshResumo) {
+        btnRefreshResumo.addEventListener('click', () => {
+          const resultsEl = document.getElementById('resumoResults');
+          if (resultsEl) resultsEl.innerHTML = '';
+          loadResumoInscricoes();
+        });
+      }
       }
       document.querySelectorAll('.upload-input').forEach((input) => {
         updateUploadIndicator(input);
