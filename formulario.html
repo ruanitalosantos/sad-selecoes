@@ -570,6 +570,20 @@
       background: rgba(232, 240, 254, 0.45);
     }
 
+    .upload-card.drag-over {
+      border-color: var(--brand);
+      border-style: solid;
+      background: rgba(0, 83, 164, 0.07);
+      transform: scale(1.02);
+      box-shadow: 0 0 0 4px rgba(0, 83, 164, 0.12);
+    }
+
+    .upload-card .drag-hint {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-top: -0.25rem;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -3327,8 +3341,9 @@
 
 
     const validateAndSubmit = () => {
-        // Block if registration period has ended
-        if (new Date() > REGISTRATION_END) {
+        // Block if registration period has ended (only if date is valid and set)
+        const regEndValid = REGISTRATION_END instanceof Date && !isNaN(REGISTRATION_END.getTime());
+        if (regEndValid && new Date() > REGISTRATION_END) {
           showFriendlyAlert(
             'O prazo de inscrições foi encerrado. Não é mais possível realizar inscrições neste processo seletivo.',
             { title: '⛔ Inscrições Encerradas', titleClass: 'text-danger' }
@@ -4671,6 +4686,54 @@
         updateUploadIndicator(input);
         input.addEventListener('change', () => updateUploadIndicator(input));
       });
+
+      document.querySelectorAll('[data-upload-card]').forEach((card) => {
+        const input = card.querySelector('.upload-input');
+        if (!input) return;
+
+        // Adiciona hint "ou arraste aqui" abaixo do botão
+        const btn = card.querySelector('.upload-button');
+        if (btn && !card.querySelector('.drag-hint')) {
+          const hint = document.createElement('p');
+          hint.className = 'drag-hint';
+          hint.textContent = 'ou arraste o arquivo aqui';
+          btn.insertAdjacentElement('afterend', hint);
+        }
+
+        ['dragenter', 'dragover'].forEach((evt) => {
+          card.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            card.classList.add('drag-over');
+          });
+        });
+
+        ['dragleave', 'dragend'].forEach((evt) => {
+          card.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            card.classList.remove('drag-over');
+          });
+        });
+
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          card.classList.remove('drag-over');
+          const files = e.dataTransfer?.files;
+          if (!files || !files.length) return;
+          try {
+            const dt = new DataTransfer();
+            dt.items.add(files[0]);
+            input.files = dt.files;
+          } catch (_) {
+            return;
+          }
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+          updateUploadIndicator(input);
+        });
+      });
+
       if (cepInput) {
         cepInput.addEventListener('input', handleCepInput);
       }
