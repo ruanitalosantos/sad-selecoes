@@ -1205,6 +1205,7 @@
                 <label for="nivel" class="form-label required">Nível</label>
                 <select id="nivel" name="nivel" class="form-select" data-prefill="{{ $json.nivel }}" required>
                   <option value="">Selecione...</option>
+                  <option value="Fundamental">Fundamental</option>
                   <option value="Médio">Médio</option>
                   <option value="Técnico">Técnico</option>
                   <option value="Superior">Superior</option>
@@ -1399,7 +1400,7 @@
           <div class="section-block">
             <h3 class="section-title">Cotas e necessidades especiais</h3>
             <div class="row g-3">
-              <div class="col-md-4">
+              <div class="col-md-4 hidden" id="ppniFieldGroup">
                 <label for="cotasPPNI" class="form-label required">Deseja concorrer às vagas PPNI?</label>
                 <select id="cotasPPNI" name="cotasPPNI" class="form-select" data-prefill="{{ $json.cotasPPNI }}" required>
                   <option value="">Selecione...</option>
@@ -3440,20 +3441,26 @@
       }
     };
 
-    const updatePPNI = () => {
-      const ppni = document.getElementById('cotasPPNI');
+    const updatePpniFieldVisibility = () => {
       const raca = document.getElementById('raca');
-      const racasPermitidas = ['preta', 'parda', 'indígena', 'indigena'];
-      const racaValida = raca && racasPermitidas.includes(raca.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''));
+      const ppniFieldGroup = document.getElementById('ppniFieldGroup');
+      const ppni = document.getElementById('cotasPPNI');
+      const racasPermitidas = ['preta', 'parda', 'indigena'];
+      const normalize = (v) => String(v || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const racaValida = raca && racasPermitidas.includes(normalize(raca.value));
 
-      if (ppni && ppni.value.toUpperCase() === 'SIM' && !racaValida) {
-        ppni.value = '';
-        showFriendlyAlert(
-          'A opção PPNI está disponível apenas para candidatos autodeclarados <strong>Pretos</strong>, <strong>Pardos</strong> ou <strong>Indígenas</strong>. Por favor, verifique o campo "Cor/Raça (IBGE)" na etapa de Identificação.',
-          { title: '⚠️ Opção indisponível' }
-        );
+      if (ppniFieldGroup) {
+        ppniFieldGroup.classList.toggle('hidden', !racaValida);
       }
 
+      if (!racaValida && ppni) {
+        ppni.value = '';
+        updatePPNI();
+      }
+    };
+
+    const updatePPNI = () => {
+      const ppni = document.getElementById('cotasPPNI');
       const isYes = ppni && ppni.value.toUpperCase() === 'SIM';
       const info = document.getElementById('ppniDocsInfo');
       const docsGroup = document.getElementById('docPpniGroup');
@@ -4363,6 +4370,8 @@
         .forEach((input) => input.addEventListener('change', updateCondicaoEspecial));
       const cotasSelect = document.getElementById('cotasPPNI');
       if (cotasSelect) cotasSelect.addEventListener('change', updatePPNI);
+      const racaSelect = document.getElementById('raca');
+      if (racaSelect) racaSelect.addEventListener('change', updatePpniFieldVisibility);
       const emailInput = document.getElementById('email');
       const emailConfirmInput = document.getElementById('email_confirm');
       if (emailInput) emailInput.addEventListener('input', validateEmailsMatch);
@@ -4416,6 +4425,7 @@
       updatePCD();
       requestAnimationFrame(() => updatePCD());
       updateCondicaoEspecial();
+      updatePpniFieldVisibility();
       updatePPNI();
       updateNacionalidadeRequirement();
 
