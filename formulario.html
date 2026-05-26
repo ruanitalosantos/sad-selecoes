@@ -1526,24 +1526,82 @@
                   <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
                 </div>
               </div>
-              <div class="col-sm-6 col-lg-4 hidden" id="docPpniGroup">
-                <div class="upload-card" data-upload-card>
-                  <div class="upload-emoji" aria-hidden="true">✊🏾</div>
-                  <p class="upload-title">Heteroidentificação (PPNI)</p>
-                  <p class="upload-instruction">Conforme edital. Anexe arquivo em PDF.</p>
-                  <input type="file" class="upload-input" id="doc_ppni" data-form-field="doc_ppni" accept=".pdf" data-force-required="true" aria-label="Documentação de Heteroidentificação" />
-                  <label class="upload-button" for="doc_ppni">Selecionar arquivo</label>
-                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+              <div class="col-12 hidden" id="docPpniGroup">
+                <div class="row g-3">
+                  <div class="col-sm-6 col-lg-4">
+                    <div class="upload-card" data-upload-card>
+                      <div class="upload-emoji" aria-hidden="true">📸</div>
+                      <p class="upload-title">Foto Frontal (PPNI)</p>
+                      <p class="upload-instruction">Foto do rosto de frente. Formatos aceitos: JPG, JPEG, PNG.</p>
+                      <input type="file" class="upload-input" id="doc_ppni_foto_frontal" data-form-field="doc_ppni_foto_frontal" accept=".jpg,.jpeg,.png" data-force-required="true" aria-label="Foto frontal para heteroidentificação" />
+                      <label class="upload-button" for="doc_ppni_foto_frontal">Selecionar arquivo</label>
+                      <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-lg-4">
+                    <div class="upload-card" data-upload-card>
+                      <div class="upload-emoji" aria-hidden="true">🤳</div>
+                      <p class="upload-title">Foto de Perfil (PPNI)</p>
+                      <p class="upload-instruction">Foto do rosto de perfil. Formatos aceitos: JPG, JPEG, PNG.</p>
+                      <input type="file" class="upload-input" id="doc_ppni_foto_perfil" data-form-field="doc_ppni_foto_perfil" accept=".jpg,.jpeg,.png" data-force-required="true" aria-label="Foto de perfil para heteroidentificação" />
+                      <label class="upload-button" for="doc_ppni_foto_perfil">Selecionar arquivo</label>
+                      <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-lg-4">
+                    <div class="upload-card" data-upload-card>
+                      <div class="upload-emoji" aria-hidden="true">🎥</div>
+                      <p class="upload-title">Vídeo de Autodeclaração (PPNI)</p>
+                      <p class="upload-instruction">Vídeo de autodeclaração racial. Formatos aceitos: MP4, MOV, WEBM.</p>
+                      <input type="file" class="upload-input" id="doc_ppni_video" data-form-field="doc_ppni_video" accept=".mp4,.mov,.webm" data-force-required="true" aria-label="Vídeo de autodeclaração para heteroidentificação" />
+                      <label class="upload-button" for="doc_ppni_video">Selecionar arquivo</label>
+                      <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-lg-4">
+                    <div class="upload-card" data-upload-card>
+                      <div class="upload-emoji" aria-hidden="true">📄</div>
+                      <p class="upload-title">Termo de Autodeclaração Racial (PPNI)</p>
+                      <p class="upload-instruction">Termo de autodeclaração racial assinado. Formato aceito: PDF.</p>
+                      <input type="file" class="upload-input" id="doc_ppni_termo" data-form-field="doc_ppni_termo" accept=".pdf" data-force-required="true" aria-label="Termo de autodeclaração racial assinado" />
+                      <label class="upload-button" for="doc_ppni_termo">Selecionar arquivo</label>
+                      <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-lg-4">
+                    <div class="upload-card" data-upload-card>
+                      <div class="upload-emoji" aria-hidden="true">🪪</div>
+                      <p class="upload-title">Foto RG Frente e Verso (PPNI)</p>
+                      <p class="upload-instruction">Foto do RG frente e verso em um único arquivo. Formato aceito: PDF.</p>
+                      <input type="file" class="upload-input" id="doc_ppni_rg" data-form-field="doc_ppni_rg" accept=".pdf" data-force-required="true" aria-label="Foto RG frente e verso para heteroidentificação" />
+                      <label class="upload-button" for="doc_ppni_rg">Selecionar arquivo</label>
+                      <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="col-sm-6 col-lg-4 hidden" id="docPcdGroup">
-                <div class="upload-card" data-upload-card>
-                  <div class="upload-emoji" aria-hidden="true">♿</div>
-                  <p class="upload-title">Laudo Médico (PCD)</p>
-                  <p class="upload-instruction">Conforme edital. Anexe arquivo em PDF.</p>
-                  <input type="file" class="upload-input" id="doc_pcd" data-form-field="doc_pcd" accept=".pdf" data-force-required="true" aria-label="Laudo Médico PCD" />
-                  <label class="upload-button" for="doc_pcd">Selecionar arquivo</label>
-                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+              <div class="col-12 hidden" id="docPcdGroup">
+                <div class="row g-3">
+                  <div class="col-sm-6 col-lg-4">
+                    <div class="upload-card" data-upload-card>
+                      <div class="upload-emoji" aria-hidden="true">📋</div>
+                      <p class="upload-title">Declaração de Deficiência</p>
+                      <p class="upload-instruction">Declaração comprobatória de deficiência. Formato aceito: PDF.</p>
+                      <input type="file" class="upload-input" id="doc_declaracao_deficiencia" data-form-field="doc_declaracao_deficiencia" accept=".pdf" data-force-required="true" aria-label="Declaração de deficiência" />
+                      <label class="upload-button" for="doc_declaracao_deficiencia">Selecionar arquivo</label>
+                      <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                    </div>
+                  </div>
+                  <div class="col-sm-6 col-lg-4">
+                    <div class="upload-card" data-upload-card>
+                      <div class="upload-emoji" aria-hidden="true">🏥</div>
+                      <p class="upload-title">Laudo Médico (especialista)</p>
+                      <p class="upload-instruction">Laudo médico emitido por especialista, contendo a caracterização da deficiência. Formato aceito: PDF.</p>
+                      <input type="file" class="upload-input" id="doc_laudo_medico_pcd" data-form-field="doc_laudo_medico_pcd" accept=".pdf" data-force-required="true" aria-label="Laudo médico especialista PCD" />
+                      <label class="upload-button" for="doc_laudo_medico_pcd">Selecionar arquivo</label>
+                      <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="col-sm-6 col-lg-4 hidden" id="docJuradoGroup">
@@ -2938,35 +2996,12 @@
     };
 
     const filterNivelOptions = () => {
+      // Todos os níveis são sempre exibidos — sem filtragem por cargos disponíveis
       if (!nivelSelect) return;
-      const dynamicLevelsMap = parseDynamicCargos();
-
-      // Sem dados dinâmicos ou tudo em 'TODOS' → mostra todas as opções
-      if (dynamicLevelsMap.size === 0) return;
-
-      const availableKeys = new Set(
-        Array.from(dynamicLevelsMap.keys()).filter(k => k !== 'TODOS')
-      );
-
-      // Se só existe 'TODOS', qualquer nível é válido
-      if (availableKeys.size === 0) return;
-
-      let selectionHidden = false;
       Array.from(nivelSelect.options).forEach((opt) => {
-        if (!opt.value) return; // preserva o placeholder
-        const norm = normalizeCargoValue(opt.value);
-        const visible = Array.from(availableKeys).some(
-          k => k === norm || k.includes(norm) || norm.includes(k)
-        );
-        opt.hidden = !visible;
-        opt.disabled = !visible;
-        if (!visible && nivelSelect.value === opt.value) selectionHidden = true;
+        opt.hidden = false;
+        opt.disabled = false;
       });
-
-      if (selectionHidden) {
-        nivelSelect.value = '';
-        nivelSelect.dispatchEvent(new Event('change', { bubbles: true }));
-      }
     };
 
     const filterCargoOptions = () => {
@@ -3273,6 +3308,15 @@
 
 
     const validateAndSubmit = () => {
+        // Block if registration period has ended
+        if (new Date() > REGISTRATION_END) {
+          showFriendlyAlert(
+            'O prazo de inscrições foi encerrado. Não é mais possível realizar inscrições neste processo seletivo.',
+            { title: '⛔ Inscrições Encerradas', titleClass: 'text-danger' }
+          );
+          return;
+        }
+
         // Check files in documentacao step (step-panel="4")
         const docTab = document.querySelector('[data-step-panel="4"]');
         const invalidFields = collectInvalidFields(docTab);
@@ -3402,23 +3446,39 @@
       if (!isYes) {
         if (group) group.querySelector('input').value = '';
         if (cid) cid.querySelector('input').value = '';
-        const docPcdInput = document.getElementById('doc_pcd');
-        if (docPcdInput) resetUploadIndicator(docPcdInput);
+        ['doc_declaracao_deficiencia', 'doc_laudo_medico_pcd'].forEach((id) => {
+          const input = document.getElementById(id);
+          if (input) resetUploadIndicator(input);
+        });
       }
     };
 
     const updatePPNI = () => {
       const ppni = document.getElementById('cotasPPNI');
+      const raca = document.getElementById('raca');
+      const racasPermitidas = ['preta', 'parda', 'indígena', 'indigena'];
+      const racaValida = raca && racasPermitidas.includes(raca.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''));
+
+      if (ppni && ppni.value.toUpperCase() === 'SIM' && !racaValida) {
+        ppni.value = '';
+        showFriendlyAlert(
+          'A opção PPNI está disponível apenas para candidatos autodeclarados <strong>Pretos</strong>, <strong>Pardos</strong> ou <strong>Indígenas</strong>. Por favor, verifique o campo "Cor/Raça (IBGE)" na etapa de Identificação.',
+          { title: '⚠️ Opção indisponível' }
+        );
+      }
+
       const isYes = ppni && ppni.value.toUpperCase() === 'SIM';
       const info = document.getElementById('ppniDocsInfo');
       const docsGroup = document.getElementById('docPpniGroup');
-      
+
       toggleHiddenGroup(isYes, info);
       toggleHiddenGroup(isYes, docsGroup);
-      
+
       if (!isYes && docsGroup) {
-        const docPpniInput = document.getElementById('doc_ppni');
-        if (docPpniInput) resetUploadIndicator(docPpniInput);
+        ['doc_ppni_foto_frontal', 'doc_ppni_foto_perfil', 'doc_ppni_video', 'doc_ppni_termo', 'doc_ppni_rg'].forEach((id) => {
+          const input = document.getElementById(id);
+          if (input) resetUploadIndicator(input);
+        });
       }
     };
 
@@ -3973,8 +4033,13 @@
             { label: 'Comprovante de residência', name: 'doc_residencia' },
             { label: 'Quitação eleitoral', name: 'doc_quitacao_eleitoral' },
             { label: 'Quitação militar', name: 'doc_militar' },
-            { label: 'Heteroidentificação (PPNI)', name: 'doc_ppni' },
-            { label: 'Laudo médico (PCD)', name: 'doc_pcd' },
+            { label: 'Foto frontal (PPNI)', name: 'doc_ppni_foto_frontal' },
+            { label: 'Foto de perfil (PPNI)', name: 'doc_ppni_foto_perfil' },
+            { label: 'Vídeo de autodeclaração (PPNI)', name: 'doc_ppni_video' },
+            { label: 'Termo de autodeclaração racial (PPNI)', name: 'doc_ppni_termo' },
+            { label: 'Foto RG frente e verso (PPNI)', name: 'doc_ppni_rg' },
+            { label: 'Declaração de deficiência (PCD)', name: 'doc_declaracao_deficiencia' },
+            { label: 'Laudo médico especialista (PCD)', name: 'doc_laudo_medico_pcd' },
             { label: 'Certificado de jurado(a)', name: 'doc_jurado' },
             { label: 'Requisitos Básicos de Escolaridade', name: 'doc_escolaridade' },
             { label: 'Comprovação de Titulação e Experiência Profissional', name: 'doc_curriculo' },
