@@ -2437,6 +2437,61 @@
       });
     }
 
+    // ── Verificação de período encerrado (escopo externo, executa sempre) ──
+    const checkRegistrationClosed = () => {
+      const regEndValid = REGISTRATION_END instanceof Date && !isNaN(REGISTRATION_END.getTime());
+      if (!regEndValid) return;
+      if (new Date() <= REGISTRATION_END) return;
+
+      const dateStr = new Date(
+        REGISTRATION_END.getFullYear(),
+        REGISTRATION_END.getMonth(),
+        REGISTRATION_END.getDate()
+      ).toLocaleDateString('pt-BR');
+
+      const dateEl = document.getElementById('closedRegistrationDate');
+      if (dateEl) dateEl.textContent = dateStr;
+
+      const modal = document.getElementById('closedRegistrationModal');
+      if (modal && typeof bootstrap !== 'undefined') {
+        new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false }).show();
+      }
+    };
+
+    // ── Verificação de inscrição existente (executa quando período está aberto) ──
+    const checkExistingInscricoes = async () => {
+      const regEndValid = REGISTRATION_END instanceof Date && !isNaN(REGISTRATION_END.getTime());
+      const now = new Date();
+      if (regEndValid && now > REGISTRATION_END) return;
+      if (!isNaN(REGISTRATION_START.getTime()) && now < REGISTRATION_START) return;
+
+      const cpf = document.getElementById('cpf')?.value?.trim();
+      if (!cpf) return;
+
+      try {
+        const response = await fetch(
+          'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-dados-raps',
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf }) }
+        );
+        const rawText = await response.text();
+        let data = null;
+        try { data = JSON.parse(rawText); } catch (_) {}
+        const items = Array.isArray(data) ? data : (data && typeof data === 'object' ? [data] : []);
+        if (!items.length) return;
+
+        const countEl = document.getElementById('existingInscricaoCount');
+        if (countEl) countEl.textContent = items.length;
+
+        const modal = document.getElementById('existingInscricaoModal');
+        if (modal && typeof bootstrap !== 'undefined') {
+          new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false }).show();
+        }
+      } catch (_) {}
+    };
+
+    checkRegistrationClosed();
+    checkExistingInscricoes();
+
     const especialidadeEntries = [];
     const normalizeEspecialidadeValue = (value) =>
       String(value || '')
@@ -5049,61 +5104,6 @@
       };
 
       checkRegistrationStatusRobust();
-
-      // Verifica se o período de inscrições já foi encerrado
-      const checkRegistrationClosed = () => {
-        const regEndValid = REGISTRATION_END instanceof Date && !isNaN(REGISTRATION_END.getTime());
-        if (!regEndValid) return;
-        if (new Date() <= REGISTRATION_END) return;
-
-        const dateStr = new Date(
-          REGISTRATION_END.getFullYear(),
-          REGISTRATION_END.getMonth(),
-          REGISTRATION_END.getDate()
-        ).toLocaleDateString('pt-BR');
-
-        const dateEl = document.getElementById('closedRegistrationDate');
-        if (dateEl) dateEl.textContent = dateStr;
-
-        const modal = document.getElementById('closedRegistrationModal');
-        if (modal && typeof bootstrap !== 'undefined') {
-          new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false }).show();
-        }
-      };
-
-      // Verifica se o candidato já possui inscrições (somente durante o período aberto)
-      const checkExistingInscricoes = async () => {
-        const regEndValid = REGISTRATION_END instanceof Date && !isNaN(REGISTRATION_END.getTime());
-        const now = new Date();
-        if (regEndValid && now > REGISTRATION_END) return;
-        if (!isNaN(REGISTRATION_START.getTime()) && now < REGISTRATION_START) return;
-
-        const cpf = document.getElementById('cpf')?.value?.trim();
-        if (!cpf) return;
-
-        try {
-          const response = await fetch(
-            'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-dados-raps',
-            { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf }) }
-          );
-          const rawText = await response.text();
-          let data = null;
-          try { data = JSON.parse(rawText); } catch (_) {}
-          const items = Array.isArray(data) ? data : (data && typeof data === 'object' ? [data] : []);
-          if (!items.length) return;
-
-          const countEl = document.getElementById('existingInscricaoCount');
-          if (countEl) countEl.textContent = items.length;
-
-          const modal = document.getElementById('existingInscricaoModal');
-          if (modal && typeof bootstrap !== 'undefined') {
-            new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false }).show();
-          }
-        } catch (_) {}
-      };
-
-      checkRegistrationClosed();
-      checkExistingInscricoes();
       showStep(0);
     } catch (error) {
       console.error('Erro ao inicializar o formulário', error);
