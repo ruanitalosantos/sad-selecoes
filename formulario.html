@@ -2495,8 +2495,6 @@
       } catch (_) {}
     };
 
-    checkRegistrationClosed();
-    checkExistingInscricoes();
 
     const especialidadeEntries = [];
     const normalizeEspecialidadeValue = (value) =>
@@ -5109,6 +5107,8 @@
       };
 
       checkRegistrationStatusRobust();
+      checkRegistrationClosed();
+      checkExistingInscricoes();
       showStep(0);
     } catch (error) {
       console.error('Erro ao inicializar o formulário', error);
