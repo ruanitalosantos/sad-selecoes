@@ -2267,6 +2267,11 @@
     const _terminoStr = (!_terminoRaw || _terminoRaw.startsWith('{{')) ? '' : _terminoRaw.substring(0, 10);
     const _todayStr = new Date().toISOString().substring(0, 10);
     const REGISTRATION_EXPIRED = !!_terminoStr && _todayStr > _terminoStr;
+    console.log('%c[SAD-Seleções] Verificação de prazo', 'color:#0053a4;font-weight:bold');
+    console.log('  termino_inscricoes (raw):', _terminoRaw);
+    console.log('  termino_inscricoes (str):', _terminoStr);
+    console.log('  hoje (str)             :', _todayStr);
+    console.log('  REGISTRATION_EXPIRED   :', REGISTRATION_EXPIRED);
     let countdownInterval;
     let hasSubmitted = false;
 
@@ -2451,18 +2456,28 @@
 
     // ── Verificação de período encerrado (escopo externo, executa sempre) ──
     const checkRegistrationClosed = () => {
-      if (!REGISTRATION_EXPIRED) return;
+      console.log('%c[SAD-Seleções] checkRegistrationClosed()', 'color:#c00;font-weight:bold');
+      console.log('  REGISTRATION_EXPIRED:', REGISTRATION_EXPIRED);
+      if (!REGISTRATION_EXPIRED) {
+        console.log('  → período ainda aberto, nada a fazer');
+        return;
+      }
 
-      // Formata a data de término para exibição (DD/MM/AAAA)
       const [y, m, d] = _terminoStr.split('-');
       const dateStr = `${d}/${m}/${y}`;
 
       const dateEl = document.getElementById('closedRegistrationDate');
+      console.log('  dateEl encontrado:', !!dateEl);
       if (dateEl) dateEl.textContent = dateStr;
 
       const modal = document.getElementById('closedRegistrationModal');
+      console.log('  modal encontrado:', !!modal);
+      console.log('  bootstrap disponível:', typeof bootstrap !== 'undefined');
       if (modal && typeof bootstrap !== 'undefined') {
+        console.log('  → exibindo modal de inscrições encerradas');
         new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false }).show();
+      } else {
+        console.warn('  ✗ modal ou bootstrap não disponível — não foi possível exibir o modal');
       }
     };
 
@@ -3496,14 +3511,18 @@
 
 
     const validateAndSubmit = () => {
+        console.log('%c[SAD-Seleções] validateAndSubmit()', 'color:#c00;font-weight:bold');
+        console.log('  REGISTRATION_EXPIRED:', REGISTRATION_EXPIRED);
         // Block if registration period has ended
         if (REGISTRATION_EXPIRED) {
+          console.log('  → bloqueando envio por prazo encerrado');
           showFriendlyAlert(
             'O prazo de inscrições foi encerrado. Não é mais possível realizar inscrições neste processo seletivo.',
             { title: '⛔ Inscrições Encerradas', titleClass: 'text-danger' }
           );
           return;
         }
+        console.log('  → prazo OK, prosseguindo com validação');
 
         // Check files in documentacao step (step-panel="4")
         const docTab = document.querySelector('[data-step-panel="4"]');
