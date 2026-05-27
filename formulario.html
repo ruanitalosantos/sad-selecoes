@@ -2257,11 +2257,16 @@
     const REGISTRATION_END = (() => {
       const raw = '{{ $json.termino_inscricoes }}';
       if (!raw || raw.startsWith('{{')) return new Date('invalid');
-      // Extrai só YYYY-MM-DD e cria fim do dia em horário local (sem conversão UTC)
       const dateOnly = raw.substring(0, 10);
       const d = new Date(dateOnly + 'T23:59:59');
       return isNaN(d.getTime()) ? new Date('invalid') : d;
     })();
+
+    // Comparação simples por string YYYY-MM-DD — não depende de fuso horário
+    const _terminoRaw = '{{ $json.termino_inscricoes }}';
+    const _terminoStr = (!_terminoRaw || _terminoRaw.startsWith('{{')) ? '' : _terminoRaw.substring(0, 10);
+    const _todayStr = new Date().toISOString().substring(0, 10);
+    const REGISTRATION_EXPIRED = !!_terminoStr && _todayStr > _terminoStr;
     let countdownInterval;
     let hasSubmitted = false;
 
@@ -2446,15 +2451,11 @@
 
     // ── Verificação de período encerrado (escopo externo, executa sempre) ──
     const checkRegistrationClosed = () => {
-      const regEndValid = REGISTRATION_END instanceof Date && !isNaN(REGISTRATION_END.getTime());
-      if (!regEndValid) return;
-      if (new Date() <= REGISTRATION_END) return;
+      if (!REGISTRATION_EXPIRED) return;
 
-      const dateStr = new Date(
-        REGISTRATION_END.getFullYear(),
-        REGISTRATION_END.getMonth(),
-        REGISTRATION_END.getDate()
-      ).toLocaleDateString('pt-BR');
+      // Formata a data de término para exibição (DD/MM/AAAA)
+      const [y, m, d] = _terminoStr.split('-');
+      const dateStr = `${d}/${m}/${y}`;
 
       const dateEl = document.getElementById('closedRegistrationDate');
       if (dateEl) dateEl.textContent = dateStr;
@@ -2467,10 +2468,8 @@
 
     // ── Verificação de inscrição existente (executa quando período está aberto) ──
     const checkExistingInscricoes = async () => {
-      const regEndValid = REGISTRATION_END instanceof Date && !isNaN(REGISTRATION_END.getTime());
-      const now = new Date();
-      if (regEndValid && now > REGISTRATION_END) return;
-      if (!isNaN(REGISTRATION_START.getTime()) && now < REGISTRATION_START) return;
+      if (REGISTRATION_EXPIRED) return;
+      if (!isNaN(REGISTRATION_START.getTime()) && new Date() < REGISTRATION_START) return;
 
       const cpf = document.getElementById('cpf')?.value?.trim();
       if (!cpf) return;
@@ -3499,9 +3498,8 @@
 
 
     const validateAndSubmit = () => {
-        // Block if registration period has ended (only if date is valid and set)
-        const regEndValid = REGISTRATION_END instanceof Date && !isNaN(REGISTRATION_END.getTime());
-        if (regEndValid && new Date() > REGISTRATION_END) {
+        // Block if registration period has ended
+        if (REGISTRATION_EXPIRED) {
           showFriendlyAlert(
             'O prazo de inscrições foi encerrado. Não é mais possível realizar inscrições neste processo seletivo.',
             { title: '⛔ Inscrições Encerradas', titleClass: 'text-danger' }
