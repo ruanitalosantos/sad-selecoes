@@ -4642,7 +4642,8 @@
     };
 
     const loadDraft = () => {
-      const raw = localStorage.getItem(storageKey);
+      let raw;
+      try { raw = localStorage.getItem(storageKey); } catch (_) { return; }
       if (!raw) return;
       try {
         const data = JSON.parse(raw);
