@@ -3047,11 +3047,15 @@
     const filterCargoOptions = () => {
       if (!cargoSelect) return;
       const dynamicLevelsMap = parseDynamicCargos();
-      
-      const nivelValue = nivelSelect ? (nivelSelect.value || nivelSelect.dataset.prefill || '') : '';
-      const normNivel = normalizeCargoValue(nivelValue);
-      
-      const combinedCargosMap = getBestCargoMap(dynamicLevelsMap, normNivel);
+
+      // Agrupa todos os cargos de todos os níveis sem filtrar por nível
+      const combinedCargosMap = new Map();
+      dynamicLevelsMap.forEach((cargoMap) => {
+        cargoMap.forEach((specs, cargo) => {
+          if (!combinedCargosMap.has(cargo)) combinedCargosMap.set(cargo, new Set());
+          specs.forEach(s => combinedCargosMap.get(cargo).add(s));
+        });
+      });
 
       const previousValue = cargoSelect.value || '';
       const previousNormalized = normalizeCargoValue(previousValue);
@@ -3108,11 +3112,13 @@
         }
 
         const dynamicLevelsMap = parseDynamicCargos();
-        const nivelValue = nivelSelect?.value || '';
-        const normNivel = normalizeCargoValue(nivelValue);
-        
-        const combinedCargosMap = getBestCargoMap(dynamicLevelsMap, normNivel);
-        const specialties = combinedCargosMap.get(cargoValue) || new Set();
+
+        // Coleta especialidades deste cargo em todos os níveis
+        const specialties = new Set();
+        dynamicLevelsMap.forEach((cargoMap) => {
+          const specs = cargoMap.get(cargoValue);
+          if (specs) specs.forEach(s => specialties.add(s));
+        });
         
         if (specialties.size > 0) {
             especialidadeGroup.classList.remove('d-none');
