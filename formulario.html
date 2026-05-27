@@ -4180,11 +4180,9 @@
 
         const items = Array.isArray(data)
           ? data
-          : (data && typeof data === 'object' && !Array.isArray(data) ? [data] : []);
+          : (data && typeof data === 'object' ? [data] : []);
 
-        const validItems = items.filter((item) => item && typeof item === 'object' && item.inscricao);
-
-        if (!validItems.length) {
+        if (!items.length) {
           if (emptyEl) emptyEl.classList.remove('hidden');
           return;
         }
@@ -4193,9 +4191,9 @@
         if (resultsEl) {
           const count = document.createElement('p');
           count.className = 'text-muted mb-3';
-          count.textContent = `${validItems.length} inscrição(ões) encontrada(s).`;
+          count.textContent = `${items.length} inscrição(ões) encontrada(s).`;
           resultsEl.appendChild(count);
-          validItems.forEach((item, i) => resultsEl.appendChild(buildResumoCard(item, i)));
+          items.forEach((item, i) => resultsEl.appendChild(buildResumoCard(item, i)));
         }
       } catch (error) {
         if (loadingEl) loadingEl.classList.add('hidden');
