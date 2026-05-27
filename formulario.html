@@ -2214,6 +2214,13 @@
     };
     sanitizePlaceholders();
 
+    // Redireciona se o nome do usuário não estiver disponível (sessão inválida ou não autenticado)
+    const _nomeField = document.getElementById('nome');
+    const _nomeValue = (_nomeField?.value || '').trim();
+    if (!_nomeValue || isRawTemplate(_nomeValue)) {
+      window.location.replace('https://sad.recife.pe.gov.br/selecoes');
+    }
+
     const form = document.getElementById('inscricaoForm');
     const wizardSteps = Array.from(document.querySelectorAll('.wizard-step'));
     const stepPanels = Array.from(document.querySelectorAll('[data-step-panel]'));
