@@ -5127,9 +5127,14 @@
       };
 
       checkRegistrationStatusRobust();
-      checkRegistrationClosed();
-      checkExistingInscricoes();
       showStep(0);
+
+      // Bootstrap ainda não está carregado neste ponto — aguarda window.load
+      window.addEventListener('load', () => {
+        console.log('%c[SAD-Seleções] window.load — bootstrap disponível:', 'color:#0053a4;font-weight:bold', typeof bootstrap !== 'undefined');
+        checkRegistrationClosed();
+        checkExistingInscricoes();
+      });
     } catch (error) {
       console.error('Erro ao inicializar o formulário', error);
     }
