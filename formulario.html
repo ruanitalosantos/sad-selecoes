@@ -2008,19 +2008,19 @@
   <div class="modal fade" id="preRegistrationModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
     data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">⏰ Inscrições ainda não abertas</h5>
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="modal-header border-0 p-4 pb-0">
+          <h5 class="modal-title fw-bold">⏰ Inscrições ainda não abertas</h5>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-4 text-center">
           <div class="emoji-bounce">⏳</div>
           <p class="modal-message">As inscrições para este processo seletivo ainda não
             estão abertas.</p>
           <p class="modal-message"><strong>Abertura em:</strong></p>
           <div class="countdown-display" id="preRegCountdown">Carregando...</div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="closePreRegModal">Fechar</button>
+        <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
+          <button type="button" class="btn btn-primary px-4" id="closePreRegModal">Fechar</button>
         </div>
       </div>
     </div>
@@ -2029,17 +2029,17 @@
   <!-- Modal: Inscrições encerradas -->
   <div class="modal fade" id="closedRegistrationModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header border-0 pb-0">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="modal-header border-0 p-4 pb-0">
           <h5 class="modal-title fw-bold text-danger">⛔ Inscrições Encerradas</h5>
         </div>
-        <div class="modal-body text-center py-4">
+        <div class="modal-body p-4 text-center">
           <div style="font-size:3rem">📋</div>
           <p class="mt-3 mb-1">As inscrições foram encerradas no dia</p>
           <p class="fw-bold fs-5 mb-2" id="closedRegistrationDate"></p>
           <p class="text-muted small">Você ainda pode consultar suas inscrições na aba <strong>Resumo</strong>.</p>
         </div>
-        <div class="modal-footer border-0 justify-content-center">
+        <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
           <button type="button" class="btn btn-primary px-5" id="btnClosedRegistrationOk">OK</button>
         </div>
       </div>
@@ -2049,18 +2049,18 @@
   <!-- Modal: Já possui inscrição -->
   <div class="modal fade" id="existingInscricaoModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header border-0 pb-0">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="modal-header border-0 p-4 pb-0">
           <h5 class="modal-title fw-bold">📋 Inscrição já realizada</h5>
         </div>
-        <div class="modal-body text-center py-4">
+        <div class="modal-body p-4 text-center">
           <div style="font-size:3rem">✅</div>
           <p class="mt-3">Você já possui <strong><span id="existingInscricaoCount">1</span> inscrição(ões)</strong> cadastrada(s) neste processo seletivo.</p>
           <p class="text-muted small">Deseja realizar uma nova inscrição ou consultar as existentes?</p>
         </div>
-        <div class="modal-footer border-0 justify-content-center gap-2 flex-wrap">
-          <button type="button" class="btn btn-outline-secondary" id="btnNovaInscricao">Realizar nova inscrição</button>
-          <button type="button" class="btn btn-primary" id="btnVerInscricoes">Ver minhas inscrições</button>
+        <div class="modal-footer border-0 p-4 pt-0 justify-content-center gap-2 flex-wrap">
+          <button type="button" class="btn btn-outline-secondary px-4" id="btnNovaInscricao">Realizar nova inscrição</button>
+          <button type="button" class="btn btn-primary px-4" id="btnVerInscricoes">Ver minhas inscrições</button>
         </div>
       </div>
     </div>
@@ -2069,14 +2069,14 @@
   <div class="modal fade" id="friendlyAlert" tabindex="-1" aria-hidden="true">
 
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="friendlyAlertTitle">Aviso!</h5>
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="modal-header border-0 p-4 pb-0">
+          <h5 class="modal-title fw-bold" id="friendlyAlertTitle">Aviso!</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
-        <div class="modal-body" id="friendlyAlertMessage"></div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendi</button>
+        <div class="modal-body p-4 text-center" id="friendlyAlertMessage"></div>
+        <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
+          <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Entendi</button>
         </div>
       </div>
     </div>
