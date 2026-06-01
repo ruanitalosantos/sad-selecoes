@@ -4247,7 +4247,8 @@
       const h5 = document.createElement('h5');
       h5.className = 'mb-1 fw-bold text-primary';
       h5.textContent = item.inscricao ? `Inscrição Nº ${item.inscricao}` : `Inscrição ${index + 1}`;
-      if (item.nota != null && item.nota !== '') {
+      const notaNum = Number(item.nota);
+      if (item.nota != null && item.nota !== '' && !isNaN(notaNum) && notaNum > 0) {
         const badge = document.createElement('span');
         badge.className = 'badge bg-primary ms-2';
         badge.textContent = `Nota: ${item.nota}`;
