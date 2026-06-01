@@ -4147,13 +4147,13 @@
       descricaoformaca:    { label: 'Descrição formação',           group: 'Avaliação' },
     };
 
-    const RESUMO_GROUP_ORDER = ['Identificação', 'Documentos', 'Contato e Endereço', 'Profissional', 'Inclusão', 'Avaliação'];
+    const RESUMO_GROUP_ORDER = ['Identificação', 'Documentos', 'Contato e Endereço', 'Profissional', 'Inclusão'];
 
     const formatResumoValue = (value, type) => {
       if (value === null || value === undefined) return null;
       if (type === 'number') {
         const num = Number(value);
-        if (value === '' || isNaN(num)) return null;
+        if (value === '' || isNaN(num) || num === 0) return null;
         return String(num);
       }
       const str = String(value).trim();
