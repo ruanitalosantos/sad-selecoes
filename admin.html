@@ -4866,28 +4866,35 @@
                 const numCapsi = document.getElementById('num_semestres_capsi');
                 const numPsic = document.getElementById('num_semestres_psic');
 
-                const isAprovadoCurriculo = e.analisecurricular === "Sim" || e.julcurricular === "Sim";
-                const isRejeitadoCurriculo = e.analisecurricular === "Não" || e.analisecurricular === "Nao" || e.julcurricular === "Não" || e.julcurricular === "Nao";
+                if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
+                    const isAprovadoCurriculo = e.analisecurricular === "Sim" || e.julcurricular === "Sim";
+                    const isRejeitadoCurriculo = e.analisecurricular === "Não" || e.analisecurricular === "Nao" || e.julcurricular === "Não" || e.julcurricular === "Nao";
 
-                acatarCurriculoSwitch.checked = isAprovadoCurriculo;
-                acatarCurriculoSwitch.disabled = isReadOnly;
-                justCurriculoText.disabled = isReadOnly;
+                    acatarCurriculoSwitch.checked = isAprovadoCurriculo;
+                    acatarCurriculoSwitch.disabled = isReadOnly;
+                    justCurriculoText.disabled = isReadOnly;
 
-                justCurriculoText.value = e.justificativacurricular || e.justificativa_curricular || '';
-                
-                document.getElementById('wrapper-justificativa-curriculo').style.display = (!isAprovadoCurriculo && isRejeitadoCurriculo) || (acatarCurriculoSwitch.checked === false && justCurriculoText.value !== '') ? 'block' : 'none';
+                    justCurriculoText.value = e.justificativacurricular || e.justificativa_curricular || '';
+                    
+                    const wrapperCurriculo = document.getElementById('wrapper-justificativa-curriculo');
+                    if (wrapperCurriculo) {
+                        wrapperCurriculo.style.display = (!isAprovadoCurriculo && isRejeitadoCurriculo) || (acatarCurriculoSwitch.checked === false && justCurriculoText.value !== '') ? 'block' : 'none';
+                    }
 
-                selFormacao.value = e.pontuacao_formacao || "0";
-                selFormacao.disabled = isReadOnly;
+                    selFormacao.value = e.pontuacao_formacao || "0";
+                    selFormacao.disabled = isReadOnly;
 
-                numCapsi.value = e.semestres_capsi || "0";
-                numCapsi.disabled = isReadOnly;
+                    numCapsi.value = e.semestres_capsi || "0";
+                    numCapsi.disabled = isReadOnly;
 
-                numPsic.value = e.semestres_psic || "0";
-                numPsic.disabled = isReadOnly;
+                    numPsic.value = e.semestres_psic || "0";
+                    numPsic.disabled = isReadOnly;
 
-                toggleCriteriosPontuacao();
-                updatePontuacaoCurricular();
+                    toggleCriteriosPontuacao();
+                    updatePontuacaoCurricular();
+                } else {
+                    console.warn('Alguns elementos da validação de análise curricular não foram encontrados no DOM.');
+                }
             } else {
                 // Outros (Critérios Humanos de PCD e PPNI)
                 if (cardHuman) cardHuman.style.display = 'block';
@@ -5076,8 +5083,48 @@
                 // 1. Extrair os dados ricos do candidato (primeiro elemento) e preencher no modal
                 const richData = docs[0];
                 if (richData) {
+                    const tempAnalyst = e.analista;
                     Object.assign(e, richData);
+                    if (!e.analista && tempAnalyst) e.analista = tempAnalyst;
+
                     updateCandidateDetailsUI(e);
+
+                    if (resolvedSourceTab === "humano") {
+                        const acatarCurriculoSwitch = document.getElementById('val_acatar_curriculo');
+                        const justCurriculoText = document.getElementById('just_acatar_curriculo');
+                        const selFormacao = document.getElementById('sel_pontuacao_formacao');
+                        const numCapsi = document.getElementById('num_semestres_capsi');
+                        const numPsic = document.getElementById('num_semestres_psic');
+
+                        if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
+                            const isAprovadoCurriculo = e.analisecurricular === "Sim" || e.julcurricular === "Sim";
+                            const isRejeitadoCurriculo = e.analisecurricular === "Não" || e.analisecurricular === "Nao" || e.julcurricular === "Não" || e.julcurricular === "Nao";
+
+                            acatarCurriculoSwitch.checked = isAprovadoCurriculo;
+                            acatarCurriculoSwitch.disabled = isReadOnly;
+                            justCurriculoText.disabled = isReadOnly;
+
+                            justCurriculoText.value = e.justificativacurricular || e.justificativa_curricular || '';
+                            
+                            const wrapperCurriculo = document.getElementById('wrapper-justificativa-curriculo');
+                            if (wrapperCurriculo) {
+                                wrapperCurriculo.style.display = (!isAprovadoCurriculo && isRejeitadoCurriculo) || (acatarCurriculoSwitch.checked === false && justCurriculoText.value !== '') ? 'block' : 'none';
+                            }
+
+                            selFormacao.value = e.pontuacao_formacao || "0";
+                            selFormacao.disabled = isReadOnly;
+
+                            numCapsi.value = e.semestres_capsi || "0";
+                            numCapsi.disabled = isReadOnly;
+
+                            numPsic.value = e.semestres_psic || "0";
+                            numPsic.disabled = isReadOnly;
+
+                            toggleCriteriosPontuacao();
+                            updatePontuacaoCurricular();
+                        }
+                    }
+
                     if (typeof updateLocalScore === 'function') {
                         updateLocalScore();
                     }
