@@ -2527,7 +2527,25 @@
                         categoria: item.categoria || item.cargo || ''
                     };
                 });
-                allEnrollments = normalized.filter(item => item.cpf && item.nomecompleto);
+                const uniqueByCPF = new Map();
+                normalized.forEach(item => {
+                    if (!item.cpf || !item.nomecompleto) return;
+                    const cpfClean = String(item.cpf).replace(/\D/g, '');
+                    if (!cpfClean) return;
+
+                    const dateVal = new Date(item.created_at || 0).getTime() || 0;
+                    
+                    if (!uniqueByCPF.has(cpfClean)) {
+                        uniqueByCPF.set(cpfClean, item);
+                    } else {
+                        const existing = uniqueByCPF.get(cpfClean);
+                        const existingDateVal = new Date(existing.created_at || 0).getTime() || 0;
+                        if (dateVal > existingDateVal) {
+                            uniqueByCPF.set(cpfClean, item);
+                        }
+                    }
+                });
+                allEnrollments = Array.from(uniqueByCPF.values());
                 updateDashboard();
 
                 if (isMobile()) {
