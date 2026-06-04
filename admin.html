@@ -4718,14 +4718,33 @@
                     isReadOnly = (e.analista !== me);
                     currentLock = isReadOnly ? `Esta inscrição está sendo analisada por: ${e.analista}` : "";
                 } else {
-                    // Atribuição automática direta conforme solicitado pelo usuário
-                    const success = await updateAnalystOnServer(e.inscricao, me);
-                    if (!success) {
-                        console.warn('Não foi possível atribuir esta inscrição no servidor, mas a análise continuará localmente para fins de teste.');
+                    // Inscrição Livre: Perguntar
+                    const result = await Swal.fire({
+                        title: 'Como deseja prosseguir?',
+                        text: "Esta inscrição não está atribuída a nenhum analista no momento.",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#0046ad',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="fas fa-user-edit me-2"></i> Atribuir para mim',
+                        cancelButtonText: '<i class="fas fa-eye me-2"></i> Apenas visualizar',
+                        reverseButtons: true
+                    });
+
+                    if (result.isConfirmed) {
+                        const success = await updateAnalystOnServer(e.inscricao, me);
+                        if (!success) {
+                            console.warn('Não foi possível atribuir esta inscrição no servidor, mas a análise continuará localmente.');
+                        }
+                        e.analista = me;
+                        isReadOnly = false;
+                        renderDataForTab(window.currentTab || 'inicio');
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        isReadOnly = true;
+                        currentLock = "Visualização da Inscrição (Modo Somente Leitura)";
+                    } else {
+                        return; // Se fechar fora do Swal, cancela a abertura do modal
                     }
-                    e.analista = me;
-                    isReadOnly = false;
-                    renderDataForTab(window.currentTab || 'inicio');
                 }
             } else if (isRestricted) {
                 isReadOnly = true;
