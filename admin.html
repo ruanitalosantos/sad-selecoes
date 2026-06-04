@@ -5415,8 +5415,17 @@
             };
 
             window.updatePontuacaoCurricular = () => {
-                const numCapsi = parseInt(document.getElementById('num_semestres_capsi').value) || 0;
-                const numPsic = parseInt(document.getElementById('num_semestres_psic').value) || 0;
+                let numCapsi = parseInt(document.getElementById('num_semestres_capsi').value) || 0;
+                let numPsic = parseInt(document.getElementById('num_semestres_psic').value) || 0;
+                
+                if (numCapsi < 0 || numCapsi > 6) {
+                    numCapsi = Math.max(0, Math.min(6, numCapsi));
+                    document.getElementById('num_semestres_capsi').value = numCapsi;
+                }
+                if (numPsic < 0 || numPsic > 6) {
+                    numPsic = Math.max(0, Math.min(6, numPsic));
+                    document.getElementById('num_semestres_psic').value = numPsic;
+                }
                 
                 const ptsCapsi = numCapsi * 5;
                 const ptsPsic = numPsic * 5;
@@ -5550,6 +5559,7 @@
                         pontuacao_formacao: ptsFormacao,
                         semestres_capsi: semestresCapsi,
                         semestres_psic: semestresPsic,
+                        pontuacao_experiencia: ptsExperiencia,
                         nota_total: scoreFinalCurricular,
                         score_final: scoreFinalCurricular,
                         inscricao: e.inscricao,
@@ -7008,13 +7018,13 @@
                                         
                                         <div class="col-md-6">
                                             <label class="small text-muted mb-1" for="num_semestres_capsi">Semestres em CAPSi</label>
-                                            <input type="number" id="num_semestres_capsi" class="form-control" min="0" value="0" oninput="updatePontuacaoCurricular()">
+                                            <input type="number" id="num_semestres_capsi" class="form-control" min="0" max="6" value="0" oninput="updatePontuacaoCurricular()">
                                             <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_capsi" class="fw-semibold text-primary">0</span></div>
                                         </div>
                                         
                                         <div class="col-md-6">
                                             <label class="small text-muted mb-1" for="num_semestres_psic">Semestres em Assistência em Psiquiatria da infância e adolescência</label>
-                                            <input type="number" id="num_semestres_psic" class="form-control" min="0" value="0" oninput="updatePontuacaoCurricular()">
+                                            <input type="number" id="num_semestres_psic" class="form-control" min="0" max="6" value="0" oninput="updatePontuacaoCurricular()">
                                             <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_psic" class="fw-semibold text-primary">0</span></div>
                                         </div>
                                     </div>
