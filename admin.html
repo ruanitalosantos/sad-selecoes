@@ -1686,8 +1686,8 @@
                                 <th>CPF LGPD</th>
                                 <th>Categoria</th>
                                 <th>Status Doc.</th>
-                                <th>Cotas PPNI</th>
-                                <th>PCD</th>
+                                <th>Formação</th>
+                                <th>Experiência</th>
                                 <th>Total</th>
                                 <th>Ações</th>
                             </tr>
@@ -3792,8 +3792,8 @@
                             <td class="font-monospace small text-muted">${maskCPF(e.cpf)}</td>
                             <td><span class="badge bg-primary bg-opacity-75">${formatCategoria(e.categoria) || '---'}</span></td>
                             <td><span class="badge ${badgeClass}">${statusDoc}</span></td>
-                            <td>${scores.base}</td>
-                            <td>${scores.human}</td>
+                            <td>${scores.formacao}</td>
+                            <td>${scores.experiencia}</td>
                             <td class="fw-bold">${scores.total}</td>
                             <td><button class="btn btn-outline-primary btn-sm" onclick="openAnalyzer('${e.id_cadastro || e.idcadastro}', true)" title="Visualizar Inscrição"><i class="fas fa-eye"></i></button></td>
                         </tr>
@@ -4541,17 +4541,17 @@
         // renderBadges is defined earlier in the file.
 
         function calculateDetailedPoints(e) {
-            let base = 0;
-            let human = 0;
+            const formacao = parseInt(e.pontuacao_formacao) || 0;
+            const experiencia = parseInt(e.pontuacao_experiencia) || 0;
+            const total = Math.min(100, formacao + experiencia);
 
-            // 1. Cotas PPNI (20 pts)
-            const racaVal = (e.racacor || '').toUpperCase();
-            if (isSim(e.cotas_ppni) || racaVal.includes('PRETA') || racaVal.includes('PARDA') || racaVal.includes('NEGRA') || racaVal.includes('INDIGENA')) base += 20;
-
-            // 2. PCD (20 pts)
-            if (isSim(e.pcd) || isSim(e.is_pcd)) human += 20;
-
-            return { base, human, total: base + human };
+            return { 
+                formacao, 
+                experiencia, 
+                total,
+                base: formacao, // retrocompatibilidade
+                human: experiencia // retrocompatibilidade
+            };
         }
 
         function calculatePoints(e) {
@@ -4718,32 +4718,14 @@
                     isReadOnly = (e.analista !== me);
                     currentLock = isReadOnly ? `Esta inscrição está sendo analisada por: ${e.analista}` : "";
                 } else {
-                    // Inscrição Livre: Perguntar
-                    const result = await Swal.fire({
-                        title: 'Como deseja prosseguir?',
-                        text: "Esta inscrição não está atribuída a nenhum analista no momento.",
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#0046ad',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: '<i class="fas fa-user-edit me-2"></i> Atribuir para mim',
-                        cancelButtonText: '<i class="fas fa-eye me-2"></i> Apenas visualizar',
-                        reverseButtons: true
-                    });
-
-                    if (result.isConfirmed) {
-                        const success = await updateAnalystOnServer(e.inscricao, me);
-                        if (success) {
-                            e.analista = me;
-                            isReadOnly = false;
-                            renderDataForTab(window.currentTab || 'inicio');
-                        } else {
-                            Swal.fire('Erro', 'Não foi possível atribuir esta inscrição.', 'error');
-                            return;
-                        }
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        isReadOnly = true;
+                    // Atribuição automática direta conforme solicitado pelo usuário
+                    const success = await updateAnalystOnServer(e.inscricao, me);
+                    if (success) {
+                        e.analista = me;
+                        isReadOnly = false;
+                        renderDataForTab(window.currentTab || 'inicio');
                     } else {
+                        Swal.fire('Erro', 'Não foi possível atribuir esta inscrição automaticamente.', 'error');
                         return;
                     }
                 }
@@ -4843,20 +4825,24 @@
                 return 0;
             };
 
-            // 3. Alternar visibilidade de cards conforme atividade
+            // 3. Alternar visibilidade de cards conforme atividade e aba de origem
             const cardDoc = document.getElementById('card-homologacao-documental');
             const cardHuman = document.getElementById('card-criterios-humanos');
+            const cardAnaliseCurricular = document.getElementById('card-analise-curricular');
             const cardRecursos = document.getElementById('card-analise-recursos');
             const sidebarPoints = document.querySelector('.col-lg-4');
 
+            // Ocultar todos por padrão
+            if (cardDoc) cardDoc.style.display = 'none';
+            if (cardHuman) cardHuman.style.display = 'none';
+            if (cardAnaliseCurricular) cardAnaliseCurricular.style.display = 'none';
+            if (cardRecursos) cardRecursos.style.display = 'none';
+
             if (e.atividade_habilitada === "ATV-007" || e.atividade_habilitada === "ATV-010") {
-                if (cardDoc) cardDoc.style.display = 'none';
-                if (cardHuman) cardHuman.style.display = 'none';
+                if (cardRecursos) cardRecursos.style.display = 'block';
                 if (sidebarPoints) sidebarPoints.style.display = 'block';
             } else if (e.atividade_habilitada === "ATV-001" || resolvedSourceTab === "resultado_homologacao" || resolvedSourceTab === "homologacao") {
                 if (cardDoc) cardDoc.style.display = 'block';
-                if (cardHuman) cardHuman.style.display = 'none';
-                if (cardRecursos) cardRecursos.style.display = 'none';
                 if (sidebarPoints) sidebarPoints.style.display = 'block';
 
                 const acatarSwitch = document.getElementById('val_acatar_inscricao');
@@ -4871,10 +4857,42 @@
                 justDocText.disabled = isReadOnly;
 
                 document.getElementById('wrapper-justificativa-doc').style.display = (acatarSwitch.checked) ? 'none' : 'block';
+            } else if (resolvedSourceTab === "humano") {
+                // Análise Curricular
+                if (cardAnaliseCurricular) cardAnaliseCurricular.style.display = 'block';
+                if (sidebarPoints) sidebarPoints.style.display = 'block';
+
+                const acatarCurriculoSwitch = document.getElementById('val_acatar_curriculo');
+                const justCurriculoText = document.getElementById('just_acatar_curriculo');
+                const selFormacao = document.getElementById('sel_pontuacao_formacao');
+                const numCapsi = document.getElementById('num_semestres_capsi');
+                const numPsic = document.getElementById('num_semestres_psic');
+
+                const isAprovadoCurriculo = e.analisecurricular === "Sim" || e.julcurricular === "Sim";
+                const isRejeitadoCurriculo = e.analisecurricular === "Não" || e.analisecurricular === "Nao" || e.julcurricular === "Não" || e.julcurricular === "Nao";
+
+                acatarCurriculoSwitch.checked = isAprovadoCurriculo;
+                acatarCurriculoSwitch.disabled = isReadOnly;
+                justCurriculoText.disabled = isReadOnly;
+
+                justCurriculoText.value = e.justificativacurricular || e.justificativa_curricular || '';
+                
+                document.getElementById('wrapper-justificativa-curriculo').style.display = (!isAprovadoCurriculo && isRejeitadoCurriculo) || (acatarCurriculoSwitch.checked === false && justCurriculoText.value !== '') ? 'block' : 'none';
+
+                selFormacao.value = e.pontuacao_formacao || "0";
+                selFormacao.disabled = isReadOnly;
+
+                numCapsi.value = e.semestres_capsi || "0";
+                numCapsi.disabled = isReadOnly;
+
+                numPsic.value = e.semestres_psic || "0";
+                numPsic.disabled = isReadOnly;
+
+                toggleCriteriosPontuacao();
+                updatePontuacaoCurricular();
             } else {
-                if (cardDoc) cardDoc.style.display = 'none';
+                // Outros (Critérios Humanos de PCD e PPNI)
                 if (cardHuman) cardHuman.style.display = 'block';
-                if (cardRecursos) cardRecursos.style.display = 'none';
                 if (sidebarPoints) sidebarPoints.style.display = 'block';
             }
 
@@ -4907,10 +4925,14 @@
             `;
             };
 
-            valTableBody.innerHTML = `
-                ${renderRow('Cotas PPNI', e.cotas_ppni || 'Não', 'Pretos, Pardos, Negros e Indígenas (20 pts)', 'p_cotas_ppni', 'val_cotas_ppni', isSim(e.cotas_ppni))}
-                ${renderRow('PCD', e.is_pcd || e.pcd || 'Não', 'Pessoa com Deficiência (20 pts)', 'p_is_pcd', 'val_is_pcd', isSim(e.is_pcd) || isSim(e.pcd))}
-            `;
+            if (resolvedSourceTab !== "humano" && valTableBody) {
+                valTableBody.innerHTML = `
+                    ${renderRow('Cotas PPNI', e.cotas_ppni || 'Não', 'Pretos, Pardos, Negros e Indígenas (20 pts)', 'p_cotas_ppni', 'val_cotas_ppni', isSim(e.cotas_ppni))}
+                    ${renderRow('PCD', e.is_pcd || e.pcd || 'Não', 'Pessoa com Deficiência (20 pts)', 'p_is_pcd', 'val_is_pcd', isSim(e.is_pcd) || isSim(e.pcd))}
+                `;
+            } else if (valTableBody) {
+                valTableBody.innerHTML = '';
+            }
 
             // Desabilitar inputs se for somente leitura
             if (isReadOnly) {
@@ -5267,8 +5289,28 @@
 
             // 2. Lógica de Pontuação e Atualização
             const updateLocalScore = () => {
-                const scores = calculateDetailedPoints(e);
-                let totalManual = 0;
+                let formacao = 0;
+                let experiencia = 0;
+
+                const isCurricularTab = (resolvedSourceTab === "humano");
+
+                if (isCurricularTab) {
+                    const acatarCheck = document.getElementById('val_acatar_curriculo');
+                    if (acatarCheck && acatarCheck.checked) {
+                        formacao = parseInt(document.getElementById('sel_pontuacao_formacao').value) || 0;
+                        
+                        const numCapsi = parseInt(document.getElementById('num_semestres_capsi').value) || 0;
+                        const numPsic = parseInt(document.getElementById('num_semestres_psic').value) || 0;
+                        
+                        experiencia = (numCapsi * 5) + (numPsic * 5);
+                        experiencia = Math.min(30, experiencia);
+                    }
+                } else {
+                    formacao = parseInt(e.pontuacao_formacao) || 0;
+                    experiencia = parseInt(e.pontuacao_experiencia) || 0;
+                }
+
+                const total = Math.min(100, formacao + experiencia);
 
                 const setScoreUI = (id, points, max) => {
                     const el = document.getElementById(id);
@@ -5282,52 +5324,43 @@
                     }
                 };
 
-                // --- Automáticos (Sincronizados com motor de cálculo) ---
-                const racaVal = (e.racacor || '').toUpperCase();
-                setScoreUI('s_raca', (racaVal.includes('PRETA') || racaVal.includes('PARDA') || racaVal.includes('NEGRA') || racaVal.includes('INDIGENA')) ? 20 : 0, 20);
-                setScoreUI('s_pcd', isSim(e.pcd) ? 20 : 0, 20);
-                setScoreUI('s_mulher', isSim(e.mulherchefe) ? 15 : 0, 15);
-
-                const perCapita = parseFloat(e.rendapercapita) || 9999;
-                let ptsRenda = (perCapita <= 218) ? 20 : (perCapita <= 706 ? 10 : 5);
-                setScoreUI('s_renda', ptsRenda, 20);
-
-                const comp = parseInt(e.qtdmembrosfamilia || e.composicaofamiliar || e.compfamilar) || 0;
-                let ptsFam = (comp >= 7) ? 20 : (comp >= 4 ? 10 : (comp >= 3 ? 5 : 0));
-                setScoreUI('s_familia', ptsFam, 20);
-
-                const hasNoFormalWork = isSim(e.semtrabalhoformal) || isNao(e.trabalho_formal) || isNao(e.trabalhoformal) || isNao(e.situacaotrabalho);
-                setScoreUI('s_trabalho', hasNoFormalWork ? 15 : 0, 15);
-
-                // --- Manuais (Validados via switches) ---
-                const valPpni = document.getElementById('val_cotas_ppni') ? document.getElementById('val_cotas_ppni').checked : false;
-                const valPcd = document.getElementById('val_is_pcd') ? document.getElementById('val_is_pcd').checked : false;
-
-                const updateRowUI = (switchId) => {
-                    const sw = document.getElementById(switchId);
-                    const just = document.getElementById('just_' + switchId);
-                    if (sw && just) {
-                        const showJust = !sw.disabled && !sw.checked;
-                        just.style.display = showJust ? 'block' : 'none';
-                        just.required = showJust;
-                    }
-                };
-
-                if (document.getElementById('p_cotas_ppni')) document.getElementById('p_cotas_ppni').innerText = valPpni ? '20' : '0';
-                updateRowUI('val_cotas_ppni');
-                if (document.getElementById('p_is_pcd')) document.getElementById('p_is_pcd').innerText = valPcd ? '20' : '0';
-                updateRowUI('val_is_pcd');
-
-                setScoreUI('s_raca', valPpni ? 20 : 0, 20);
-                setScoreUI('s_pcd', valPcd ? 20 : 0, 20);
-
-                const finalTotal = (valPpni ? 20 : 0) + (valPcd ? 20 : 0);
-                document.getElementById('s_total').innerText = `${finalTotal} / 40`;
+                setScoreUI('s_formacao', formacao, 70);
+                setScoreUI('s_experiencia', experiencia, 30);
+                
+                const totalEl = document.getElementById('s_total');
+                if (totalEl) totalEl.innerText = `${total} / 100`;
             };
 
             window.toggleJustificativaDoc = () => {
                 const acatado = document.getElementById('val_acatar_inscricao').checked;
                 document.getElementById('wrapper-justificativa-doc').style.display = acatado ? 'none' : 'block';
+            };
+
+            window.toggleCriteriosPontuacao = () => {
+                const acatar = document.getElementById('val_acatar_curriculo').checked;
+                const section = document.getElementById('section-criterios-pontuacao');
+                const wrapper = document.getElementById('wrapper-justificativa-curriculo');
+                
+                if (section) section.style.display = acatar ? 'block' : 'none';
+                if (wrapper) wrapper.style.display = acatar ? 'none' : 'block';
+                
+                updateLocalScore();
+            };
+
+            window.updatePontuacaoCurricular = () => {
+                const numCapsi = parseInt(document.getElementById('num_semestres_capsi').value) || 0;
+                const numPsic = parseInt(document.getElementById('num_semestres_psic').value) || 0;
+                
+                const ptsCapsi = numCapsi * 5;
+                const ptsPsic = numPsic * 5;
+                
+                const spanCapsi = document.getElementById('pts_semestres_capsi');
+                const spanPsic = document.getElementById('pts_semestres_psic');
+                
+                if (spanCapsi) spanCapsi.innerText = ptsCapsi;
+                if (spanPsic) spanPsic.innerText = ptsPsic;
+                
+                updateLocalScore();
             };
 
             // Adicionar listeners nos switches
@@ -5428,20 +5461,73 @@
                             payload.julpontuacao = (totalChecked > 0);
                         }
                     }
-                } else {
+                } else if (resolvedSourceTab === "humano") {
+                    const acatado = document.getElementById('val_acatar_curriculo').checked;
+                    const justificativa = document.getElementById('just_acatar_curriculo').value.trim();
+
+                    if (!acatado && !justificativa) {
+                        Swal.fire('Atenção', 'A justificativa é obrigatória ao não acatar o currículo.', 'warning');
+                        this.disabled = false;
+                        this.innerText = 'Concluir análise';
+                        return;
+                    }
+
+                    const ptsFormacao = acatado ? (parseInt(document.getElementById('sel_pontuacao_formacao').value) || 0) : 0;
+                    const semestresCapsi = acatado ? (parseInt(document.getElementById('num_semestres_capsi').value) || 0) : 0;
+                    const semestresPsic = acatado ? (parseInt(document.getElementById('num_semestres_psic').value) || 0) : 0;
+                    
+                    const ptsExperiencia = acatado ? Math.min(30, (semestresCapsi * 5) + (semestresPsic * 5)) : 0;
+                    const scoreFinalCurricular = acatado ? (ptsFormacao + ptsExperiencia) : 0;
+
                     payload = {
                         atividade_habilitada: "ATV-002",
                         inscricao: e.inscricao,
                         analista: loggedUser,
+                        acatado: acatado,
+                        analisecurricular: acatado ? "Sim" : "Não",
+                        justificativa: acatado ? "" : justificativa,
+                        pontuacao_formacao: ptsFormacao,
+                        semestres_capsi: semestresCapsi,
+                        semestres_psic: semestresPsic,
+                        pontuacao_experiencia: ptsExperiencia,
+                        score_final: scoreFinalCurricular
+                    };
+                } else {
+                    // Critérios Humanos (PCD / PPNI)
+                    const valPpni = document.getElementById('val_cotas_ppni') ? document.getElementById('val_cotas_ppni').checked : false;
+                    const valPcd = document.getElementById('val_is_pcd') ? document.getElementById('val_is_pcd').checked : false;
+                    const justPpni = document.getElementById('just_val_cotas_ppni') ? document.getElementById('just_val_cotas_ppni').value.trim() : '';
+                    const justPcd = document.getElementById('just_val_is_pcd') ? document.getElementById('just_val_is_pcd').value.trim() : '';
+
+                    // Se rejeitado e sem justificativa
+                    const swPpni = document.getElementById('val_cotas_ppni');
+                    const swPcd = document.getElementById('val_is_pcd');
+                    if (swPpni && !swPpni.disabled && !valPpni && !justPpni) {
+                        Swal.fire('Atenção', 'A justificativa é obrigatória ao rejeitar a cota PPNI.', 'warning');
+                        this.disabled = false;
+                        this.innerText = 'Concluir análise';
+                        return;
+                    }
+                    if (swPcd && !swPcd.disabled && !valPcd && !justPcd) {
+                        Swal.fire('Atenção', 'A justificativa é obrigatória ao rejeitar a cota PCD.', 'warning');
+                        this.disabled = false;
+                        this.innerText = 'Concluir análise';
+                        return;
+                    }
+
+                    payload = {
+                        atividade_habilitada: "ATV-002_humanos",
+                        inscricao: e.inscricao,
+                        analista: loggedUser,
                         validacoes: {
-                            cotas_ppni: document.getElementById('val_cotas_ppni').checked,
-                            is_pcd: document.getElementById('val_is_pcd').checked
+                            cotas_ppni: valPpni,
+                            is_pcd: valPcd
                         },
                         justificativas: {
-                            cotas_ppni: document.getElementById('just_val_cotas_ppni').value,
-                            is_pcd: document.getElementById('just_val_is_pcd').value
+                            cotas_ppni: justPpni,
+                            is_pcd: justPcd
                         },
-                        score_final: parseInt(document.getElementById('s_total').innerText) || 0
+                        score_final: e.score_final || calculatePoints(e)
                     };
                 }
 
@@ -6310,8 +6396,8 @@
                     'CPF LGPD': maskCPF(e.cpf),
                     'Categoria': formatCategoria(e.categoria) || '',
                     'Status Doc.': getHomologacaoStatus(e),
-                    'Cotas PPNI': scores.base,
-                    'PCD': scores.human,
+                    'Formação': scores.formacao,
+                    'Experiência': scores.experiencia,
                     'Total': scores.total
                 };
             });
@@ -6336,7 +6422,7 @@
             doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 22);
             doc.text(`Total de registros: ${list.length}`, 14, 27);
 
-            const headers = [['Inscrição', 'Nome Completo', 'CPF', 'Categoria', 'Status Doc.', 'Cotas PPNI', 'PCD', 'Total']];
+            const headers = [['Inscrição', 'Nome Completo', 'CPF', 'Categoria', 'Status Doc.', 'Formação', 'Experiência', 'Total']];
             const rows = list.map(e => {
                 const scores = calculateDetailedPoints(e);
                 return [
@@ -6345,8 +6431,8 @@
                     maskCPF(e.cpf),
                     formatCategoria(e.categoria) || '',
                     getHomologacaoStatus(e),
-                    scores.base,
-                    scores.human,
+                    scores.formacao,
+                    scores.experiencia,
                     scores.total
                 ];
             });
@@ -6756,6 +6842,62 @@
                                 </div>
                             </div>
 
+                            <!-- Card de Análise Curricular e Pontuação (aba humano) -->
+                            <div class="card-container p-4 mb-4" id="card-analise-curricular" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="fw-bold text-primary mb-1">ANÁLISE CURRICULAR</h6>
+                                        <p class="text-muted small mb-0">Indique se o currículo do candidato atende aos requisitos mínimos.</p>
+                                    </div>
+                                    <div class="form-check form-switch p-0 m-0 d-flex align-items-center gap-3">
+                                        <label class="form-check-label fw-bold text-primary" for="val_acatar_curriculo">ACATAR CURRÍCULO?</label>
+                                        <input class="form-check-input ms-0" type="checkbox" id="val_acatar_curriculo"
+                                            style="width: 3.5em; height: 1.75em;" onchange="toggleCriteriosPontuacao()">
+                                    </div>
+                                </div>
+                                <div id="wrapper-justificativa-curriculo" style="display: none;">
+                                    <label class="small fw-bold text-danger mb-2">JUSTIFICATIVA DA REJEIÇÃO</label>
+                                    <textarea id="just_acatar_curriculo" class="form-control" rows="3"
+                                        placeholder="Descreva o motivo do indeferimento do currículo..."></textarea>
+                                </div>
+
+                                <!-- Seção de Critérios de Pontuação (aparece se Acatar Currículo for Sim) -->
+                                <div id="section-criterios-pontuacao" class="mt-4 border-top pt-4" style="display: none;">
+                                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-graduation-cap me-2"></i>CRITÉRIOS DE PONTUAÇÃO</h6>
+                                    
+                                    <!-- Formação Profissional -->
+                                    <div class="mb-4">
+                                        <label class="small fw-bold text-muted mb-2 col-12">FORMAÇÃO PROFISSIONAL (Máximo 70 pontos - Não cumulativo)</label>
+                                        <select id="sel_pontuacao_formacao" class="form-select" onchange="updatePontuacaoCurricular()">
+                                            <option value="0">Selecione o título de maior pontuação...</option>
+                                            <option value="70">Residência em Psiquiatria da Infância e Adolescência (CNRM) - 70 pts</option>
+                                            <option value="60">Residência em Psiquiatria (CNRM) - 60 pts</option>
+                                            <option value="50">Título de Especialista em Psiquiatria da Infância e Adolescência (AMB) - 50 pts</option>
+                                            <option value="40">Título de Especialista em Psiquiatria (AMB) - 40 pts</option>
+                                            <option value="30">Especialização em Psiquiatria da Infância e Adolescência (mínimo 630h) - 30 pts</option>
+                                            <option value="20">Especialização em Psiquiatria da Infância e Adolescência (mínimo 360h) - 20 pts</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Experiência Profissional -->
+                                    <div class="row g-3">
+                                        <label class="small fw-bold text-muted col-12 mb-0">EXPERIÊNCIA PROFISSIONAL (5 pontos por semestre - Máximo 30 pontos no total)</label>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="small text-muted mb-1" for="num_semestres_capsi">Semestres em CAPSi</label>
+                                            <input type="number" id="num_semestres_capsi" class="form-control" min="0" value="0" oninput="updatePontuacaoCurricular()">
+                                            <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_capsi" class="fw-semibold text-primary">0</span></div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="small text-muted mb-1" for="num_semestres_psic">Semestres em Assistência em Psiquiatria da infância e adolescência</label>
+                                            <input type="number" id="num_semestres_psic" class="form-control" min="0" value="0" oninput="updatePontuacaoCurricular()">
+                                            <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_psic" class="fw-semibold text-primary">0</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="card-container p-4 mb-4" id="card-criterios-humanos">
                                 <h6 class="fw-bold text-primary mb-4 border-bottom pb-2">VALIDAÇÃO DE ANÁLISE CURRICULAR
                                 </h6>
@@ -6829,14 +6971,14 @@
                                         </thead>
                                         <tbody style="font-size: 0.85rem;">
                                             <tr>
-                                                <td class="ps-3">Cotas PPNI</td>
+                                                <td class="ps-3">Formação Profissional</td>
                                                 <td class="text-center"><span class="badge bg-light text-dark"
-                                                        id="s_raca">0 / 20</span></td>
+                                                        id="s_formacao">0 / 70</span></td>
                                             </tr>
                                             <tr>
-                                                <td class="ps-3">PCD</td>
+                                                <td class="ps-3">Experiência Profissional</td>
                                                 <td class="text-center"><span class="badge bg-light text-dark"
-                                                        id="s_pcd">0 / 20</span></td>
+                                                        id="s_experiencia">0 / 30</span></td>
                                             </tr>
                                         </tbody>
                                         <tfoot class="bg-primary text-white">
