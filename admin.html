@@ -4589,7 +4589,7 @@
 
         async function fetchDocs(inscricao) {
             try {
-                const response = await callWebhook('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultarcnhsocialanexos', {
+                const response = await callWebhook('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultaranexosraps', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ inscricao })
@@ -4599,6 +4599,92 @@
                 console.error('Erro ao buscar anexos:', error);
                 return [];
             }
+        }
+
+        function updateCandidateDetailsUI(e) {
+            const getVal = (val, fallback = '---') => {
+                return (val !== null && val !== undefined && String(val).trim() !== '') ? String(val).trim() : fallback;
+            };
+
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            };
+
+            // SESSÃO 1: IDENTIFICAÇÃO DO CANDIDATO
+            setVal('det-nome', getVal(e.nome || e.nomecompleto));
+            setVal('det-nomesocial', getVal(e.nome_social || e.nomesocial, 'Não informado'));
+            setVal('det-cpf', getVal(e.cpf));
+            setVal('det-nasc', getVal(formatDate(e.nasc || e.datanascimento || e.nascdata)));
+            setVal('det-nacionalidade', getVal(e.nacionalidade));
+            setVal('det-nis', getVal(e.nis));
+
+            // Naturalidade e filiação
+            setVal('det-naturalidade', getVal(e.naturalidade_cidade || e.naturalidadecidade));
+            setVal('det-naturalidade-uf', getVal(e.naturalidade_uf || e.naturalidadeuf));
+            setVal('det-mae', getVal(e.mae));
+            setVal('det-pai', getVal(e.pai, 'Não informado'));
+
+            // Documentos de identificação
+            setVal('det-rg', getVal(e.rg_numero || e.rgnumero));
+            setVal('det-rg-orgao', getVal(e.rg_orgao || e.rgorgao));
+            setVal('det-rg-uf', getVal(e.rg_uf || e.rguf));
+            setVal('det-rg-data', getVal(formatDate(e.rg_data || e.rgdata || e.rgdataex)));
+
+            // Informações complementares
+            setVal('det-sexo', getVal(e.sexo));
+            setVal('det-genero', getVal(e.genero));
+            setVal('det-genero-outro', getVal(e.genero_outro || e.generooutro, 'Não informado'));
+            setVal('det-estadocivil', getVal(e.estado_civil || e.estadocivil));
+            setVal('det-raca', getVal(e.raca || e.racacor));
+
+            // SESSÃO 2: ENDEREÇO E CONTATO
+            setVal('det-email', getVal(e.email));
+            setVal('det-email-conf', getVal(e.email_confirm || e.emailconfirm || e.email));
+            setVal('det-tel', getVal(e.tel1 || e.telefone));
+            setVal('det-tel2', getVal(e.tel2, 'Não informado'));
+            setVal('det-cep', getVal(e.cep));
+            setVal('det-logradouro', getVal(e.logradouro));
+            setVal('det-numero', getVal(e.numero));
+            setVal('det-complemento', getVal(e.complemento, 'Sem complemento'));
+            setVal('det-bairro', getVal(e.bairro));
+            setVal('det-cidade', getVal(e.cidade));
+            setVal('det-uf', getVal(e.uf));
+
+            // SESSÃO 3: PERFIL PROFISSIONAL E VÍNCULOS
+            setVal('det-nivel', getVal(e.nivel));
+            setVal('det-ies', getVal(e.ies));
+            setVal('det-curso', getVal(e.curso));
+            setVal('det-anoconclusao', getVal(e.ano_conclusao || e.anoconclusao));
+            setVal('det-categoria-cargo', getVal(e.cargo));
+            setVal('det-especialidade', getVal(e.especialidade, 'Não informado'));
+            setVal('det-militar', getVal(e.militar, 'Não se aplica'));
+            setVal('det-politicos', getVal(e.politicos, 'Não'));
+
+            // Situação militar e eleitoral
+            setVal('det-alistamento-numero', getVal(e.alistamento_numero || e.alistamentonum));
+            setVal('det-alistamento-orgao', getVal(e.alistamento_orgao || e.alistamentoorgao));
+            setVal('det-alistamento-data', getVal(formatDate(e.alistamento_data || e.alistamentodata || e.dtalistamento)));
+            setVal('det-titulo', getVal(e.titulo));
+            setVal('det-zona', getVal(e.zona));
+            setVal('det-secao', getVal(e.secao));
+
+            // Experiências adicionais
+            setVal('det-foi-jurado', getVal(e.foi_jurado || e.foijurado || e.juradofuncao));
+            setVal('det-jurado-periodo', getVal(e.juradoperiodo, 'Não informado'));
+            setVal('det-vinculo-publico', getVal(e.vinculo_publico || e.vinculopublicoop));
+            setVal('det-qual-vinculo', getVal(e.qual_vinculo || e.qualvinculo, 'Não informado'));
+            setVal('det-vinculo-cargo', getVal(e.vinculo_cargo || e.vinculocargo, 'Não informado'));
+            setVal('det-vinculo-orgao', getVal(e.vinculo_orgao || e.vinculoorgao, 'Não informado'));
+            setVal('det-vinculo-tempo', getVal(e.vinculo_tempo_servico || e.vinculotemposerv, 'Não informado'));
+
+            // SESSÃO 4: DOCUMENTOS E DECLARAÇÕES
+            setVal('det-declara-ppni', getVal(e.cotas_ppni || e.criisppni));
+            setVal('det-declara-pcd', getVal(e.is_pcd || e.pcd || e.ispcd || e.criispcd));
+            setVal('det-declara-condicao', getVal(e.condicao_especial || e.condicaoespecial));
+            setVal('det-pcd-tipo', getVal(e.tipo_pcd || e.tipopcd, 'Não informado'));
+            setVal('det-pcd-cid', getVal(e.pcd_cid || e.pcdcid, 'Não informado'));
+            setVal('det-declara-necessidade', getVal(e.necessidade, 'Não informado'));
         }
 
         async function openAnalyzer(idOrInsc, forceReadOnly = false, sourceTab = null) {
@@ -4733,74 +4819,8 @@
             document.getElementById('analyzer-info').innerText = `CPF: ${e.cpf}`;
             document.getElementById('analyzer-inscricao').innerText = e.inscricao || 'PENDENTE';
 
-            // Calculate age
-            let idade = '---';
-            let isoNasc = e.datanascimento;
-            if (isoNasc && isoNasc.includes('/')) {
-                const parts = isoNasc.split('/');
-                if (parts.length >= 3) isoNasc = `${parts[2].split(' ')[0]}-${parts[1]}-${parts[0]}`;
-            }
-
-            if (isoNasc) {
-                const birthDate = new Date(isoNasc + 'T00:00:00');
-                if (!isNaN(birthDate.getTime())) {
-                    const diff = Date.now() - birthDate.getTime();
-                    idade = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25)) + ' anos';
-                }
-            }
-
-            // Calculate Tempo CadÚnico
-            let tempoCadunico = '---';
-            const dtCadunicoStr = e.data_atualizacao_cadunico || e.dataatualizacaocadunico || e.dataatualizacao;
-            let isoCadunico = dtCadunicoStr;
-            if (isoCadunico && isoCadunico.includes('/')) {
-                const parts = isoCadunico.split('/');
-                if (parts.length >= 3) isoCadunico = `${parts[2].split(' ')[0]}-${parts[1]}-${parts[0]}`;
-            }
-
-            if (e.tempoatualizacao) {
-                tempoCadunico = e.tempoatualizacao;
-            } else if (isoCadunico) {
-                const dtCadunico = new Date(isoCadunico + 'T00:00:00');
-                if (!isNaN(dtCadunico.getTime())) {
-                    const diffM = (Date.now() - dtCadunico.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
-                    tempoCadunico = Math.floor(diffM) + ' meses';
-                }
-            }
-
-            document.getElementById('det-categoria').innerText = formatCategoria(e.categoria) || '---';
-            document.getElementById('det-nomesocial').innerText = e.nomesocial || 'Não informado';
-            document.getElementById('det-nasc').innerText = formatDate(e.datanascimento) || '---';
-            document.getElementById('det-idade').innerText = idade;
-            document.getElementById('det-nis').innerText = e.nis || '---';
-            document.getElementById('det-genero').innerText = e.genero || '---';
-            document.getElementById('det-raca').innerText = e.racacor || '---';
-            document.getElementById('det-tel').innerText = e.telefone || '---';
-            document.getElementById('det-email').innerText = e.email || '---';
-            document.getElementById('det-canal').innerText = e.canalpreferencial || e.preferenciaconta || '---';
-
-            // Dados de Endereço
-            document.getElementById('det-cep').innerText = e.cep || e.cepuc || '---';
-            document.getElementById('det-logradouro').innerText = e.logradouro || e.logradourouc || '---';
-            document.getElementById('det-numero').innerText = e.numero || e.numerolimpo || '---';
-            document.getElementById('det-complemento').innerText = e.complemento || '---';
-            document.getElementById('det-bairro').innerText = e.bairro || e.bairrouc || '---';
-
-            const cidadeRaw = e.cidade || e.cidadeuc || '';
-            const cidadeVal = cidadeRaw.trim();
-            const detCidadeEl = document.getElementById('det-cidade');
-            if (cidadeVal) {
-                const isRecife = cidadeVal.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes('recife');
-                if (!isRecife) {
-                    detCidadeEl.innerHTML = `<span class="badge bg-danger text-white px-2 py-1"><i class="fas fa-exclamation-triangle me-1"></i>${cidadeVal}</span>`;
-                } else {
-                    detCidadeEl.innerText = cidadeVal;
-                }
-            } else {
-                detCidadeEl.innerText = '---';
-            }
-
-            document.getElementById('det-uf').innerText = e.uf || e.ufuc || '---';
+            // Populando campos iniciais disponíveis antes do retorno rico do webhook
+            updateCandidateDetailsUI(e);
 
             // 2. Calcular Faixa de Tempo App e Pontos Individuais
             const getAppDetail = () => {
@@ -5032,7 +5052,43 @@
                     window.currentDocs = [];
                     return;
                 }
-                window.currentDocs = docs.map(doc => {
+
+                // 1. Extrair os dados ricos do candidato (primeiro elemento) e preencher no modal
+                const richData = docs[0];
+                if (richData) {
+                    Object.assign(e, richData);
+                    updateCandidateDetailsUI(e);
+                    if (typeof updateLocalScore === 'function') {
+                        updateLocalScore();
+                    }
+                }
+
+                // 2. Filtrar os anexos (são os elementos a partir do índice 1)
+                const rawAttachments = docs.slice(1);
+
+                const DOC_NAMES = {
+                    'doc_id_frente': 'Identidade (Frente)',
+                    'doc_id_verso': 'Identidade (Verso)',
+                    'doc_cpf': 'CPF',
+                    'doc_quitacao_eleitoral': 'Quitação Eleitoral',
+                    'doc_militar': 'Certificado Militar',
+                    'doc_escolaridade': 'Comprovante de Escolaridade',
+                    'doc_curriculo': 'Currículo Profissional',
+                    'doc_declaracao_deficiencia': 'Declaração de Deficiência',
+                    'doc_laudo_medico_pcd': 'Laudo Médico PCD',
+                    'doc_ppni_foto_frontal': 'PPNI - Foto Frontal',
+                    'doc_ppni_foto_perfil': 'PPNI - Foto Perfil',
+                    'doc_ppni_video': 'PPNI - Vídeo de Autodeclaração',
+                    'doc_ppni_termo': 'PPNI - Termo Assinado',
+                    'doc_ppni_rg': 'PPNI - RG do Candidato',
+                    'doc_jurado': 'Comprovante de Jurado',
+                    'doc_vinculo_publico': 'Comprovante de Vínculo Público',
+                    'doc_recurso_inscricao': 'Recurso - Indeferimento Inscrição',
+                    'doc_recurso_cotas': 'Recurso - Cotas PPNI',
+                    'doc_recurso_pcd': 'Recurso - Vagas PCD'
+                };
+
+                window.currentDocs = rawAttachments.map(doc => {
                     let link = doc.medialink || doc.mediaLink || doc.midialink;
                     if (!link) return null;
                     if (link.includes('/download/storage/v1/b/')) {
@@ -5050,7 +5106,13 @@
                     }
 
                     let nome = 'Documento';
-                    if (nomeRaw) {
+                    const catDoc = doc.categoria_doc || '';
+                    if (DOC_NAMES[catDoc]) {
+                        nome = DOC_NAMES[catDoc];
+                    } else if (catDoc) {
+                        nome = catDoc.replace('doc_', '').replace(/_/g, ' ');
+                        nome = nome.charAt(0).toUpperCase() + nome.slice(1);
+                    } else if (nomeRaw) {
                         nome = nomeRaw.split('-CNH-')[0].split('-')[0]; // Pega antes de -CNH- ou do primeiro hifen
                         nome = nome.replace('doc', '').replace(/([A-Z])/g, ' $1').trim();
                     }
@@ -5448,98 +5510,187 @@
         let currentDocIndex = 0;
         let currentZoom = 1;
 
+        window.closeMediaPreview = function () {
+            const previewBox = document.getElementById('media-preview-box');
+            if (previewBox) {
+                previewBox.classList.add('d-none');
+            }
+            const iframe = document.getElementById('media-preview-iframe');
+            if (iframe) iframe.src = '';
+            const img = document.getElementById('media-preview-img');
+            if (img) img.src = '';
+        };
+
         window.viewDocument = function (index) {
             currentDocIndex = index;
             const doc = window.currentDocs[index];
             if (!doc) return;
 
-            const viewerModalEl = document.getElementById('viewerModal');
-            let viewerModal = bootstrap.Modal.getInstance(viewerModalEl);
-            if (!viewerModal) viewerModal = new bootstrap.Modal(viewerModalEl);
+            const analyzerModalEl = document.getElementById('analyzerModal');
+            const isAnalyzerOpen = analyzerModalEl && analyzerModalEl.classList.contains('show');
 
-            const frame = document.getElementById('viewerFrame');
-            const img = document.getElementById('viewerImage');
-            const isImg = /\.(jpg|jpeg|png)(\?.*)?$/i.test(doc.link) || /\.(jpg|jpeg|png)$/i.test(doc.nomeRaw);
-            const isHeic = /\.heic(\?.*)?$/i.test(doc.link) || /\.heic$/i.test(doc.nomeRaw);
+            if (isAnalyzerOpen) {
+                const previewBox = document.getElementById('media-preview-box');
+                const title = document.getElementById('media-preview-title');
+                const loading = document.getElementById('media-preview-loading');
+                const iframe = document.getElementById('media-preview-iframe');
+                const img = document.getElementById('media-preview-img');
 
-            document.getElementById('viewerTitle').innerText = doc.nome;
-            document.getElementById('doc-counter').innerText = `${index + 1} / ${window.currentDocs.length}`;
+                if (previewBox) previewBox.classList.remove('d-none');
+                if (title) title.innerHTML = `<i class="fas fa-eye me-2"></i>Visualização Média: ${doc.nome}`;
 
-            resetZoom();
+                const isImg = /\.(jpg|jpeg|png)(\?.*)?$/i.test(doc.link) || /\.(jpg|jpeg|png)$/i.test(doc.nomeRaw);
+                const isHeic = /\.heic(\?.*)?$/i.test(doc.link) || /\.heic$/i.test(doc.nomeRaw);
+                const isPdf = /\.pdf(\?.*)?$/i.test(doc.link) || /\.pdf$/i.test(doc.nomeRaw || '') || doc.nome.toLowerCase().includes('pdf') || (doc.nomeRaw && doc.nomeRaw.toLowerCase().includes('pdf'));
 
-            const btnOpenNewTab = document.getElementById('btn-open-new-tab');
-            if (btnOpenNewTab) btnOpenNewTab.href = doc.link;
+                if (loading) loading.classList.add('d-none');
+                if (iframe) { iframe.classList.add('d-none'); iframe.src = ''; }
+                if (img) { img.classList.add('d-none'); img.src = ''; }
 
-            if (isHeic) {
-                // Se já tiver URL convertida em cache, usa diretamente
-                if (doc._convertedUrl) {
-                    frame.style.display = 'none';
-                    img.style.display = 'block';
-                    img.src = doc._convertedUrl;
-                    viewerModal.show();
-                } else {
-                    // Converte na hora e exibe spinner no viewer
-                    frame.style.display = 'none';
-                    img.style.display = 'block';
-                    img.src = '';
-                    img.alt = 'Convertendo HEIC...';
-                    const loadingEl = document.getElementById('viewer-loading-heic');
-                    if (loadingEl) loadingEl.style.display = 'flex';
-                    viewerModal.show();
-
-                    async function fetchBlobWithProxyViewer(url) {
-                        try {
+                if (isHeic) {
+                    if (doc._convertedUrl) {
+                        img.src = doc._convertedUrl;
+                        img.classList.remove('d-none');
+                    } else {
+                        if (loading) loading.classList.remove('d-none');
+                        const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
                             const r = await fetch(url);
                             if (!r.ok) throw new Error('HTTP ' + r.status);
                             return await r.blob();
-                        } catch (e) {
-                            console.warn('Falha no fetch direto no viewer. Tentando corsproxy.io...', e);
-                            try {
-                                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-                                const rProxy = await fetch(proxyUrl);
-                                if (!rProxy.ok) throw new Error('Proxy 1 HTTP ' + rProxy.status);
-                                return await rProxy.blob();
-                            } catch (e2) {
-                                console.warn('Falha no corsproxy.io no viewer. Tentando codetabs...', e2);
-                                const proxyUrl2 = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url);
-                                const rProxy2 = await fetch(proxyUrl2);
-                                if (!rProxy2.ok) throw new Error('Proxy 2 HTTP ' + rProxy2.status);
-                                return await rProxy2.blob();
-                            }
-                        }
+                        };
+                        fetchFn(doc.link)
+                            .then(blob => heic2any({ blob, toType: 'image/jpeg', quality: 0.85 }))
+                            .then(convertedBlob => {
+                                const url = URL.createObjectURL(convertedBlob);
+                                doc._convertedUrl = url;
+                                img.src = url;
+                                img.classList.remove('d-none');
+                                if (loading) loading.classList.add('d-none');
+                            })
+                            .catch(err => {
+                                console.error('Erro na conversão HEIC:', err);
+                                if (loading) loading.classList.add('d-none');
+                                Swal.fire('Erro', 'Não foi possível carregar a imagem HEIC.', 'error');
+                            });
                     }
-
-                    // Expõe função de proxy viewer para o fallback
-                    window.fetchBlobWithProxyViewer = fetchBlobWithProxyViewer;
-
-                    fetchBlobWithProxyViewer(doc.link)
-                        .then(blob => heic2any({ blob, toType: 'image/jpeg', quality: 0.85 }))
-                        .then(convertedBlob => {
-                            const url = URL.createObjectURL(convertedBlob);
-                            doc._convertedUrl = url;
-                            img.src = url;
-                            img.alt = doc.nome;
-                            if (loadingEl) loadingEl.style.display = 'none';
-                        })
-                        .catch(err => {
-                            console.error('Erro na conversão HEIC do viewer:', err);
-                            if (loadingEl) loadingEl.style.display = 'none';
-                            img.alt = 'Erro ao converter HEIC';
-                            Swal.fire('Erro', 'Não foi possível converter o HEIC. Detalhe: ' + err.message, 'error');
-                        });
+                } else if (isImg) {
+                    img.src = doc._convertedUrl || doc.link;
+                    img.classList.remove('d-none');
+                } else if (isPdf) {
+                    iframe.src = doc.link;
+                    iframe.classList.remove('d-none');
+                } else {
+                    iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
+                    iframe.classList.remove('d-none');
                 }
-            } else if (isImg) {
-                frame.style.display = 'none';
-                img.style.display = 'block';
-                img.src = doc._convertedUrl || doc.link;
-                img.onerror = function () {
-                    if (!doc._convertedUrl) {
+
+                setTimeout(() => {
+                    previewBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+
+            } else {
+                const viewerModalEl = document.getElementById('viewerModal');
+                let viewerModal = bootstrap.Modal.getInstance(viewerModalEl);
+                if (!viewerModal) viewerModal = new bootstrap.Modal(viewerModalEl);
+
+                const frame = document.getElementById('viewerFrame');
+                const img = document.getElementById('viewerImage');
+                const isImg = /\.(jpg|jpeg|png)(\?.*)?$/i.test(doc.link) || /\.(jpg|jpeg|png)$/i.test(doc.nomeRaw);
+                const isHeic = /\.heic(\?.*)?$/i.test(doc.link) || /\.heic$/i.test(doc.nomeRaw);
+
+                document.getElementById('viewerTitle').innerText = doc.nome;
+                document.getElementById('doc-counter').innerText = `${index + 1} / ${window.currentDocs.length}`;
+
+                resetZoom();
+
+                const btnOpenNewTab = document.getElementById('btn-open-new-tab');
+                if (btnOpenNewTab) btnOpenNewTab.href = doc.link;
+
+                if (isHeic) {
+                    if (doc._convertedUrl) {
+                        frame.style.display = 'none';
+                        img.style.display = 'block';
+                        img.src = doc._convertedUrl;
+                        viewerModal.show();
+                    } else {
+                        frame.style.display = 'none';
+                        img.style.display = 'block';
                         img.src = '';
-                        img.alt = 'Recuperando imagem...';
+                        img.alt = 'Convertendo HEIC...';
                         const loadingEl = document.getElementById('viewer-loading-heic');
                         if (loadingEl) loadingEl.style.display = 'flex';
-                        if (window.fetchBlobWithProxyViewer) {
-                            window.fetchBlobWithProxyViewer(doc.link).then(blob => {
+                        viewerModal.show();
+
+                        const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
+                            try {
+                                const r = await fetch(url);
+                                if (!r.ok) throw new Error('HTTP ' + r.status);
+                                return await r.blob();
+                            } catch (e) {
+                                console.warn('Falha no fetch direto no viewer. Tentando corsproxy.io...', e);
+                                try {
+                                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                                    const rProxy = await fetch(proxyUrl);
+                                    if (!rProxy.ok) throw new Error('Proxy 1 HTTP ' + rProxy.status);
+                                    return await rProxy.blob();
+                                } catch (e2) {
+                                    console.warn('Falha no corsproxy.io no viewer. Tentando codetabs...', e2);
+                                    const proxyUrl2 = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url);
+                                    const rProxy2 = await fetch(proxyUrl2);
+                                    if (!rProxy2.ok) throw new Error('Proxy 2 HTTP ' + rProxy2.status);
+                                    return await rProxy2.blob();
+                                }
+                            }
+                        };
+
+                        fetchFn(doc.link)
+                            .then(blob => heic2any({ blob, toType: 'image/jpeg', quality: 0.85 }))
+                            .then(convertedBlob => {
+                                const url = URL.createObjectURL(convertedBlob);
+                                doc._convertedUrl = url;
+                                img.src = url;
+                                img.alt = doc.nome;
+                                if (loadingEl) loadingEl.style.display = 'none';
+                            })
+                            .catch(err => {
+                                console.error('Erro na conversão HEIC do viewer:', err);
+                                if (loadingEl) loadingEl.style.display = 'none';
+                                img.alt = 'Erro ao converter HEIC';
+                                Swal.fire('Erro', 'Não foi possível converter o HEIC. Detalhe: ' + err.message, 'error');
+                            });
+                    }
+                } else if (isImg) {
+                    frame.style.display = 'none';
+                    img.style.display = 'block';
+                    img.src = doc._convertedUrl || doc.link;
+                    img.onerror = function () {
+                        if (!doc._convertedUrl) {
+                            img.src = '';
+                            img.alt = 'Recuperando imagem...';
+                            const loadingEl = document.getElementById('viewer-loading-heic');
+                            if (loadingEl) loadingEl.style.display = 'flex';
+                            const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
+                                try {
+                                    const r = await fetch(url);
+                                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                                    return await r.blob();
+                                } catch (e) {
+                                    console.warn('Falha no fetch direto no viewer. Tentando corsproxy.io...', e);
+                                    try {
+                                        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                                        const rProxy = await fetch(proxyUrl);
+                                        if (!rProxy.ok) throw new Error('Proxy 1 HTTP ' + rProxy.status);
+                                        return await rProxy.blob();
+                                    } catch (e2) {
+                                        console.warn('Falha no corsproxy.io no viewer. Tentando codetabs...', e2);
+                                        const proxyUrl2 = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url);
+                                        const rProxy2 = await fetch(proxyUrl2);
+                                        if (!rProxy2.ok) throw new Error('Proxy 2 HTTP ' + rProxy2.status);
+                                        return await rProxy2.blob();
+                                    }
+                                }
+                            };
+                            fetchFn(doc.link).then(blob => {
                                 const objectUrl = URL.createObjectURL(blob);
                                 doc._convertedUrl = objectUrl;
                                 img.src = objectUrl;
@@ -5551,71 +5702,11 @@
                                 Swal.fire('Erro', 'Não foi possível carregar a imagem.', 'error');
                             });
                         }
-                    }
-                };
-                viewerModal.show();
-            } else {
-                img.style.display = 'none';
-                frame.style.display = 'block';
-                frame.src = '';
-
-                const isPdf = /\.pdf(\?.*)?$/i.test(doc.link) || /\.pdf$/i.test(doc.nomeRaw || '') || doc.nome.toLowerCase().includes('pdf');
-                if (isPdf) {
-                    const loadingEl = document.getElementById('viewer-loading-heic');
-                    if (loadingEl) {
-                        const span = loadingEl.querySelector('span');
-                        if (span) span.innerText = 'Carregando PDF com alta performance...';
-                        loadingEl.style.display = 'flex';
-                    }
-
-                    async function loadPdfBlob(url) {
-                        try {
-                            const fetchFn = window.fetchBlobWithProxyViewer || async function (u) {
-                                const r = await fetch(u);
-                                if (!r.ok) throw new Error('HTTP ' + r.status);
-                                return await r.blob();
-                            };
-
-                            const blob = await fetchFn(url);
-                            const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-
-                            const reader = new FileReader();
-                            reader.onload = function () {
-                                const text = reader.result;
-                                const pages = (text.match(/\/Type\s*\/Page\b/g) || []).length;
-                                if (pages > 1) {
-                                    if (loadingEl) loadingEl.style.display = 'none';
-                                    Swal.fire({
-                                        title: 'Documento Multipáginas',
-                                        html: 'Como este PDF possui <strong>' + pages + ' páginas</strong>, ele será aberto automaticamente em uma nova aba para garantir a melhor visualização e evitar falhas de carregamento do navegador.',
-                                        icon: 'success',
-                                        confirmButtonText: 'Entendi'
-                                    }).then(() => {
-                                        window.open(url, '_blank');
-                                    });
-                                } else {
-                                    const blobUrl = URL.createObjectURL(pdfBlob);
-                                    frame.src = blobUrl;
-                                    if (loadingEl) loadingEl.style.display = 'none';
-                                    viewerModal.show();
-                                }
-                            };
-                            reader.readAsText(pdfBlob);
-                        } catch (err) {
-                            console.warn('Erro ao carregar PDF via blob, abrindo em nova aba:', err);
-                            if (loadingEl) loadingEl.style.display = 'none';
-                            Swal.fire({
-                                title: 'Visualização Externa',
-                                html: 'Não foi possível carregar a prévia interna do PDF devido a restrições do servidor.<br><br><strong>O arquivo será aberto automaticamente em uma nova aba para visualização completa.</strong>',
-                                icon: 'info',
-                                confirmButtonText: 'Ok, entendi'
-                            }).then(() => {
-                                window.open(url, '_blank');
-                            });
-                        }
-                    }
-                    loadPdfBlob(doc.link);
+                    };
+                    viewerModal.show();
                 } else {
+                    frame.style.display = 'block';
+                    img.style.display = 'none';
                     frame.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
                     viewerModal.show();
                 }
@@ -6323,86 +6414,322 @@
                 <div class="modal-body p-4 bg-light">
                     <div class="row g-4">
                         <div class="col-lg-8">
-                            <div class="card-container p-4 mb-4">
-                                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">DADOS DE IDENTIFICAÇÃO</h6>
-                                <div class="row g-3" id="candidato-detalhes">
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Categoria Escolhida</label>
-                                        <span class="fw-medium text-primary fw-bold" id="det-categoria">---</span>
+                            <!-- SESSÃO 1: IDENTIFICAÇÃO DO CANDIDATO -->
+                            <div class="card-container p-4 mb-4 shadow-sm" style="border-radius: 16px;">
+                                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2"><i class="fas fa-id-card me-2"></i>IDENTIFICAÇÃO DO CANDIDATO</h6>
+                                
+                                <!-- Dados Básicos -->
+                                <div class="mb-4">
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Dados básicos</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Nome completo</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-nome" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Nome social</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-nomesocial" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">CPF</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-cpf" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">Data de nascimento</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-nasc" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Nacionalidade</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-nacionalidade" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">NIS</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-nis" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Nome Social</label>
-                                        <span class="fw-medium" id="det-nomesocial">---</span>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Data de Nascimento</label>
-                                        <span class="fw-medium" id="det-nasc">---</span>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Idade</label>
-                                        <span class="fw-medium" id="det-idade">---</span>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">NIS</label>
-                                        <span class="fw-medium" id="det-nis">---</span>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Gênero (CadÚnico)</label>
-                                        <span class="fw-medium" id="det-genero">---</span>
-                                    </div>
+                                </div>
 
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Autodeclaração de cor/raça</label>
-                                        <span class="fw-medium" id="det-raca">---</span>
+                                <!-- Naturalidade e filiação -->
+                                <div class="mb-4">
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Naturalidade e filiação</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Naturalidade</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-naturalidade" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">UF</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-naturalidade-uf" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small text-muted d-block mb-1">Nome da mãe</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-mae" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small text-muted d-block mb-1">Nome do pai</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-pai" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Telefone/WhatsApp</label>
-                                        <span class="fw-medium" id="det-tel">---</span>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">E-mail</label>
-                                        <span class="fw-medium text-truncate d-block" id="det-email">---</span>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Canal Preferencial</label>
-                                        <span class="fw-medium" id="det-canal">---</span>
-                                    </div>
+                                </div>
 
+                                <!-- Documentos de identificação -->
+                                <div class="mb-4">
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Documentos de identificação</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">RG</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-rg" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Órgão emissor</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-rg-orgao" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">UF</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-rg-uf" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Expedição</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-rg-data" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                    </div>
+                                </div>
 
-                                    <!-- Endereço -->
-                                    <div class="col-12 mt-3">
-                                        <h6 class="fw-bold text-secondary mb-2"
-                                            style="font-size: 0.85rem; letter-spacing: 0.5px;"><i
-                                                class="fas fa-map-marked-alt me-2"></i>ENDEREÇO</h6>
-                                        <hr class="my-1 opacity-25">
+                                <!-- Informações complementares -->
+                                <div>
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Informações complementares</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Sexo</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-sexo" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Gênero</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-genero" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Informe o outro gênero</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-genero-outro" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Estado civil</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-estadocivil" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Cor/Raça</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-raca" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">CEP</label>
-                                        <span class="fw-medium" id="det-cep">---</span>
+                                </div>
+                            </div>
+
+                            <!-- SESSÃO 2: ENDEREÇO E CONTATO -->
+                            <div class="card-container p-4 mb-4 shadow-sm" style="border-radius: 16px;">
+                                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2"><i class="fas fa-envelope me-2"></i>ENDEREÇO E CONTATO</h6>
+                                
+                                <!-- Contato -->
+                                <div class="mb-4">
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Contato</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">E-mail</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-email" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Confirme o e-mail</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-email-conf" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">Telefone 1</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-tel" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">Telefone 2</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-tel2" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="small text-muted d-block">Logradouro</label>
-                                        <span class="fw-medium" id="det-logradouro">---</span>
+                                </div>
+
+                                <!-- Endereço residencial -->
+                                <div>
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Endereço residencial</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">CEP</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-cep" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="small text-muted d-block mb-1">Logradouro</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-logradouro" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">Número</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-numero" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Complemento</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-complemento" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Bairro</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-bairro" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Cidade</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-cidade" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">UF</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-uf" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Número</label>
-                                        <span class="fw-medium" id="det-numero">---</span>
+                                </div>
+                            </div>
+
+                            <!-- SESSÃO 3: PERFIL PROFISSIONAL E VÍNCULOS -->
+                            <div class="card-container p-4 mb-4 shadow-sm" style="border-radius: 16px;">
+                                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2"><i class="fas fa-briefcase me-2"></i>PERFIL PROFISSIONAL E VÍNCULOS</h6>
+                                
+                                <!-- Formação acadêmica -->
+                                <div class="mb-4">
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Formação acadêmica</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Nível</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-nivel" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Instituição</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-ies" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Curso</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-curso" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">Ano de conclusão</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-anoconclusao" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Complemento</label>
-                                        <span class="fw-medium" id="det-complemento">---</span>
+                                </div>
+
+                                <!-- Atuação profissional -->
+                                <div class="mb-4">
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Atuação profissional</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Função pretendida</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-categoria-cargo" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Especialidade (quando houver)</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-especialidade" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Serviço militar obrigatório quitado?</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-militar" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="small text-muted d-block mb-1">Tem parentesco com agentes políticos?</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-politicos" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Bairro</label>
-                                        <span class="fw-medium" id="det-bairro">---</span>
+                                </div>
+
+                                <!-- Situação militar e eleitoral -->
+                                <div class="mb-4">
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Situação militar e eleitoral</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Número CAM</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-alistamento-numero" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="small text-muted d-block mb-1">Órgão emissor</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-alistamento-orgao" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="small text-muted d-block mb-1">Data de emissão</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-alistamento-data" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Título de eleitor</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-titulo" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small text-muted d-block mb-1">Zona</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-zona" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small text-muted d-block mb-1">Seção</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-secao" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">Cidade</label>
-                                        <span class="fw-medium" id="det-cidade">---</span>
+                                </div>
+
+                                <!-- Experiências adicionais -->
+                                <div>
+                                    <div class="text-secondary small fw-bold mb-3 uppercase" style="letter-spacing: 0.5px;">Experiências adicionais</div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="small text-muted d-block mb-1">Já atuou como jurado(a)?</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-foi-jurado" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small text-muted d-block mb-1">Informações sobre atuação como jurado(a)</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-jurado-periodo" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small text-muted d-block mb-1">Possui algum outro vínculo com o serviço público?</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-vinculo-publico" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="small text-muted d-block mb-1">Qual vínculo?</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-qual-vinculo" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Cargo</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-vinculo-cargo" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Órgão</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-vinculo-orgao" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="small text-muted d-block mb-1">Tempo de serviço</label>
+                                            <input type="text" class="form-control bg-light border-0" id="det-vinculo-tempo" readonly value="---" style="font-size: 0.9rem;">
+                                        </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="small text-muted d-block">UF</label>
-                                        <span class="fw-medium" id="det-uf">---</span>
+                                </div>
+                            </div>
+
+                            <!-- SESSÃO 4: DOCUMENTOS E DECLARAÇÕES -->
+                            <div class="card-container p-4 mb-4 shadow-sm" style="border-radius: 16px;">
+                                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2"><i class="fas fa-file-signature me-2"></i>DOCUMENTOS E DECLARAÇÕES</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="small text-muted d-block mb-1">Concorrer às vagas PPNI?</label>
+                                        <input type="text" class="form-control bg-light border-0" id="det-declara-ppni" readonly value="---" style="font-size: 0.9rem;">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="small text-muted d-block mb-1">É PCD?</label>
+                                        <input type="text" class="form-control bg-light border-0" id="det-declara-pcd" readonly value="---" style="font-size: 0.9rem;">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="small text-muted d-block mb-1">Necessita de condição especial?</label>
+                                        <input type="text" class="form-control bg-light border-0" id="det-declara-condicao" readonly value="---" style="font-size: 0.9rem;">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="small text-muted d-block mb-1">Tipo de deficiência</label>
+                                        <input type="text" class="form-control bg-light border-0" id="det-pcd-tipo" readonly value="---" style="font-size: 0.9rem;">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="small text-muted d-block mb-1">CID (se houver)</label>
+                                        <input type="text" class="form-control bg-light border-0" id="det-pcd-cid" readonly value="---" style="font-size: 0.9rem;">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="small text-muted d-block mb-1">Descreva a necessidade</label>
+                                        <input type="text" class="form-control bg-light border-0" id="det-declara-necessidade" readonly value="---" style="font-size: 0.9rem;">
                                     </div>
                                 </div>
                             </div>
@@ -6474,6 +6801,19 @@
                                     <h6 class="fw-bold text-secondary mb-3"><i
                                             class="fas fa-gavel me-2"></i>Documentação de Recursos</h6>
                                     <div id="docs-recursos-container" class="d-flex flex-wrap gap-3"></div>
+                                </div>
+                            </div>
+
+                            <!-- Preview de Documento Integrado (Visualização Média) -->
+                            <div id="media-preview-box" class="card-container p-4 mt-4 d-none animate__animated animate__fadeIn">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="fw-bold text-primary" id="media-preview-title"><i class="fas fa-eye me-2"></i>Visualização Média</span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeMediaPreview()"><i class="fas fa-times me-1"></i>Fechar Visualização</button>
+                                </div>
+                                <div class="media-preview-content d-flex justify-content-center align-items-center bg-light rounded" style="min-height: 400px; max-height: 500px; overflow: auto; border: 1px dashed var(--border-color);">
+                                    <div id="media-preview-loading" class="spinner-border text-primary d-none" role="status"></div>
+                                    <iframe id="media-preview-iframe" class="d-none w-100" style="height: 450px; border: 0;"></iframe>
+                                    <img id="media-preview-img" class="img-fluid d-none rounded shadow-sm" style="max-height: 450px; object-fit: contain;">
                                 </div>
                             </div>
                         </div>
