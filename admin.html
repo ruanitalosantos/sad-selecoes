@@ -3672,7 +3672,7 @@
                         <td>${e.nomecompleto}</td>
                         <td>${e.cpf}</td>
                         <td>${formatCategoria(e.categoria)}</td>
-                        <td><button class="btn btn-outline-primary btn-sm" onclick="openAnalyzer('${e.id_cadastro || e.idcadastro}', true)" title="Visualizar Inscrição"><i class="fas fa-eye"></i></button></td>
+                        <td><button class="btn btn-outline-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', true)" title="Visualizar Inscrição"><i class="fas fa-eye"></i></button></td>
                     </tr>
                 `).join('');
             }
@@ -3717,7 +3717,7 @@
                         <td>${formatDate(e.created_at, true)}</td>
                         <td>${renderCidadeBadge(e)}</td>
                         <td>${renderAnalystTag(e)}</td>
-                        <td><button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.id_cadastro}', false, 'homologacao')">Analisar</button></td>
+                        <td><button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'homologacao')">Analisar</button></td>
                     </tr>
                 `).join('');
             }
@@ -3748,7 +3748,7 @@
                             <td class="font-monospace small text-muted">${maskCPF(e.cpf)}</td>
                             <td><span class="badge bg-primary bg-opacity-75">${formatCategoria(e.categoria) || '---'}</span></td>
                             <td><span class="badge ${badgeClass}">${status}</span></td>
-                            <td><button class="btn btn-outline-primary btn-sm" onclick="openAnalyzer('${e.id_cadastro || e.idcadastro}', true, 'resultado_homologacao')" title="Visualizar Inscrição"><i class="fas fa-eye"></i></button></td>
+                            <td><button class="btn btn-outline-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'resultado_homologacao')" title="Visualizar Inscrição"><i class="fas fa-eye"></i></button></td>
                         </tr>
                     `;
                 }).join('') || '<tr><td colspan="7" class="text-center py-4">Nenhum resultado disponível.</td></tr>';
@@ -3795,7 +3795,7 @@
                             <td>${scores.formacao}</td>
                             <td>${scores.experiencia}</td>
                             <td class="fw-bold">${scores.total}</td>
-                            <td><button class="btn btn-outline-primary btn-sm" onclick="openAnalyzer('${e.id_cadastro || e.idcadastro}', true)" title="Visualizar Inscrição"><i class="fas fa-eye"></i></button></td>
+                            <td><button class="btn btn-outline-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', true)" title="Visualizar Inscrição"><i class="fas fa-eye"></i></button></td>
                         </tr>
                     `;
                 }).join('') || '<tr><td colspan="10" class="text-center py-4">Nenhum dado disponível.</td></tr>';
@@ -3868,7 +3868,7 @@
                             <td>${calculatePoints(e)} pts</td>
                             <td>${flagHtml}</td>
                             <td>${renderAnalystTag(e)}</td>
-                            <td><button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.id_cadastro}', false, 'humano')">Analisar</button></td>
+                            <td><button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'humano')">Analisar</button></td>
                         </tr>
                     `;
                 }).join('');
@@ -3893,10 +3893,10 @@
                         } else {
                             statusMotivoHtml = `<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Aguardando Análise</span>`;
                         }
-                        actionsHtml = `<button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.id_cadastro}', false, 'criterios_humanos')">Analisar</button>`;
+                        actionsHtml = `<button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')">Analisar</button>`;
                     } else {
                         statusMotivoHtml = `<span class="text-danger small fw-bold" title="Análise curricular ou julgamento curricular não é Sim"><i class="fas fa-ban me-1"></i>Apenas visualização - Sem aprovação curricular</span>`;
-                        actionsHtml = `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.id_cadastro}', true, 'criterios_humanos')" title="Visualizar Inscrição"><i class="fas fa-eye text-muted"></i> Visualizar</button>`;
+                        actionsHtml = `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Visualizar Inscrição"><i class="fas fa-eye text-muted"></i> Visualizar</button>`;
                     }
 
                     return `
@@ -3941,8 +3941,8 @@
                         const isReadOnly = !isMeOrFree;
 
                         const actionBtn = isReadOnly
-                            ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.id_cadastro}', true, 'recursos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
-                            : `<button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.id_cadastro}', false, 'recursos')">${status === 'Pendente' ? 'Julgar' : 'Visualizar'}</button>`;
+                            ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'recursos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
+                            : `<button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'recursos')">${status === 'Pendente' ? 'Julgar' : 'Visualizar'}</button>`;
 
                         return `
                             <tr>
@@ -5547,7 +5547,7 @@
                         atividade_habilitada: "ATV-002",
                         inscricao: e.inscricao,
                         analista: loggedUser,
-                        acatado: acatado,
+                        acatado: acatado ? "Sim" : "Não",
                         analisecurricular: acatado ? "Sim" : "Não",
                         justificativa: acatado ? "" : justificativa,
                         pontuacao_formacao: ptsFormacao,
@@ -6906,6 +6906,56 @@
                                 </div>
                             </div>
 
+
+
+                            <div class="card-container p-4 mb-4" id="card-criterios-humanos">
+                                <h6 class="fw-bold text-primary mb-4 border-bottom pb-2">VALIDAÇÃO DE ANÁLISE CURRICULAR
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Critério</th>
+                                                <th>Valor Declarado</th>
+                                                <th>Detalhe/Faixa</th>
+                                                <th class="text-center">Pontos</th>
+                                                <th class="text-center">Validar</th>
+                                                <th>Justificativa (Se rejeitado)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Card de Análise de Recursos -->
+                            <div class="card-container p-4 mb-4 border-warning border-start border-4"
+                                id="card-analise-recursos" style="display: none;">
+                                <h6 class="fw-bold text-warning mb-4 border-bottom pb-2">
+                                    <i class="fas fa-gavel me-2"></i>ANÁLISE DE RECURSOS APRESENTADOS
+                                </h6>
+                                <div id="recursos-analise-items">
+                                    <!-- Itens de recursos serão preenchidos via JS -->
+                                </div>
+                            </div>
+
+                            <div class="card-container p-4">
+                                <h6 class="fw-bold text-primary mb-4 border-bottom pb-2">DOCUMENTAÇÃO DO CANDIDATO</h6>
+                                <div id="docs-loader" class="text-center py-4">
+                                    <div class="spinner-border text-primary spinner-border-sm"></div>
+                                    <span class="ms-2 small text-muted">Buscando anexos...</span>
+                                </div>
+                                <div id="wrapper-docs-gerais" class="mb-4">
+                                    <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-folder me-2"></i>Documentos
+                                        Gerais</h6>
+                                    <div id="docs-container" class="d-flex flex-wrap gap-3"></div>
+                                </div>
+                                <div id="wrapper-docs-recursos" class="mb-4 d-none">
+                                    <h6 class="fw-bold text-secondary mb-3"><i
+                                            class="fas fa-gavel me-2"></i>Documentação de Recursos</h6>
+                                    <div id="docs-recursos-container" class="d-flex flex-wrap gap-3"></div>
+                                </div>
+                            </div>
+
                             <!-- Card de Análise Curricular e Pontuação (aba humano) -->
                             <div class="card-container p-4 mb-4" id="card-analise-curricular" style="display: none;">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -6959,54 +7009,6 @@
                                             <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_psic" class="fw-semibold text-primary">0</span></div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="card-container p-4 mb-4" id="card-criterios-humanos">
-                                <h6 class="fw-bold text-primary mb-4 border-bottom pb-2">VALIDAÇÃO DE ANÁLISE CURRICULAR
-                                </h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Critério</th>
-                                                <th>Valor Declarado</th>
-                                                <th>Detalhe/Faixa</th>
-                                                <th class="text-center">Pontos</th>
-                                                <th class="text-center">Validar</th>
-                                                <th>Justificativa (Se rejeitado)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <!-- Card de Análise de Recursos -->
-                            <div class="card-container p-4 mb-4 border-warning border-start border-4"
-                                id="card-analise-recursos" style="display: none;">
-                                <h6 class="fw-bold text-warning mb-4 border-bottom pb-2">
-                                    <i class="fas fa-gavel me-2"></i>ANÁLISE DE RECURSOS APRESENTADOS
-                                </h6>
-                                <div id="recursos-analise-items">
-                                    <!-- Itens de recursos serão preenchidos via JS -->
-                                </div>
-                            </div>
-
-                            <div class="card-container p-4">
-                                <h6 class="fw-bold text-primary mb-4 border-bottom pb-2">DOCUMENTAÇÃO DO CANDIDATO</h6>
-                                <div id="docs-loader" class="text-center py-4">
-                                    <div class="spinner-border text-primary spinner-border-sm"></div>
-                                    <span class="ms-2 small text-muted">Buscando anexos...</span>
-                                </div>
-                                <div id="wrapper-docs-gerais" class="mb-4">
-                                    <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-folder me-2"></i>Documentos
-                                        Gerais</h6>
-                                    <div id="docs-container" class="d-flex flex-wrap gap-3"></div>
-                                </div>
-                                <div id="wrapper-docs-recursos" class="mb-4 d-none">
-                                    <h6 class="fw-bold text-secondary mb-3"><i
-                                            class="fas fa-gavel me-2"></i>Documentação de Recursos</h6>
-                                    <div id="docs-recursos-container" class="d-flex flex-wrap gap-3"></div>
                                 </div>
                             </div>
 
