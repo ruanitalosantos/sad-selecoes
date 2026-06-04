@@ -5393,6 +5393,9 @@
                 
                 const totalEl = document.getElementById('s_total');
                 if (totalEl) totalEl.innerText = `${total} / 100`;
+
+                const totalElCurricular = document.getElementById('nota_total_curricular_val');
+                if (totalElCurricular) totalElCurricular.innerText = `${total} / 100`;
             };
 
             window.toggleJustificativaDoc = () => {
@@ -5544,17 +5547,18 @@
                     const scoreFinalCurricular = acatado ? (ptsFormacao + ptsExperiencia) : 0;
 
                     payload = {
-                        atividade_habilitada: "ATV-002",
-                        inscricao: e.inscricao,
-                        analista: loggedUser,
-                        acatado: acatado ? "Sim" : "Não",
-                        analisecurricular: acatado ? "Sim" : "Não",
-                        justificativa: acatado ? "" : justificativa,
                         pontuacao_formacao: ptsFormacao,
                         semestres_capsi: semestresCapsi,
                         semestres_psic: semestresPsic,
-                        pontuacao_experiencia: ptsExperiencia,
-                        score_final: scoreFinalCurricular
+                        nota_total: scoreFinalCurricular,
+                        score_final: scoreFinalCurricular,
+                        inscricao: e.inscricao,
+                        nome: e.nomecompleto || e.nome || '',
+                        acatado: acatado ? "Sim" : "Não",
+                        analisecurricular: acatado ? "Sim" : "Não",
+                        justificativa: acatado ? "" : justificativa,
+                        analista: loggedUser,
+                        atividade_habilitada: "ATV-002"
                     };
                 } else {
                     // Critérios Humanos (PCD / PPNI)
@@ -5595,10 +5599,15 @@
                     };
                 }
 
-                console.log('Enviando payload para processar-analise:', payload);
+                let targetWebhook = 'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/processar-analise';
+                if (resolvedSourceTab === "humano") {
+                    targetWebhook = 'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/atualizarbancocomnota';
+                }
+
+                console.log('Enviando payload para:', targetWebhook, payload);
 
                 try {
-                    const res = await callWebhook('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/processar-analise', {
+                    const res = await callWebhook(targetWebhook, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -7008,6 +7017,12 @@
                                             <input type="number" id="num_semestres_psic" class="form-control" min="0" value="0" oninput="updatePontuacaoCurricular()">
                                             <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_psic" class="fw-semibold text-primary">0</span></div>
                                         </div>
+                                    </div>
+                                    
+                                    <!-- Nota Total Curricular -->
+                                    <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border-start border-4 border-primary" style="background-color: #f8fafc !important;">
+                                        <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Nota Total Curricular</span>
+                                        <span class="fs-4 fw-bold text-primary" id="nota_total_curricular_val">0 / 100</span>
                                     </div>
                                 </div>
                             </div>
