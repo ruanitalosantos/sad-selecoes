@@ -4583,13 +4583,15 @@
 
         function isSim(v) {
             if (v === null || v === undefined) return false;
-            const s = String(v).toLowerCase();
-            return s === 'sim' || s === '1' || s === 'true';
+            if (typeof v === 'boolean') return v;
+            const s = String(v).toLowerCase().trim();
+            return s === 'sim' || s === 'true' || s === '1' || s === 's';
         }
         function isNao(v) {
             if (v === null || v === undefined) return false;
-            const s = String(v).toLowerCase();
-            return s === 'não' || s === 'nao' || s === '0' || s === 'false';
+            if (typeof v === 'boolean') return !v;
+            const s = String(v).toLowerCase().trim();
+            return s === 'não' || s === 'nao' || s === '0' || s === 'false' || s === 'n';
         }
 
         async function fetchDocs(inscricao) {
