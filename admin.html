@@ -3881,7 +3881,7 @@
                 criteriaList.sort(prioritySort);
 
                 criteriaBody.innerHTML = criteriaList.map(e => {
-                    const isElegivel = e.analisecurricular === "Sim" || e.julcurricular === "Sim";
+                    const isElegivel = isSim(e.analisecurricular) || isSim(e.julcurricular);
                     
                     let statusMotivoHtml = "";
                     let actionsHtml = "";
@@ -4708,7 +4708,7 @@
             }
 
             // Regra específica para aba criterios_humanos: Bloqueado se análise curricular não for Sim
-            if (resolvedSourceTab === 'criterios_humanos' && !(e.analisecurricular === "Sim" || e.julcurricular === "Sim")) {
+            if (resolvedSourceTab === 'criterios_humanos' && !(isSim(e.analisecurricular) || isSim(e.julcurricular))) {
                 isReadOnly = true;
                 currentLock = "Apenas visualização: Candidato não elegível para análise nesta etapa pois a Análise Curricular não foi aprovada (diferente de 'Sim').";
             }
@@ -4949,22 +4949,57 @@
             `;
             };
 
-            if (resolvedSourceTab !== "humano" && valTableBody) {
-                valTableBody.innerHTML = `
-                    ${renderRow('Cotas PPNI', e.cotas_ppni || 'Não', 'Pretos, Pardos, Negros e Indígenas (20 pts)', 'p_cotas_ppni', 'val_cotas_ppni', isSim(e.cotas_ppni))}
-                    ${renderRow('PCD', e.is_pcd || e.pcd || 'Não', 'Pessoa com Deficiência (20 pts)', 'p_is_pcd', 'val_is_pcd', isSim(e.is_pcd) || isSim(e.pcd))}
-                `;
-            } else if (valTableBody) {
-                valTableBody.innerHTML = '';
-            }
+            window.toggleValidationJustification = (swId) => {
+                const sw = document.getElementById(swId);
+                const justInput = document.getElementById(`just_${swId}`);
+                if (sw && justInput) {
+                    justInput.style.display = sw.checked ? 'none' : 'block';
+                }
+            };
 
-            // Desabilitar inputs se for somente leitura
-            if (isReadOnly) {
-                setTimeout(() => {
+            window.updateValidationTable = () => {
+                if (!valTableBody) return;
+
+                if (resolvedSourceTab === "criterios_humanos") {
+                    let rowsHtml = '';
+                    const temPpni = isSim(e.cotas_ppni);
+                    const temPcd = isSim(e.is_pcd) || isSim(e.pcd);
+
+                    if (temPpni) {
+                        rowsHtml += renderRow('Cotas PPNI', e.cotas_ppni || 'Não', 'Pretos, Pardos, Negros e Indígenas (20 pts)', 'p_cotas_ppni', 'val_cotas_ppni', true);
+                    }
+                    if (temPcd) {
+                        rowsHtml += renderRow('PCD', e.is_pcd || e.pcd || 'Não', 'Pessoa com Deficiência (20 pts)', 'p_is_pcd', 'val_is_pcd', true);
+                    }
+
+                    valTableBody.innerHTML = rowsHtml || '<tr><td colspan="6" class="text-center py-3 text-muted">Candidato sem cotas declaradas.</td></tr>';
+                } else if (resolvedSourceTab !== "humano") {
+                    valTableBody.innerHTML = `
+                        ${renderRow('Cotas PPNI', e.cotas_ppni || 'Não', 'Pretos, Pardos, Negros e Indígenas (20 pts)', 'p_cotas_ppni', 'val_cotas_ppni', isSim(e.cotas_ppni))}
+                        ${renderRow('PCD', e.is_pcd || e.pcd || 'Não', 'Pessoa com Deficiência (20 pts)', 'p_is_pcd', 'val_is_pcd', isSim(e.is_pcd) || isSim(e.pcd))}
+                    `;
+                } else {
+                    valTableBody.innerHTML = '';
+                }
+
+                // Configurações de inputs baseadas em permissão
+                if (isReadOnly) {
                     document.querySelectorAll('.human-validation').forEach(sw => sw.disabled = true);
                     document.querySelectorAll('.validation-justification').forEach(inp => inp.disabled = true);
-                }, 100);
-            }
+                } else {
+                    // Adicionar listeners para os switches de validação humana
+                    document.querySelectorAll('.human-validation').forEach(sw => {
+                        sw.removeEventListener('change', updateLocalScore);
+                        sw.addEventListener('change', updateLocalScore);
+
+                        const swId = sw.id;
+                        sw.addEventListener('change', () => window.toggleValidationJustification(swId));
+                    });
+                }
+            };
+
+            // Executar primeira vez de forma síncrona
+            window.updateValidationTable();
 
             // Vincular funções de cálculo ao escopo do modal
             window.getAppPoints = getAppPoints;
@@ -5108,6 +5143,10 @@
 
                     updateCandidateDetailsUI(e);
 
+                    if (typeof window.updateValidationTable === 'function') {
+                        window.updateValidationTable();
+                    }
+
                     if (resolvedSourceTab === "humano") {
                         const acatarCurriculoSwitch = document.getElementById('val_acatar_curriculo');
                         const justCurriculoText = document.getElementById('just_acatar_curriculo');
@@ -5116,8 +5155,8 @@
                         const numPsic = document.getElementById('num_semestres_psic');
 
                         if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
-                            const isAprovadoCurriculo = e.analisecurricular === "Sim" || e.julcurricular === "Sim";
-                            const isRejeitadoCurriculo = e.analisecurricular === "Não" || e.analisecurricular === "Nao" || e.julcurricular === "Não" || e.julcurricular === "Nao";
+                            const isAprovadoCurriculo = isSim(e.analisecurricular) || isSim(e.julcurricular);
+                            const isRejeitadoCurriculo = isNao(e.analisecurricular) || isNao(e.julcurricular);
 
                             acatarCurriculoSwitch.checked = isAprovadoCurriculo;
                             acatarCurriculoSwitch.disabled = isReadOnly;
