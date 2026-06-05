@@ -4824,6 +4824,26 @@
                 item.pontuacao_experiencia = experienciaVal;
             }
 
+            // Normalize semestres_capsi / nota_exp1 / notaexp1
+            const capsiVal = (item.nota_exp1 !== undefined && item.nota_exp1 !== null && item.nota_exp1 !== '') ? item.nota_exp1 : 
+                             (item.notaexp1 !== undefined && item.notaexp1 !== null && item.notaexp1 !== '') ? item.notaexp1 : 
+                             (item.semestres_capsi !== undefined && item.semestres_capsi !== null && item.semestres_capsi !== '') ? item.semestres_capsi : null;
+            if (capsiVal !== null) {
+                item.nota_exp1 = capsiVal;
+                item.notaexp1 = capsiVal;
+                item.semestres_capsi = capsiVal;
+            }
+
+            // Normalize semestres_psic / notaexp2 / nota_exp2
+            const psicVal = (item.notaexp2 !== undefined && item.notaexp2 !== null && item.notaexp2 !== '') ? item.notaexp2 : 
+                            (item.nota_exp2 !== undefined && item.nota_exp2 !== null && item.nota_exp2 !== '') ? item.nota_exp2 : 
+                            (item.semestres_psic !== undefined && item.semestres_psic !== null && item.semestres_psic !== '') ? item.semestres_psic : null;
+            if (psicVal !== null) {
+                item.notaexp2 = psicVal;
+                item.nota_exp2 = psicVal;
+                item.semestres_psic = psicVal;
+            }
+
             return item;
         }
 
