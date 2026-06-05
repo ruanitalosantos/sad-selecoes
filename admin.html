@@ -3876,37 +3876,31 @@
 
             if (tabId === 'criterios_humanos' && document.getElementById('criterios-humanos-table')) {
                 const criteriaBody = document.getElementById('criterios-humanos-table');
-                let criteriaList = [...filtered];
+                let criteriaList = filtered.filter(e => isSim(e.cotas_ppni) || isSim(e.is_pcd) || isSim(e.pcd));
 
                 criteriaList.sort(prioritySort);
 
                 criteriaBody.innerHTML = criteriaList.map(e => {
                     const isElegivel = isSim(e.analisecurricular) || isSim(e.julcurricular);
-                    const temCotas = isSim(e.cotas_ppni) || isSim(e.is_pcd) || isSim(e.pcd);
                     
                     let statusMotivoHtml = "";
                     let actionsHtml = "";
 
-                    if (temCotas) {
-                        if (isElegivel) {
-                            const isAnalisado = e.validacoes && (e.validacoes.cotas_ppni !== undefined || e.validacoes.is_pcd !== undefined);
-                            if (isAnalisado) {
-                                statusMotivoHtml = `<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Analisado</span>`;
-                            } else {
-                                statusMotivoHtml = `<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Aguardando Análise</span>`;
-                            }
-                            actionsHtml = `
-                                <div class="d-flex gap-1">
-                                    <button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')">Analisar</button>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
-                                </div>
-                            `;
+                    if (isElegivel) {
+                        const isAnalisado = e.validacoes && (e.validacoes.cotas_ppni !== undefined || e.validacoes.is_pcd !== undefined);
+                        if (isAnalisado) {
+                            statusMotivoHtml = `<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Analisado</span>`;
                         } else {
-                            statusMotivoHtml = `<span class="text-danger small fw-bold" title="Análise curricular ou julgamento curricular não é Sim"><i class="fas fa-ban me-1"></i>Apenas visualização - Sem aprovação curricular</span>`;
-                            actionsHtml = `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Visualizar Inscrição"><i class="fas fa-eye text-muted"></i> Visualizar</button>`;
+                            statusMotivoHtml = `<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Aguardando Análise</span>`;
                         }
+                        actionsHtml = `
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')">Analisar</button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
+                            </div>
+                        `;
                     } else {
-                        statusMotivoHtml = `<span class="badge bg-secondary text-white" title="Candidato não possui cotas declaradas (PCD ou PPNI)"><i class="fas fa-info-circle me-1"></i>Não Cotista</span>`;
+                        statusMotivoHtml = `<span class="text-danger small fw-bold" title="Análise curricular ou julgamento curricular não é Sim"><i class="fas fa-ban me-1"></i>Apenas visualização - Sem aprovação curricular</span>`;
                         actionsHtml = `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Visualizar Inscrição"><i class="fas fa-eye text-muted"></i> Visualizar</button>`;
                     }
 
@@ -3923,7 +3917,7 @@
                             <td>${actionsHtml}</td>
                         </tr>
                     `;
-                }).join('') || '<tr><td colspan="9" class="text-center py-4">Nenhum candidato encontrado.</td></tr>';
+                }).join('') || '<tr><td colspan="9" class="text-center py-4">Nenhum candidato PPNI/PCD encontrado.</td></tr>';
             }
 
             if (tabId === 'recursos' && document.getElementById('resource-table')) {
