@@ -778,6 +778,194 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
         }
+
+        /* --- Novas Estilizações de Design Premium (Critérios Humanos & Modais) --- */
+        .nav-item[data-tab="criterios_humanos"].active {
+            background: rgba(147, 51, 234, 0.1);
+            color: #9333ea;
+        }
+        
+        .nav-item[data-tab="cronograma"].active {
+            background: rgba(107, 114, 128, 0.1);
+            color: #4b5563;
+        }
+
+        .btn-sm {
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .table-badge {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+            text-transform: uppercase;
+        }
+        
+        .table-badge.success {
+            background: rgba(22, 101, 52, 0.08);
+            color: #166534;
+            border-color: rgba(22, 101, 52, 0.15);
+        }
+        
+        .table-badge.warning {
+            background: rgba(180, 83, 9, 0.08);
+            color: #b45309;
+            border-color: rgba(180, 83, 9, 0.15);
+        }
+        
+        .table-badge.danger {
+            background: rgba(153, 27, 27, 0.08);
+            color: #991b1b;
+            border-color: rgba(153, 27, 27, 0.15);
+        }
+        
+        .table-badge.secondary {
+            background: rgba(71, 85, 105, 0.08);
+            color: #475569;
+            border-color: rgba(71, 85, 105, 0.15);
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .btn-action i {
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .btn-action.btn-view {
+            padding: 6px 8px;
+        }
+
+        .score-preview-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid var(--primary);
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .score-preview-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .score-preview-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-metric {
+            padding: 10px 15px;
+            background: rgba(241, 245, 249, 0.6);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            transition: var(--transition);
+        }
+        
+        .score-metric:hover {
+            background: rgba(241, 245, 249, 1);
+            border-color: #cbd5e1;
+        }
+
+        .score-metric-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .score-metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        
+        .score-metric-value.highlight {
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        .curricular-result-banner {
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid transparent;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        
+        .curricular-result-banner.success {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: #bbf7d0;
+            border-left: 5px solid #166534;
+        }
+
+        .curricular-result-banner.danger {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: #fca5a5;
+            border-left: 5px solid #991b1b;
+        }
+
+        .curricular-result-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .curricular-result-banner.success .curricular-result-title {
+            color: #166534;
+        }
+
+        .curricular-result-banner.danger .curricular-result-title {
+            color: #991b1b;
+        }
+
+        .validation-justification {
+            border: 1.5px solid #fca5a5 !important;
+            background-color: #fef2f2 !important;
+            transition: var(--transition) !important;
+        }
+        
+        .validation-justification:focus {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+        }
     </style>
 </head>
 
@@ -2642,7 +2830,7 @@
 
                 // Critérios Humanos contagem
                 if (isSim(e.cotas_ppni) || isSim(e.is_pcd) || isSim(e.pcd)) {
-                    if (e.analisecurricular === "Sim" || e.julcurricular === "Sim") {
+                    if (isSim(e.analisecurricular) || isSim(e.julcurricular)) {
                         const isCriteriosHumanosAnalyzed = e.validacoes && (e.validacoes.cotas_ppni !== undefined || e.validacoes.is_pcd !== undefined);
                         if (isCriteriosHumanosAnalyzed) {
                             criteriaHumanAnalyzed++;
@@ -3885,15 +4073,15 @@
                     
                     const statusCotasHtml = isElegivel
                         ? (e.validacoes && (e.validacoes.cotas_ppni !== undefined || e.validacoes.is_pcd !== undefined)
-                            ? `<span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 small fw-semibold"><i class="fas fa-check-circle me-1"></i>Cotas: Ok</span>`
-                            : `<span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1.5 small fw-semibold" style="color: #b25e00 !important; background-color: rgba(255, 193, 7, 0.08) !important; border-color: rgba(255, 193, 7, 0.2) !important;"><i class="fas fa-clock me-1"></i>Cotas: Pendente</span>`)
-                        : `<span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 small fw-semibold" title="Análise curricular não aprovada"><i class="fas fa-ban me-1"></i>Cotas: Bloqueado</span>`;
+                            ? `<span class="table-badge success"><i class="fas fa-check-circle me-1"></i>Cotas: Ok</span>`
+                            : `<span class="table-badge warning"><i class="fas fa-clock me-1"></i>Cotas: Pendente</span>`)
+                        : `<span class="table-badge danger" title="Análise curricular não aprovada"><i class="fas fa-ban me-1"></i>Cotas: Bloqueado</span>`;
 
                     const curricularStatusHtml = isSim(e.analisecurricular) || isSim(e.julcurricular)
-                        ? `<span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 small fw-semibold"><i class="fas fa-graduation-cap me-1"></i>Currículo: Sim</span>`
+                        ? `<span class="table-badge success"><i class="fas fa-graduation-cap me-1"></i>Currículo: Sim</span>`
                         : isNao(e.analisecurricular) || isNao(e.julcurricular)
-                            ? `<span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 small fw-semibold"><i class="fas fa-graduation-cap me-1"></i>Currículo: Não</span>`
-                            : `<span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 small fw-semibold"><i class="fas fa-graduation-cap me-1"></i>Currículo: Pendente</span>`;
+                            ? `<span class="table-badge danger"><i class="fas fa-graduation-cap me-1"></i>Currículo: Não</span>`
+                            : `<span class="table-badge secondary"><i class="fas fa-graduation-cap me-1"></i>Currículo: Pendente</span>`;
 
                     const statusMotivoHtml = `
                         <div class="d-flex align-items-center gap-2">
@@ -3907,12 +4095,12 @@
                     if (isElegivel) {
                         actionsHtml = `
                             <div class="d-flex gap-1">
-                                <button class="btn btn-primary btn-sm px-2.5 py-1 fw-semibold" style="border-radius: 8px;" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')">Analisar</button>
-                                <button class="btn btn-outline-secondary btn-sm px-2 py-1" style="border-radius: 8px;" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
+                                <button class="btn btn-primary btn-sm btn-action" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')"><i class="fas fa-user-check me-1"></i>Analisar</button>
+                                <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
                             </div>
                         `;
                     } else {
-                        actionsHtml = `<button class="btn btn-outline-secondary btn-sm px-2.5 py-1 fw-semibold" style="border-radius: 8px;" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Visualizar Inscrição"><i class="fas fa-eye text-muted me-1"></i> Visualizar</button>`;
+                        actionsHtml = `<button class="btn btn-outline-secondary btn-sm btn-action fw-semibold" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Visualizar Inscrição"><i class="fas fa-eye text-muted me-1"></i>Visualizar</button>`;
                     }
 
                     return `
@@ -4811,23 +4999,22 @@
                 const isRejeitado = isNao(e.analisecurricular) || isNao(e.julcurricular);
 
                 if (isAprovado || isRejeitado) {
-                    const statusBadge = isAprovado
-                        ? '<span class="badge bg-success fs-6 px-3 py-2"><i class="fas fa-check me-1"></i>CURRÍCULO ACATADO</span>'
-                        : '<span class="badge bg-danger fs-6 px-3 py-2"><i class="fas fa-times me-1"></i>CURRÍCULO NÃO ACATADO</span>';
+                    const statusText = isAprovado ? 'Currículo Acatado' : 'Currículo Não Acatado';
+                    const iconClass = isAprovado ? 'fa-check-circle' : 'fa-times-circle';
                     const justCurricular = e.justcurricular || e.justificativacurricular || e.justificativa_curricular || '';
 
+                    resultadoCurricularCard.className = `curricular-result-banner ${isAprovado ? 'success' : 'danger'}`;
+
                     resultadoCurricularCard.innerHTML = `
-                        <div class="card-container p-4 mb-4 border-start border-4 ${isAprovado ? 'border-success' : 'border-danger'}">
-                            <h6 class="fw-bold mb-3 ${isAprovado ? 'text-success' : 'text-danger'}">
-                                <i class="fas fa-graduation-cap me-2"></i>RESULTADO DA ANÁLISE CURRICULAR
-                            </h6>
-                            <div class="mb-3">${statusBadge}</div>
-                            ${(!isAprovado && justCurricular) ? `
-                            <div class="alert alert-warning py-2 mb-0">
-                                <div class="small fw-bold text-uppercase text-muted mb-1">Justificativa de Rejeição Curricular</div>
-                                <p class="mb-0 small">${justCurricular}</p>
-                            </div>` : ''}
+                        <div class="curricular-result-title">
+                            <i class="fas ${iconClass} fs-5"></i>
+                            <span>${statusText}</span>
                         </div>
+                        ${(!isAprovado && justCurricular) ? `
+                        <div class="alert alert-warning py-2 mb-0 border-0 bg-white bg-opacity-50 text-dark">
+                            <div class="small fw-bold text-uppercase text-muted mb-1" style="font-size: 0.7rem;">Justificativa de Rejeição Curricular</div>
+                            <p class="mb-0 small fw-semibold">${justCurricular}</p>
+                        </div>` : ''}
                     `;
                     resultadoCurricularCard.style.display = 'block';
                 } else {
@@ -4862,7 +5049,7 @@
                     document.getElementById('human-preview-nota-total').innerText = (notaTotal !== '---') ? `${notaTotal} / 100` : '---';
                     document.getElementById('human-preview-formacao').innerText = (formacao !== '---') ? `${formacao} pts` : '---';
                     document.getElementById('human-preview-experiencia').innerText = (experiencia !== '---') ? `${experiencia} pts` : '---';
-                    document.getElementById('human-preview-semestres').innerText = `CAPSi: ${capsi} sem. / Psic: ${psic} sem.`;
+                    document.getElementById('human-preview-semestres').innerHTML = `CAPSi: ${capsi} sem.<br>Psic: ${psic} sem.`;
                 } else {
                     previewEl.style.display = 'none';
                 }
@@ -7033,25 +7220,35 @@
                                 <h6 class="fw-bold text-primary mb-4 border-bottom pb-2">VALIDAÇÃO DE ANÁLISE CURRICULAR
                                 </h6>
                                 
-                                <!-- Pontuação Curricular do Candidato (Visível apenas na aba de Critérios Humanos) -->
-                                <div id="human-score-preview" class="mb-4 p-3 bg-light rounded border-start border-4 border-primary" style="display: none; background-color: #f8fafc !important;">
-                                    <div class="fw-bold text-dark mb-2" style="font-size: 0.9rem;"><i class="fas fa-calculator text-primary me-2"></i>Pontuação Curricular do Candidato</div>
-                                    <div class="row g-2 text-center text-md-start">
+                                <div id="human-score-preview" class="score-preview-card" style="display: none;">
+                                    <div class="score-preview-title">
+                                        <i class="fas fa-calculator text-primary"></i>
+                                        <span>Pontuação Curricular Anterior</span>
+                                    </div>
+                                    <div class="row g-3">
                                         <div class="col-6 col-md-3">
-                                            <small class="text-muted d-block" style="font-size: 0.75rem;">Nota Total</small>
-                                            <span class="fw-bold fs-5 text-primary" id="human-preview-nota-total">---</span>
+                                            <div class="score-metric">
+                                                <div class="score-metric-label">Nota Total</div>
+                                                <div class="score-metric-value highlight" id="human-preview-nota-total">---</div>
+                                            </div>
                                         </div>
                                         <div class="col-6 col-md-3">
-                                            <small class="text-muted d-block" style="font-size: 0.75rem;">Formação</small>
-                                            <span class="fw-bold text-dark" id="human-preview-formacao">---</span>
+                                            <div class="score-metric">
+                                                <div class="score-metric-label">Formação</div>
+                                                <div class="score-metric-value" id="human-preview-formacao">---</div>
+                                            </div>
                                         </div>
                                         <div class="col-6 col-md-3">
-                                            <small class="text-muted d-block" style="font-size: 0.75rem;">Experiência</small>
-                                            <span class="fw-bold text-dark" id="human-preview-experiencia">---</span>
+                                            <div class="score-metric">
+                                                <div class="score-metric-label">Experiência</div>
+                                                <div class="score-metric-value" id="human-preview-experiencia">---</div>
+                                            </div>
                                         </div>
                                         <div class="col-12 col-md-3">
-                                            <small class="text-muted d-block" style="font-size: 0.75rem;">Tempo de Experiência</small>
-                                            <span class="small text-muted fw-semibold" id="human-preview-semestres">---</span>
+                                            <div class="score-metric h-100 d-flex flex-column justify-content-center">
+                                                <div class="score-metric-label">Semestres</div>
+                                                <div class="score-metric-value" style="font-size: 0.85rem; line-height: 1.4;" id="human-preview-semestres">---</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
