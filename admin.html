@@ -4777,47 +4777,10 @@
             // Exibir tag de lock no modal
             document.getElementById('analyzer-lock-tag').innerHTML = renderAnalystTag(e);
 
-            // Card de Resultado da Análise (modo somente leitura)
-            const resultadoCardId = 'card-resultado-analise';
-            let resultadoCard = document.getElementById(resultadoCardId);
-            if (!resultadoCard) {
-                resultadoCard = document.createElement('div');
-                resultadoCard.id = resultadoCardId;
-                const cardContainer = document.querySelector('#analyzerModal .modal-body .col-lg-8');
-                if (cardContainer) cardContainer.prepend(resultadoCard);
-            }
-
-            if (isReadOnly) {
-                const acatado = (e.analiseinscricao !== undefined && e.analiseinscricao !== null && e.analiseinscricao !== '')
-                    ? isTrue(e.analiseinscricao)
-                    : (e.acatado === true || e.acatado === 'true');
-                const justDoc = e.justinscricao || e.justificativa || e.justificativa_documental || '';
-                const statusDocBadge = acatado === true
-                    ? '<span class="badge bg-success fs-6 px-3 py-2"><i class="fas fa-check me-1"></i>INSCRI\u00c7\u00c3O ACATADA</span>'
-                    : acatado === false
-                        ? '<span class="badge bg-danger fs-6 px-3 py-2"><i class="fas fa-times me-1"></i>INSCRI\u00c7\u00c3O N\u00c3O ACATADA</span>'
-                        : '';
-
-                if (statusDocBadge) {
-                    resultadoCard.innerHTML = `
-                        <div class="card-container p-4 mb-4 border-start border-4 ${acatado ? 'border-success' : 'border-danger'
-                        }">
-                            <h6 class="fw-bold mb-3 ${acatado ? 'text-success' : 'text-danger'
-                        }"><i class="fas fa-file-contract me-2"></i>RESULTADO DA AN\u00c1LISE DOCUMENTAL</h6>
-                            <div class="mb-3">${statusDocBadge}</div>
-                            ${justDoc ? `
-                            <div class="alert alert-warning py-2 mb-0">
-                                <div class="small fw-bold text-uppercase text-muted mb-1">Justificativa de Rejei\u00e7\u00e3o</div>
-                                <p class="mb-0 small">${justDoc}</p>
-                            </div>` : ''}
-                        </div>
-                    `;
-                    resultadoCard.style.display = 'block';
-                } else {
-                    resultadoCard.style.display = 'none';
-                }
-            } else {
-                if (resultadoCard) resultadoCard.style.display = 'none';
+            // Remover card de resultado de análise documental no topo
+            const oldResultadoCard = document.getElementById('card-resultado-analise');
+            if (oldResultadoCard) {
+                oldResultadoCard.remove();
             }
 
             // 1. Atualizar Título e Dados de Identificação
