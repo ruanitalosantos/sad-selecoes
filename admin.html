@@ -4777,11 +4777,54 @@
             // Exibir tag de lock no modal
             document.getElementById('analyzer-lock-tag').innerHTML = renderAnalystTag(e);
 
-            // Remover card de resultado de análise documental no topo
+            // Remover card de resultado de análise documental no topo se existir
             const oldResultadoCard = document.getElementById('card-resultado-analise');
             if (oldResultadoCard) {
                 oldResultadoCard.remove();
             }
+
+            // Card de Resultado da Análise Curricular
+            const resultadoCurricularCardId = 'card-resultado-curricular';
+            let resultadoCurricularCard = document.getElementById(resultadoCurricularCardId);
+            if (!resultadoCurricularCard) {
+                resultadoCurricularCard = document.createElement('div');
+                resultadoCurricularCard.id = resultadoCurricularCardId;
+                const cardContainer = document.querySelector('#analyzerModal .modal-body .col-lg-8');
+                if (cardContainer) cardContainer.prepend(resultadoCurricularCard);
+            }
+
+            const updateHumanResultCardUI = () => {
+                if (!resultadoCurricularCard) return;
+
+                const isAprovado = isSim(e.analisecurricular) || isSim(e.julcurricular);
+                const isRejeitado = isNao(e.analisecurricular) || isNao(e.julcurricular);
+
+                if (isAprovado || isRejeitado) {
+                    const statusBadge = isAprovado
+                        ? '<span class="badge bg-success fs-6 px-3 py-2"><i class="fas fa-check me-1"></i>CURRÍCULO ACATADO</span>'
+                        : '<span class="badge bg-danger fs-6 px-3 py-2"><i class="fas fa-times me-1"></i>CURRÍCULO NÃO ACATADO</span>';
+                    const justCurricular = e.justcurricular || e.justificativacurricular || e.justificativa_curricular || '';
+
+                    resultadoCurricularCard.innerHTML = `
+                        <div class="card-container p-4 mb-4 border-start border-4 ${isAprovado ? 'border-success' : 'border-danger'}">
+                            <h6 class="fw-bold mb-3 ${isAprovado ? 'text-success' : 'text-danger'}">
+                                <i class="fas fa-graduation-cap me-2"></i>RESULTADO DA ANÁLISE CURRICULAR
+                            </h6>
+                            <div class="mb-3">${statusBadge}</div>
+                            ${(!isAprovado && justCurricular) ? `
+                            <div class="alert alert-warning py-2 mb-0">
+                                <div class="small fw-bold text-uppercase text-muted mb-1">Justificativa de Rejeição Curricular</div>
+                                <p class="mb-0 small">${justCurricular}</p>
+                            </div>` : ''}
+                        </div>
+                    `;
+                    resultadoCurricularCard.style.display = 'block';
+                } else {
+                    resultadoCurricularCard.style.display = 'none';
+                }
+            };
+
+            updateHumanResultCardUI();
 
             // 1. Atualizar Título e Dados de Identificação
             document.getElementById('analyzer-name').innerText = e.nomecompleto || 'Analisador de Inscrição';
@@ -5146,6 +5189,10 @@
 
                     if (typeof updateHumanScorePreviewUI === 'function') {
                         updateHumanScorePreviewUI();
+                    }
+
+                    if (typeof updateHumanResultCardUI === 'function') {
+                        updateHumanResultCardUI();
                     }
 
                     if (typeof window.updateValidationTable === 'function') {
