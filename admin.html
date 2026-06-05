@@ -2706,7 +2706,7 @@
                 const data = await response.json();
                 const normalized = (data || []).map(item => {
                     const idVal = item.id || item.id_cadastro || item.idcadastro || '';
-                    return {
+                    const mapped = {
                         ...item,
                         nomecompleto: item.nomecompleto || item.nome || '',
                         id_cadastro: idVal,
@@ -2714,6 +2714,7 @@
                         atividade_habilitada: item.atividade_habilitada || item.atividadehabilit || '',
                         categoria: item.categoria || item.cargo || ''
                     };
+                    return normalizeCandidateScores(mapped);
                 });
                 const uniqueByCPF = new Map();
                 normalized.forEach(item => {
@@ -2766,7 +2767,7 @@
                     const data = await response.json();
                     rankingData = (data || []).map(item => {
                         const idVal = item.id || item.id_cadastro || item.idcadastro || '';
-                        return {
+                        const mapped = {
                             ...item,
                             nomecompleto: item.nomecompleto || item.nome || '',
                             id_cadastro: idVal,
@@ -2774,6 +2775,7 @@
                             atividade_habilitada: item.atividade_habilitada || item.atividadehabilit || '',
                             categoria: item.categoria || item.cargo || ''
                         };
+                        return normalizeCandidateScores(mapped);
                     });
                 }
             } catch (error) {
@@ -4793,6 +4795,38 @@
             return s === 'não' || s === 'nao' || s === '0' || s === 'false' || s === 'n';
         }
 
+        function normalizeCandidateScores(item) {
+            if (!item) return item;
+            
+            // Normalize nota / nota_total / score_final
+            const notaVal = (item.nota !== undefined && item.nota !== null && item.nota !== '') ? item.nota : 
+                            (item.nota_total !== undefined && item.nota_total !== null && item.nota_total !== '') ? item.nota_total : 
+                            (item.score_final !== undefined && item.score_final !== null && item.score_final !== '') ? item.score_final : null;
+            if (notaVal !== null) {
+                item.nota = notaVal;
+                item.nota_total = notaVal;
+                item.score_final = notaVal;
+            }
+
+            // Normalize nprovatitulos / pontuacao_formacao
+            const formacaoVal = (item.nprovatitulos !== undefined && item.nprovatitulos !== null && item.nprovatitulos !== '') ? item.nprovatitulos : 
+                                (item.pontuacao_formacao !== undefined && item.pontuacao_formacao !== null && item.pontuacao_formacao !== '') ? item.pontuacao_formacao : null;
+            if (formacaoVal !== null) {
+                item.nprovatitulos = formacaoVal;
+                item.pontuacao_formacao = formacaoVal;
+            }
+
+            // Normalize notaexperiencia / pontuacao_experiencia
+            const experienciaVal = (item.notaexperiencia !== undefined && item.notaexperiencia !== null && item.notaexperiencia !== '') ? item.notaexperiencia : 
+                                   (item.pontuacao_experiencia !== undefined && item.pontuacao_experiencia !== null && item.pontuacao_experiencia !== '') ? item.pontuacao_experiencia : null;
+            if (experienciaVal !== null) {
+                item.notaexperiencia = experienciaVal;
+                item.pontuacao_experiencia = experienciaVal;
+            }
+
+            return item;
+        }
+
         async function fetchDocs(inscricao) {
             try {
                 const response = await callWebhook('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultaranexosraps', {
@@ -4896,9 +4930,10 @@
         async function openAnalyzer(idOrInsc, forceReadOnly = false, sourceTab = null) {
             const e = allEnrollments.find(x => (x.id_cadastro == idOrInsc || x.idcadastro == idOrInsc || x.inscricao == idOrInsc));
             if (!e) {
-                console.error('Inscrição não encontrada:', id);
+                console.error('Inscrição não encontrada:', idOrInsc);
                 return;
             }
+            normalizeCandidateScores(e);
 
             const me = getCurrentAnalyst();
             const isRestricted = isUserRestricted();
@@ -5382,6 +5417,8 @@
                     const tempAnalyst = e.analista;
                     Object.assign(e, richData);
                     if (!e.analista && tempAnalyst) e.analista = tempAnalyst;
+
+                    normalizeCandidateScores(e);
 
                     updateCandidateDetailsUI(e);
 
