@@ -3845,8 +3845,8 @@
                 }
 
                 humanBody.innerHTML = humanList.map(e => {
-                    const hasAnalisecurricularSim = e.analisecurricular === "Sim" || e.julcurricular === "Sim";
-                    const hasAnalisecurricularNao = e.analisecurricular === "Não" || e.analisecurricular === "Nao" || e.julcurricular === "Não" || e.julcurricular === "Nao";
+                    const hasAnalisecurricularSim = isSim(e.analisecurricular) || isSim(e.julcurricular);
+                    const hasAnalisecurricularNao = isNao(e.analisecurricular) || isNao(e.julcurricular);
                     let flagText = "Não analisado";
                     let flagClass = "bg-secondary";
                     if (hasAnalisecurricularSim) {
@@ -3883,24 +3883,45 @@
                 criteriaBody.innerHTML = criteriaList.map(e => {
                     const isElegivel = isSim(e.analisecurricular) || isSim(e.julcurricular);
                     
+                    const curricularStatusHtml = isSim(e.analisecurricular) || isSim(e.julcurricular)
+                        ? `<span class="badge bg-success bg-opacity-75 ms-1" style="font-size: 0.75rem;" title="Análise Curricular Aprovada"><i class="fas fa-graduation-cap me-1"></i>Curricular: Sim</span>`
+                        : isNao(e.analisecurricular) || isNao(e.julcurricular)
+                            ? `<span class="badge bg-danger bg-opacity-75 ms-1" style="font-size: 0.75rem;" title="Análise Curricular Rejeitada"><i class="fas fa-graduation-cap me-1"></i>Curricular: Não</span>`
+                            : `<span class="badge bg-secondary bg-opacity-75 ms-1" style="font-size: 0.75rem;" title="Análise Curricular Pendente"><i class="fas fa-graduation-cap me-1"></i>Curricular: Pendente</span>`;
+
                     let statusMotivoHtml = "";
                     let actionsHtml = "";
 
                     if (isElegivel) {
                         const isAnalisado = e.validacoes && (e.validacoes.cotas_ppni !== undefined || e.validacoes.is_pcd !== undefined);
                         if (isAnalisado) {
-                            statusMotivoHtml = `<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Analisado</span>`;
+                            statusMotivoHtml = `
+                                <div class="d-flex flex-column gap-1 align-items-center">
+                                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Analisado</span>
+                                    ${curricularStatusHtml}
+                                </div>
+                            `;
                         } else {
-                            statusMotivoHtml = `<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Aguardando Análise</span>`;
+                            statusMotivoHtml = `
+                                <div class="d-flex flex-column gap-1 align-items-center">
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Aguardando Análise</span>
+                                    ${curricularStatusHtml}
+                                </div>
+                            `;
                         }
                         actionsHtml = `
-                            <div class="d-flex gap-1">
+                            <div class="d-flex gap-1 justify-content-center">
                                 <button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')">Analisar</button>
                                 <button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
                             </div>
                         `;
                     } else {
-                        statusMotivoHtml = `<span class="text-danger small fw-bold" title="Análise curricular ou julgamento curricular não é Sim"><i class="fas fa-ban me-1"></i>Apenas visualização - Sem aprovação curricular</span>`;
+                        statusMotivoHtml = `
+                            <div class="d-flex flex-column gap-1 align-items-center">
+                                <span class="text-danger small fw-bold text-center" title="Análise curricular ou julgamento curricular não é Sim"><i class="fas fa-ban me-1"></i>Apenas visualização - Sem aprovação curricular</span>
+                                ${curricularStatusHtml}
+                            </div>
+                        `;
                         actionsHtml = `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Visualizar Inscrição"><i class="fas fa-eye text-muted"></i> Visualizar</button>`;
                     }
 
