@@ -850,7 +850,7 @@
             <div class="nav-item">
                 <a href="#" class="nav-link" data-tab="resumo"><i class="fas fa-clipboard-list"></i><span>Resumo</span></a>
             </div>
-            <div class="nav-item">
+            <div class="nav-item" id="navItemRecursos" style="display:none">
                 <a href="#" class="nav-link" data-tab="recursos"><i class="fas fa-gavel"></i><span>Recursos</span></a>
             </div>
             <div class="nav-item d-none">
@@ -1750,13 +1750,14 @@
         <section id="recursos" class="tab-content">
             <div class="section-header">
                 <h2 class="section-title">Interposição de Recursos</h2>
-                <p class="text-muted">Acompanhe prazos e submeta recursos contra resultados preliminares.</p>
+                <p class="text-muted">Acompanhe e submeta recursos contra resultados preliminares.</p>
             </div>
-            <div class="card p-5 text-center">
+            <div id="recursosClosed" class="card p-5 text-center">
                 <i class="fas fa-gavel fa-4x text-muted mb-3 opacity-25"></i>
-                <h3 class="text-muted">Período de recursos fechado</h3>
-                <p class="text-muted">Consulte o cronograma da seleção para saber as datas de abertura de recursos.</p>
+                <h3 class="text-muted">Nenhum resultado disponível para recurso</h3>
+                <p class="text-muted">Os resultados preliminares ainda não foram divulgados ou não há inscrições a contestar.</p>
             </div>
+            <div id="recursosContent" class="hidden"></div>
         </section>
 
         <!-- Tab: Pontuação -->
@@ -4269,6 +4270,197 @@
       return wrapper;
     };
 
+    const ANALYSIS_FIELDS = [
+      { key: 'analisecurricular', justKey: 'justcurricular',  recursoKey: 'justreccurriculo', label: 'Análise Curricular' },
+      { key: 'analisecotas',      justKey: 'justcotas',       recursoKey: 'justreccotas',     label: 'Análise de Cotas (PPNI)' },
+      { key: 'analisepcd',        justKey: 'justpcd',         recursoKey: 'justrecpcd',       label: 'Análise PCD' },
+    ];
+
+    const buildRecursosContent = (items) => {
+      const contentEl  = document.getElementById('recursosContent');
+      const closedEl   = document.getElementById('recursosClosed');
+      const navItemEl  = document.getElementById('navItemRecursos');
+      if (!contentEl) return;
+      contentEl.innerHTML = '';
+
+      const isNegative = (v) => /^n[ãa]o$/i.test(String(v || '').trim());
+
+      const relevant = items.filter(item =>
+        ANALYSIS_FIELDS.some(f => String(item[f.key] || '').trim())
+      );
+
+      if (!relevant.length) return;
+
+      if (navItemEl)  navItemEl.style.display = '';
+      if (closedEl)   closedEl.classList.add('hidden');
+      contentEl.classList.remove('hidden');
+
+      relevant.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'card mb-4';
+
+        const hdr = document.createElement('div');
+        hdr.className = 'card-header bg-white border-bottom py-3';
+        const h5 = document.createElement('h5');
+        h5.className = 'mb-1 fw-bold text-primary';
+        h5.textContent = item.inscricao ? `Inscrição Nº ${item.inscricao}` : 'Inscrição';
+        const sub = document.createElement('div');
+        sub.className = 'text-muted small';
+        sub.textContent = [item.cargo, item.especialidade].filter(Boolean).join(' — ');
+        hdr.appendChild(h5);
+        if (sub.textContent) hdr.appendChild(sub);
+        card.appendChild(hdr);
+
+        const body = document.createElement('div');
+        body.className = 'card-body p-4';
+
+        const recursoTextareas = {};
+        let hasNegative = false;
+
+        ANALYSIS_FIELDS.forEach(({ key, justKey, recursoKey, label }) => {
+          const analiseVal = String(item[key] || '').trim();
+          if (!analiseVal) return;
+
+          const neg = isNegative(analiseVal);
+          if (neg) hasNegative = true;
+
+          const block = document.createElement('div');
+          block.className = 'section-block';
+
+          const title = document.createElement('h3');
+          title.className = 'section-title';
+          title.textContent = label;
+          block.appendChild(title);
+
+          const row = document.createElement('div');
+          row.className = 'row g-3';
+
+          // Resultado
+          const resCol = document.createElement('div');
+          resCol.className = 'col-12 col-md-4';
+          const resLbl = document.createElement('label');
+          resLbl.className = 'form-label';
+          resLbl.textContent = 'Resultado';
+          const resInput = document.createElement('input');
+          resInput.type = 'text';
+          resInput.className = 'form-control fw-bold';
+          resInput.readOnly = true;
+          resInput.style.backgroundColor = '#f8f9fb';
+          resInput.style.color = neg ? '#dc3545' : '#198754';
+          resInput.value = analiseVal;
+          resCol.appendChild(resLbl);
+          resCol.appendChild(resInput);
+          row.appendChild(resCol);
+
+          if (neg) {
+            const justVal = String(item[justKey] || '').trim();
+            if (justVal) {
+              const justCol = document.createElement('div');
+              justCol.className = 'col-12';
+              const justLbl = document.createElement('label');
+              justLbl.className = 'form-label';
+              justLbl.textContent = 'Justificativa da banca';
+              const justTa = document.createElement('textarea');
+              justTa.className = 'form-control';
+              justTa.readOnly = true;
+              justTa.rows = 3;
+              justTa.style.backgroundColor = '#f8f9fb';
+              justTa.style.resize = 'none';
+              justTa.value = justVal;
+              justCol.appendChild(justLbl);
+              justCol.appendChild(justTa);
+              row.appendChild(justCol);
+            }
+
+            const alreadySent = String(item[recursoKey] || '').trim();
+            const recCol = document.createElement('div');
+            recCol.className = 'col-12';
+            const recLbl = document.createElement('label');
+            recLbl.className = 'form-label fw-semibold';
+            recLbl.textContent = 'Seu recurso';
+            if (alreadySent) {
+              const sentBadge = document.createElement('span');
+              sentBadge.className = 'badge bg-success ms-2';
+              sentBadge.textContent = 'Enviado';
+              recLbl.appendChild(sentBadge);
+            }
+            const recTa = document.createElement('textarea');
+            recTa.className = 'form-control';
+            recTa.rows = 4;
+            recTa.placeholder = 'Descreva os motivos do seu recurso...';
+            if (alreadySent) {
+              recTa.value = alreadySent;
+              recTa.readOnly = true;
+              recTa.style.backgroundColor = '#f8f9fb';
+            }
+            recCol.appendChild(recLbl);
+            recCol.appendChild(recTa);
+            row.appendChild(recCol);
+            recursoTextareas[recursoKey] = recTa;
+          }
+
+          block.appendChild(row);
+          body.appendChild(block);
+        });
+
+        // Botão enviar — só se há análise negativa e pelo menos um campo ainda editável
+        if (hasNegative && Object.values(recursoTextareas).some(ta => !ta.readOnly)) {
+          const btnRow = document.createElement('div');
+          btnRow.className = 'mt-4 d-flex justify-content-end';
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn btn-primary px-4';
+          btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Recurso';
+
+          btn.addEventListener('click', async () => {
+            const payload = { id: item.id ?? item.inscricao };
+            let valid = true;
+
+            Object.entries(recursoTextareas).forEach(([key, ta]) => {
+              if (ta.readOnly) return;
+              const val = ta.value.trim();
+              if (!val) { ta.classList.add('is-invalid'); valid = false; }
+              else       { ta.classList.remove('is-invalid'); payload[key] = val; }
+            });
+
+            if (!valid) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
+
+            try {
+              const res = await fetch(
+                'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/receber-recurso-raps',
+                { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+              );
+              if (res.ok) {
+                Object.values(recursoTextareas).forEach(ta => {
+                  if (!ta.readOnly) { ta.readOnly = true; ta.style.backgroundColor = '#f8f9fb'; }
+                });
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Recurso enviado';
+                btn.className = 'btn btn-success px-4';
+              } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Recurso';
+                showFriendlyAlert('Não foi possível enviar o recurso. Tente novamente.', { title: 'Erro ao enviar', titleClass: 'text-danger' });
+              }
+            } catch (_) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Enviar Recurso';
+              showFriendlyAlert('Não foi possível enviar o recurso. Verifique sua conexão.', { title: 'Erro ao enviar', titleClass: 'text-danger' });
+            }
+          });
+
+          btnRow.appendChild(btn);
+          body.appendChild(btnRow);
+        }
+
+        card.appendChild(body);
+        contentEl.appendChild(card);
+      });
+    };
+
     const loadResumoInscricoes = async () => {
       const cpf = document.getElementById('cpf')?.value?.trim();
       const resultsEl = document.getElementById('resumoResults');
@@ -4348,7 +4540,8 @@
                 span.textContent = ` — ${parts.join(' — ')}`;
                 btn.appendChild(span);
               }
-              if (item.nota != null && item.nota !== '') {
+              const accNotaNum = Number(item.nota);
+              if (item.nota != null && item.nota !== '' && !isNaN(accNotaNum) && accNotaNum > 0) {
                 const badge = document.createElement('span');
                 badge.className = 'badge bg-primary ms-3';
                 badge.textContent = `Nota: ${item.nota}`;
@@ -4374,6 +4567,9 @@
             resultsEl.appendChild(accordion);
           }
         }
+
+        buildRecursosContent(items);
+
       } catch (error) {
         if (loadingEl) loadingEl.classList.add('hidden');
         if (emptyEl) emptyEl.classList.remove('hidden');
