@@ -4584,6 +4584,12 @@
                     }
                 }
 
+                const me = getCurrentAnalyst();
+                const nivelAnalista = getAnalystLevel();
+                const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
+                const isLeader = BANCA_LEADERS.includes(me);
+                const podeAnalisarCurricular = (nivelAnalista === 'todos' && !isLeader);
+
                 humanBody.innerHTML = humanList.map(e => {
                     const hasAnalisecurricularSim = isSim(e.analisecurricular);
                     const hasAnalisecurricularNao = isNao(e.analisecurricular);
@@ -4599,7 +4605,7 @@
                     const flagHtml = `<span class="badge ${flagClass}">${flagText}</span>`;
 
                     const isAlreadyAnalyzed = hasAnalisecurricularSim || hasAnalisecurricularNao;
-                    const actionButton = isAlreadyAnalyzed
+                    const actionButton = (isAlreadyAnalyzed || !podeAnalisarCurricular)
                         ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'humano')" title="Visualizar Inscrição"><i class="fas fa-eye me-1"></i>Visualizar</button>`
                         : `<button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'humano')">Analisar</button>`;
 
@@ -4622,6 +4628,11 @@
             if (tabId === 'criterios_humanos' && document.getElementById('criterios-humanos-table')) {
                 const criteriaBody = document.getElementById('criterios-humanos-table');
                 let criteriaList = filtered.filter(e => isSim(e.cotas_ppni) || isSim(e.is_pcd) || isSim(e.pcd));
+
+                const me = getCurrentAnalyst();
+                const nivelAnalista = getAnalystLevel();
+                const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
+                const isLeader = BANCA_LEADERS.includes(me);
 
                 criteriaList.sort(prioritySort);
 
@@ -4699,6 +4710,14 @@
                         // Verifica se está aguardando perícia médica
                         const aguardandoPericia = temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm) && (e.resultado_pericia === undefined || e.resultado_pericia === null || e.resultado_pericia === '');
 
+                        // Determinar se o usuário logado tem permissão de escrita/análise para este candidato de cotas
+                        let temPermissaoEscritaCotas = false;
+                        if (temPpni) {
+                            temPermissaoEscritaCotas = isLeader && !aguardandoVotosBanca;
+                        } else if (temPcd) {
+                            temPermissaoEscritaCotas = (nivelAnalista === 'todos' && !isLeader);
+                        }
+
                         if (aguardandoPericia) {
                             actionsHtml = `
                                 <div class="d-flex gap-1">
@@ -4708,17 +4727,32 @@
                             `;
                         } else if (!isCriteriosHumanosAnalyzed) {
                             if (aguardandoVotosBanca) {
+                                // Se for líder, avisa que aguarda banca. Se não for líder, mostra apenas botão normal de Visualizar
+                                if (isLeader) {
+                                    actionsHtml = `
+                                        <div class="d-flex gap-1">
+                                            <button class="btn btn-outline-warning btn-sm btn-action fw-semibold" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Aguardando 5 votos da banca (Atual: ${totalBancaVotes}/5)"><i class="fas fa-lock me-1"></i>Banca (${totalBancaVotes}/5)</button>
+                                            <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
+                                        </div>
+                                    `;
+                                } else {
+                                    actionsHtml = `
+                                        <div class="d-flex gap-1">
+                                            <button class="btn btn-outline-secondary btn-sm btn-action fw-semibold" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Visualizar Inscrição (Aguardando votos da banca)"><i class="fas fa-eye text-muted me-1"></i>Visualizar</button>
+                                        </div>
+                                    `;
+                                }
+                            } else if (temPermissaoEscritaCotas) {
                                 actionsHtml = `
                                     <div class="d-flex gap-1">
-                                        <button class="btn btn-outline-warning btn-sm btn-action fw-semibold" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Aguardando 5 votos da banca (Atual: ${totalBancaVotes}/5)"><i class="fas fa-lock me-1"></i>Banca (${totalBancaVotes}/5)</button>
+                                        <button class="btn btn-primary btn-sm btn-action" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')"><i class="fas fa-user-check me-1"></i>Analisar</button>
                                         <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
                                     </div>
                                 `;
                             } else {
                                 actionsHtml = `
                                     <div class="d-flex gap-1">
-                                        <button class="btn btn-primary btn-sm btn-action" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')"><i class="fas fa-user-check me-1"></i>Analisar</button>
-                                        <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
+                                        <button class="btn btn-outline-secondary btn-sm btn-action fw-semibold" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Visualizar Inscrição"><i class="fas fa-eye text-muted me-1"></i>Visualizar</button>
                                     </div>
                                 `;
                             }
@@ -4860,8 +4894,11 @@
                         }
 
                         const me = getCurrentAnalyst().trim();
+                        const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
+                        const isLeader = BANCA_LEADERS.includes(me);
+
                         const isMeOrFree = !e.analisa || e.analisa === me;
-                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal;
+                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal || !isLeader;
 
                         const actionBtn = isReadOnly
                             ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'recursos_humanos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
