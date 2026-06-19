@@ -4980,9 +4980,17 @@
                         const me = getCurrentAnalyst().trim();
                         const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
                         const isLeader = BANCA_LEADERS.includes(me);
+                        const nivelAnalista = getAnalystLevel();
+
+                        let temPermissaoEscritaRecurso = false;
+                        if (temRecPpni) {
+                            temPermissaoEscritaRecurso = isLeader;
+                        } else if (temRecPcd) {
+                            temPermissaoEscritaRecurso = (nivelAnalista === 'todos' && !isLeader);
+                        }
 
                         const isMeOrFree = !e.analisa || e.analisa === me;
-                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal || !isLeader;
+                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal || !temPermissaoEscritaRecurso;
 
                         const actionBtn = isReadOnly
                             ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'recursos_humanos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
@@ -6234,18 +6242,22 @@
                 }
             }
 
-            // 2. Restrições de Liderança (Presidente e Suplente) para Análise Curricular (humano) e Recurso de Cotas
-            if (resolvedSourceTab === 'humano') {
-                if (!isLeader) {
-                    forceReadOnly = true;
-                    isReadOnly = true;
-                    currentLock = "Modo Leitura: Apenas o Presidente (cristina.cavalcant) e seu Suplente (larissa.leite) podem analisar o currículo.";
-                }
-            } else if (resolvedSourceTab === 'recursos_humanos') {
-                if (!isLeader) {
-                    forceReadOnly = true;
-                    isReadOnly = true;
-                    currentLock = "Modo Leitura: Apenas o Presidente (cristina.cavalcant) e seu Suplente (larissa.leite) podem julgar recursos de cotas.";
+            // 2. Restrições de Liderança (Presidente e Suplente) para Recursos de Cotas (recursos_humanos)
+            if (resolvedSourceTab === 'recursos_humanos') {
+                if (temPpni) {
+                    // Apenas presidente/suplente julgam recurso de cotas PPNI
+                    if (!isLeader) {
+                        forceReadOnly = true;
+                        isReadOnly = true;
+                        currentLock = "Modo Leitura: Apenas o Presidente (cristina.cavalcant) e seu Suplente (larissa.leite) podem julgar recursos de cotas PPNI.";
+                    }
+                } else if (temPcd) {
+                    // Se for PCD puro, analistas de heteroidentificação (incluindo presidente/suplente) não podem julgar
+                    if (nivelAnalista === 'heteroidentificacao') {
+                        forceReadOnly = true;
+                        isReadOnly = true;
+                        currentLock = "Modo Leitura: Analista de nível 'heteroidentificacao' só pode julgar recursos de cotas PPNI.";
+                    }
                 }
             }
 
