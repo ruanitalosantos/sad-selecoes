@@ -3126,7 +3126,7 @@
 
         async function fetchEnrollments() {
             try {
-                const response = await callWebhook(ENDPOINT);
+                const response = await callWebhook(ENDPOINT + '?t=' + Date.now());
                 if (!response || !response.ok) {
                     console.warn('Falha ao consultar webhook de inscrições.');
                     return;
@@ -8894,7 +8894,7 @@
 
         async function fetchBancaEvaluations() {
             try {
-                const response = await callWebhook('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/heteroidentificacao', {
+                const response = await callWebhook('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/heteroidentificacao?t=' + Date.now(), {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
