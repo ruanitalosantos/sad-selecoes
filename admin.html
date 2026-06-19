@@ -3476,6 +3476,8 @@
                 }
             } catch (err) {
                 console.error('Erro na requisição de níveis dos analistas (usando "todos" como fallback):', err);
+            } finally {
+                updateAnalystDisplay();
             }
         }
 
@@ -3493,8 +3495,7 @@
             const nameEl = document.getElementById('logged-user-name');
             if (nameEl) nameEl.innerText = getMockNameFor(currentMockLogin);
 
-            const loginEl = document.getElementById('logged-user-ad');
-            if (loginEl) loginEl.innerText = currentMockLogin;
+            updateAnalystDisplay();
 
             let selectorHtml = `
                 <select id="local-user-mock-select" class="form-select form-select-sm mt-1" style="font-size: 0.75rem; padding: 0.15rem 0.5rem; height: auto; background-color: #f8f9fa; border: 1px solid #ced4da;">
@@ -3527,6 +3528,15 @@
             return 'Analista Comum';
         }
 
+        function updateAnalystDisplay() {
+            const loginEl = document.getElementById('logged-user-ad');
+            if (loginEl) {
+                const userLogin = getCurrentAnalyst();
+                const level = getAnalystLevel();
+                loginEl.innerText = `${userLogin} (Nível: ${level})`;
+            }
+        }
+
         function initializeSession() {
             if (!LOGGED_USER) {
                 setupLocalTestSelector();
@@ -3538,8 +3548,7 @@
             if (nameEl) nameEl.innerText = LOGGED_USER.nome;
 
             // Atualizar Login
-            const loginEl = document.getElementById('logged-user-ad');
-            if (loginEl) loginEl.innerText = LOGGED_USER.login;
+            updateAnalystDisplay();
 
             // Atualizar Avatar (Iniciais)
             const avatarEl = document.getElementById('logged-user-avatar');
