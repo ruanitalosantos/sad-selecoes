@@ -4644,11 +4644,19 @@
                     }
 
                     // Determinar o statusCotasHtml em cascata
+                    const bancaVotesPreliminar = (window.bancaEvaluations && window.bancaEvaluations[e.inscricao])?.filter(v => v.fase === 'preliminar') || [];
+                    const totalBancaVotes = bancaVotesPreliminar.length;
+                    const aguardandoVotosBanca = temPpni && totalBancaVotes < 5;
+
                     let statusCotasHtml = "";
                     if (!isElegivel) {
                         statusCotasHtml = `<span class="table-badge danger" title="Análise curricular não aprovada"><i class="fas fa-ban me-1"></i>Cotas: Bloqueado</span>`;
                     } else if (!isCriteriosHumanosAnalyzed) {
-                        statusCotasHtml = `<span class="table-badge warning"><i class="fas fa-clock me-1"></i>Cotas: Pendente</span>`;
+                        if (aguardandoVotosBanca) {
+                            statusCotasHtml = `<span class="table-badge warning" style="background-color: #fff3cd; color: #856404; border-color: #ffeeba;" title="Faltam votos da banca de heteroidentificação"><i class="fas fa-users me-1"></i>Banca: ${totalBancaVotes}/5</span>`;
+                        } else {
+                            statusCotasHtml = `<span class="table-badge warning"><i class="fas fa-clock me-1"></i>Cotas: Pendente</span>`;
+                        }
                     } else {
                         // Todas as cotas analisadas
                         // Se for PCD, foi aceito e exige perícia médica
@@ -4699,12 +4707,21 @@
                                 </div>
                             `;
                         } else if (!isCriteriosHumanosAnalyzed) {
-                            actionsHtml = `
-                                <div class="d-flex gap-1">
-                                    <button class="btn btn-primary btn-sm btn-action" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')"><i class="fas fa-user-check me-1"></i>Analisar</button>
-                                    <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
-                                </div>
-                            `;
+                            if (aguardandoVotosBanca) {
+                                actionsHtml = `
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-outline-warning btn-sm btn-action fw-semibold" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Aguardando 5 votos da banca (Atual: ${totalBancaVotes}/5)"><i class="fas fa-lock me-1"></i>Banca (${totalBancaVotes}/5)</button>
+                                        <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
+                                    </div>
+                                `;
+                            } else {
+                                actionsHtml = `
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-primary btn-sm btn-action" onclick="openAnalyzer('${e.inscricao}', false, 'criterios_humanos')"><i class="fas fa-user-check me-1"></i>Analisar</button>
+                                        <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
+                                    </div>
+                                `;
+                            }
                         } else {
                             // Se já analisado de cotas e sem perícia pendente -> apenas visualizar
                             actionsHtml = `
@@ -6077,13 +6094,42 @@
             }
 
             // Regras de acesso baseadas no nível do analista (todos vs heteroidentificacao)
-            const nivelAnalista = getAnalystLevel();
-            if (resolvedSourceTab === 'criterios_humanos') {
-                const forcarPpni = (e.mostrar_ppni !== undefined && e.mostrar_ppni !== null && e.mostrar_ppni !== '') ? isTrue(e.mostrar_ppni) : null;
-                const forcarPcd = (e.mostrar_pcd !== undefined && e.mostrar_pcd !== null && e.mostrar_pcd !== '') ? isTrue(e.mostrar_pcd) : null;
-                const temPpni = (forcarPpni !== null) ? forcarPpni : isSim(e.cotas_ppni);
-                const temPcd = (forcarPcd !== null) ? forcarPcd : (isSim(e.is_pcd) || isSim(e.pcd));
+            const forcarPpni = (e.mostrar_ppni !== undefined && e.mostrar_ppni !== null && e.mostrar_ppni !== '') ? isTrue(e.mostrar_ppni) : null;
+            const forcarPcd = (e.mostrar_pcd !== undefined && e.mostrar_pcd !== null && e.mostrar_pcd !== '') ? isTrue(e.mostrar_pcd) : null;
+            const temPpni = (forcarPpni !== null) ? forcarPpni : isSim(e.cotas_ppni);
+            const temPcd = (forcarPcd !== null) ? forcarPcd : (isSim(e.is_pcd) || isSim(e.pcd));
 
+            const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
+            const isLeader = BANCA_LEADERS.includes(me);
+            const nivelAnalista = getAnalystLevel();
+
+            // 1. Restrições Gerais para o nível de 'heteroidentificacao'
+            if (nivelAnalista === 'heteroidentificacao') {
+                const abasPermitidas = ['criterios_humanos', 'recursos_humanos'];
+                if (!abasPermitidas.includes(resolvedSourceTab)) {
+                    forceReadOnly = true;
+                    isReadOnly = true;
+                    currentLock = "Modo Leitura: Analista de nível 'heteroidentificacao' não possui permissão de escrita nesta aba.";
+                }
+            }
+
+            // 2. Restrições de Liderança (Presidente e Suplente) para Análise Curricular (humano) e Recurso de Cotas
+            if (resolvedSourceTab === 'humano') {
+                if (!isLeader) {
+                    forceReadOnly = true;
+                    isReadOnly = true;
+                    currentLock = "Modo Leitura: Apenas o Presidente (cristina.cavalcant) e seu Suplente (larissa.leite) podem analisar o currículo.";
+                }
+            } else if (resolvedSourceTab === 'recursos_humanos') {
+                if (!isLeader) {
+                    forceReadOnly = true;
+                    isReadOnly = true;
+                    currentLock = "Modo Leitura: Apenas o Presidente (cristina.cavalcant) e seu Suplente (larissa.leite) podem julgar recursos de cotas.";
+                }
+            }
+
+            // 3. Regras Específicas para Análise de Critérios Humanos (PPNI/PCD)
+            if (resolvedSourceTab === 'criterios_humanos') {
                 // Se as cotas do candidato já estiverem completamente analisadas, trava em modo leitura
                 let isCriteriosHumanosAnalyzed = true;
                 if (temPpni && (e.analisecotas === undefined || e.analisecotas === null || e.analisecotas === '')) {
@@ -6100,26 +6146,40 @@
                     forceReadOnly = true;
                     isReadOnly = true;
                     currentLock = "Modo Leitura: A análise de cotas para este candidato já foi concluída e homologada.";
-                }
+                } else {
+                    // Candidato não analisado ainda. Aplicar regras de permissão adicionais:
+                    if (temPpni) {
+                        // Regra de Liderança para PPNI
+                        if (!isLeader) {
+                            forceReadOnly = true;
+                            isReadOnly = true;
+                            currentLock = "Modo Leitura: Apenas o Presidente (cristina.cavalcant) e seu Suplente (larissa.leite) podem analisar candidatos PPNI.";
+                        } else {
+                            // Regra dos 5 Votos da Banca na Fase Preliminar
+                            const bancaVotesPreliminar = (window.bancaEvaluations && window.bancaEvaluations[e.inscricao])?.filter(v => v.fase === 'preliminar') || [];
+                            const totalBancaVotes = bancaVotesPreliminar.length;
+                            if (totalBancaVotes < 5) {
+                                forceReadOnly = true;
+                                isReadOnly = true;
+                                currentLock = `Apenas Visualização: O candidato possui apenas ${totalBancaVotes} de 5 votos da banca na fase preliminar. A análise de critérios humanos só fica disponível após 5 votos.`;
+                            }
+                        }
+                    }
 
-                if (nivelAnalista === 'heteroidentificacao') {
-                    if (!temPpni) {
+                    // Se for analista de nível heteroidentificacao, só pode analisar se for PPNI (não PCD puro)
+                    if (nivelAnalista === 'heteroidentificacao' && !temPpni) {
                         forceReadOnly = true;
                         isReadOnly = true;
                         currentLock = "Modo Leitura: Analista do nível 'heteroidentificacao' só pode avaliar candidatos com cotas PPNI.";
                     }
-                } else if (nivelAnalista === 'todos') {
-                    if (!temPcd && !temPpni) {
-                        forceReadOnly = true;
-                        isReadOnly = true;
-                        currentLock = "Modo Leitura: Candidato sem cotas declaradas (PCD / PPNI) para análise.";
-                    }
                 }
-            } else if (nivelAnalista === 'heteroidentificacao') {
-                // Heteroidentificação não avalia análise curricular nem outras etapas
-                forceReadOnly = true;
-                isReadOnly = true;
-                currentLock = "Modo Leitura: Analista do nível 'heteroidentificacao' só possui permissão de escrita na aba de Critérios Humanos.";
+
+                // Se o analista for de nível 'todos', mas o candidato não possuir cotas PCD nem PPNI
+                if (nivelAnalista === 'todos' && !temPcd && !temPpni) {
+                    forceReadOnly = true;
+                    isReadOnly = true;
+                    currentLock = "Modo Leitura: Candidato sem cotas declaradas (PCD / PPNI) para análise.";
+                }
             }
 
             // Regra específica para abas de cotas: Bloqueado se análise curricular não for Sim
