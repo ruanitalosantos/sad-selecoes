@@ -3111,6 +3111,9 @@
 
         async function fetchEnrollments() {
             try {
+                // Obter contagem e votos atualizados da banca de heteroidentificação
+                await fetchBancaEvaluations();
+
                 const response = await callWebhook(ENDPOINT);
                 const data = await response.json();
                 const normalized = (data || []).map(item => {
@@ -8483,7 +8486,7 @@
             showLoader();
             try {
                 // Paralelizar chamadas para acelerar o carregamento
-                await Promise.all([fetchRPAMapping(), fetchEnrollments(), fetchRankingGeral(), fetchAnalystLevel()]);
+                await Promise.all([fetchRPAMapping(), fetchEnrollments(), fetchRankingGeral(), fetchAnalystLevel(), fetchBancaEvaluations()]);
             } catch (err) {
                 console.error("Erro na inicialização de dados:", err);
             } finally {
