@@ -3398,7 +3398,10 @@
         }
 
         function getCurrentAnalyst() {
-            return LOGGED_USER ? LOGGED_USER.login : 'sas_analista';
+            if (!LOGGED_USER) {
+                return localStorage.getItem('sas_mock_login') || 'sas_analista';
+            }
+            return LOGGED_USER.login;
         }
 
         function getCurrentAnalystCpf() {
@@ -3413,6 +3416,12 @@
         async function fetchAnalystLevel() {
             const userLogin = getCurrentAnalyst();
             window.currentAnalystLevel = 'todos';
+
+            if (!LOGGED_USER) {
+                window.currentAnalystLevel = localStorage.getItem('sas_mock_level') || 'todos';
+                console.log(`[Local Mock] Nível do analista simulado '${userLogin}':`, window.currentAnalystLevel);
+                return;
+            }
 
             if (userLogin === 'sas_analista') {
                 console.log('Ambiente local ou sem login detectado. Usando nível padrão "todos".');
@@ -3458,8 +3467,55 @@
             return window.currentAnalystLevel || 'todos';
         }
 
+        function setupLocalTestSelector() {
+            const footerEl = document.querySelector('.sidebar-footer .flex-grow-1');
+            if (!footerEl) return;
+
+            const currentMockLogin = localStorage.getItem('sas_mock_login') || 'sas_analista';
+            const currentMockLevel = localStorage.getItem('sas_mock_level') || 'todos';
+
+            const nameEl = document.getElementById('logged-user-name');
+            if (nameEl) nameEl.innerText = getMockNameFor(currentMockLogin);
+
+            const loginEl = document.getElementById('logged-user-ad');
+            if (loginEl) loginEl.innerText = currentMockLogin;
+
+            let selectorHtml = `
+                <select id="local-user-mock-select" class="form-select form-select-sm mt-1" style="font-size: 0.75rem; padding: 0.15rem 0.5rem; height: auto; background-color: #f8f9fa; border: 1px solid #ced4da;">
+                    <option value="sas_analista|todos" ${currentMockLogin === 'sas_analista' ? 'selected' : ''}>sas_analista (Todos)</option>
+                    <option value="cristina.cavalcant|heteroidentificacao" ${currentMockLogin === 'cristina.cavalcant' ? 'selected' : ''}>cristina.cavalcant (Hetero/Líder)</option>
+                    <option value="larissa.leite|heteroidentificacao" ${currentMockLogin === 'larissa.leite' ? 'selected' : ''}>larissa.leite (Hetero/Líder)</option>
+                    <option value="analista_hetero|heteroidentificacao" ${currentMockLogin === 'analista_hetero' ? 'selected' : ''}>analista_hetero (Hetero/Comum)</option>
+                </select>
+            `;
+
+            const oldSelect = document.getElementById('local-user-mock-select');
+            if (oldSelect) oldSelect.remove();
+
+            footerEl.insertAdjacentHTML('beforeend', selectorHtml);
+
+            const selectEl = document.getElementById('local-user-mock-select');
+            selectEl.addEventListener('change', async (e) => {
+                const [login, level] = e.target.value.split('|');
+                localStorage.setItem('sas_mock_login', login);
+                localStorage.setItem('sas_mock_level', level);
+                localStorage.setItem('sas_last_tab', window.currentTab || 'dashboard');
+                window.location.reload();
+            });
+        }
+
+        function getMockNameFor(login) {
+            if (login === 'cristina.cavalcant') return 'Cristina Cavalcant';
+            if (login === 'larissa.leite') return 'Larissa Leite';
+            if (login === 'analista_hetero') return 'Analista Hetero';
+            return 'Analista Comum';
+        }
+
         function initializeSession() {
-            if (!LOGGED_USER) return;
+            if (!LOGGED_USER) {
+                setupLocalTestSelector();
+                return;
+            }
 
             // Atualizar Nome no Header/Sidebar
             const nameEl = document.getElementById('logged-user-name');
