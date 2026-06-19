@@ -2971,6 +2971,9 @@
 
             if (tabId === 'humano' || tabId === 'criterios_humanos' || tabId === 'recursos' || tabId === 'recursos_humanos' || tabId === 'heteroidentificacao') {
                 showLoader();
+                if (tabId === 'criterios_humanos' || tabId === 'recursos_humanos' || tabId === 'heteroidentificacao') {
+                    fetchBancaEvaluations().catch(err => console.warn(err));
+                }
                 fetchEnrollments();
             } else if (tabId === 'ranking_geral') {
                 showLoader();
@@ -3111,10 +3114,11 @@
 
         async function fetchEnrollments() {
             try {
-                // Obter contagem e votos atualizados da banca de heteroidentificação
-                await fetchBancaEvaluations();
-
                 const response = await callWebhook(ENDPOINT);
+                if (!response || !response.ok) {
+                    console.warn('Falha ao consultar webhook de inscrições.');
+                    return;
+                }
                 const data = await response.json();
                 const normalized = (data || []).map(item => {
                     const idVal = item.id || item.id_cadastro || item.idcadastro || '';
@@ -8542,7 +8546,7 @@
             showLoader();
             try {
                 // Paralelizar chamadas para acelerar o carregamento
-                await Promise.all([fetchRPAMapping(), fetchEnrollments(), fetchRankingGeral(), fetchAnalystLevel(), fetchBancaEvaluations()]);
+                await Promise.all([fetchRPAMapping(), fetchEnrollments(), fetchRankingGeral(), fetchAnalystLevel()]);
             } catch (err) {
                 console.error("Erro na inicialização de dados:", err);
             } finally {
@@ -8556,6 +8560,9 @@
                     switchTab('dashboard');
                 }
                 hideLoader();
+                
+                // Obter dados da banca de heteroidentificação em background, sem bloquear o dashboard
+                fetchBancaEvaluations().catch(err => console.warn('Erro ao carregar banca em background:', err));
             }
 
             // Auto-refresh a cada 5 minutos
