@@ -2709,22 +2709,15 @@
 
         // Dados do Usuário Logado (substituídos pelo Code node do n8n antes de servir)
         const LOGGED_USER = (() => {
-            let login = '{{ login }}';
+            const login = '{{ login }}';
             if (!login || login.startsWith('{{')) {
-                login = 'ruan.santos';
-            }
-            let nivel = '{{ nivel }}';
-            if (login === 'ruan.santos') {
-                nivel = 'todos';
-            } else if (nivel.startsWith('{{')) {
-                nivel = 'todos';
+                return null;
             }
             return {
-                nome: login === 'ruan.santos' ? 'Ruan Santos' : '{{ nome }}',
+                nome: '{{ nome }}',
                 login,
                 perfil: '{{ perfil }}',
                 status: '{{ status }}',
-                nivel: nivel,
                 cpf: '{{ cpf }}'
             };
         })();
@@ -3412,8 +3405,54 @@
             return '';
         }
 
+        window.currentAnalystLevel = 'todos';
+
+        async function fetchAnalystLevel() {
+            const userLogin = getCurrentAnalyst();
+            window.currentAnalystLevel = 'todos';
+
+            if (userLogin === 'sas_analista') {
+                console.log('Ambiente local ou sem login detectado. Usando nível padrão "todos".');
+                return;
+            }
+
+            try {
+                const response = await fetch('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultarniveisanalistas');
+                if (response.ok) {
+                    const data = await response.json();
+                    let level = 'todos';
+                    if (Array.isArray(data)) {
+                        const found = data.find(item => {
+                            const itemLogin = item.login || item.usuario || item.username || item.email || '';
+                            return itemLogin.toLowerCase().trim() === userLogin.toLowerCase().trim();
+                        });
+                        if (found) {
+                            level = found.nivel || found.level || 'todos';
+                        }
+                    } else if (data && typeof data === 'object') {
+                        const keys = Object.keys(data);
+                        const matchedKey = keys.find(k => k.toLowerCase().trim() === userLogin.toLowerCase().trim());
+                        if (matchedKey) {
+                            const val = data[matchedKey];
+                            if (typeof val === 'object' && val !== null) {
+                                level = val.nivel || val.level || 'todos';
+                            } else {
+                                level = val;
+                            }
+                        }
+                    }
+                    window.currentAnalystLevel = level;
+                    console.log(`Nível do analista '${userLogin}' obtido dinamicamente do webhook:`, level);
+                } else {
+                    console.warn('Erro ao consultar níveis dos analistas (usando "todos" como fallback):', response.status);
+                }
+            } catch (err) {
+                console.error('Erro na requisição de níveis dos analistas (usando "todos" como fallback):', err);
+            }
+        }
+
         function getAnalystLevel() {
-            return LOGGED_USER ? (LOGGED_USER.nivel || 'todos') : 'todos';
+            return window.currentAnalystLevel || 'todos';
         }
 
         function initializeSession() {
@@ -8347,7 +8386,7 @@
             showLoader();
             try {
                 // Paralelizar chamadas para acelerar o carregamento
-                await Promise.all([fetchRPAMapping(), fetchEnrollments(), fetchRankingGeral()]);
+                await Promise.all([fetchRPAMapping(), fetchEnrollments(), fetchRankingGeral(), fetchAnalystLevel()]);
             } catch (err) {
                 console.error("Erro na inicialização de dados:", err);
             } finally {
@@ -8846,7 +8885,7 @@
 
                 // Placar Acumulado (Show details if votes >= 5 or if analyst is admin/final evaluator)
                 let placarHtml = "";
-                const isFinalEvaluator = (currentUser === 'ruan.santos' || LOGGED_USER.perfil === 'Gestor' || LOGGED_USER.perfil === 'gestor');
+                const isFinalEvaluator = (currentUser === 'ruan.santos' || (LOGGED_USER && (LOGGED_USER.perfil === 'Gestor' || LOGGED_USER.perfil === 'gestor')));
 
                 // Count yes/no votes
                 let simVotes = 0;
