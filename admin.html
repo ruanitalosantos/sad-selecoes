@@ -9173,27 +9173,17 @@
                 }
                 enquadra_indigena = enqRadio.value;
             } else if (classif === 'Negro') {
-                // Validate all phenotype rows
+                // Phenotype rows are optional, default to empty string if not answered
                 const phenoKeys = [
                     'pele_melanoderma', 'pele_feoderma', 'pele_leucoderma',
                     'cabelo_crespo', 'nariz_chato', 'boca_grossa',
                     'maxilar_saliente', 'macas_salientes'
                 ];
 
-                let missing = false;
                 phenoKeys.forEach(key => {
                     const checked = document.querySelector(`input[name="${key}"]:checked`);
-                    if (!checked) {
-                        missing = true;
-                    } else {
-                        fenotipo[key] = checked.value;
-                    }
+                    fenotipo[key] = checked ? checked.value : "";
                 });
-
-                if (missing) {
-                    Swal.fire('Ficha Incompleta', 'Por favor, responda "Sim" ou "Não" para todas as características fenotípicas.', 'warning');
-                    return;
-                }
 
                 const enqRadio = document.querySelector('input[name="banca_enquadra_negro"]:checked');
                 if (!enqRadio) {
