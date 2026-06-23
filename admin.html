@@ -2772,6 +2772,15 @@
             let lastResp;
             let lastError;
 
+            const fetchOptions = { ...options };
+            if (!fetchOptions.method || fetchOptions.method.toUpperCase() === 'GET') {
+                const headers = { ...fetchOptions.headers };
+                headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+                headers['Pragma'] = 'no-cache';
+                headers['Expires'] = '0';
+                fetchOptions.headers = headers;
+            }
+
             for (const server of servers) {
                 try {
                     const fullUrl = server + path;
@@ -2779,7 +2788,7 @@
                     const timeoutId = setTimeout(() => controller.abort(), 6000);
 
                     const response = await fetch(fullUrl, {
-                        ...options,
+                        ...fetchOptions,
                         signal: controller.signal
                     });
                     clearTimeout(timeoutId);
@@ -3285,18 +3294,18 @@
                         const temPcd = isSim(e.is_pcd) || isSim(e.pcd);
                         let isCriteriosHumanosAnalyzed = true;
 
-                        if (temPpni && (e.analisecotas === undefined || e.analisecotas === null || e.analisecotas === '')) {
-                            isCriteriosHumanosAnalyzed = false;
-                        }
-                        if (temPcd && (e.analisepcd === undefined || e.analisepcd === null || e.analisepcd === '')) {
-                            isCriteriosHumanosAnalyzed = false;
-                        }
-                        // Se exige perícia médica, só conclui quando a perícia tiver resultado
-                        if (temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm)) {
-                            if (e.resultado_pericia === undefined || e.resultado_pericia === null || e.resultado_pericia === '') {
-                                isCriteriosHumanosAnalyzed = false;
-                            }
-                        }
+                         if (temPpni && isEmptyVal(e.analisecotas)) {
+                             isCriteriosHumanosAnalyzed = false;
+                         }
+                         if (temPcd && isEmptyVal(e.analisepcd)) {
+                             isCriteriosHumanosAnalyzed = false;
+                         }
+                         // Se exige perícia médica, só conclui quando a perícia tiver resultado
+                         if (temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm)) {
+                             if (isEmptyVal(e.resultado_pericia)) {
+                                 isCriteriosHumanosAnalyzed = false;
+                             }
+                         }
                         if (!temPpni && !temPcd) {
                             isCriteriosHumanosAnalyzed = true;
                         }
@@ -3679,6 +3688,12 @@
             if (typeof v === 'boolean') return v;
             const s = String(v).toLowerCase().trim();
             return s === 'sim' || s === 'true' || s === '1' || s === 's';
+        }
+
+        function isEmptyVal(v) {
+            if (v === null || v === undefined) return true;
+            const s = String(v).toLowerCase().trim();
+            return s === '' || s === 'null' || s === 'undefined';
         }
 
         function maskCPF(cpf) {
@@ -4744,10 +4759,10 @@
 
                     // Verifica se a análise de cotas dele está concluída
                     let isCriteriosHumanosAnalyzed = true;
-                    if (temPpni && (e.analisecotas === undefined || e.analisecotas === null || e.analisecotas === '')) {
+                    if (temPpni && isEmptyVal(e.analisecotas)) {
                         isCriteriosHumanosAnalyzed = false;
                     }
-                    if (temPcd && (e.analisepcd === undefined || e.analisepcd === null || e.analisepcd === '')) {
+                    if (temPcd && isEmptyVal(e.analisepcd)) {
                         isCriteriosHumanosAnalyzed = false;
                     }
                     if (!temPpni && !temPcd) {
@@ -4808,7 +4823,7 @@
                     // Lógica de ações dinâmicas
                     if (isElegivel) {
                         // Verifica se está aguardando perícia médica
-                        const aguardandoPericia = temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm) && (e.resultado_pericia === undefined || e.resultado_pericia === null || e.resultado_pericia === '');
+                        const aguardandoPericia = temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm) && isEmptyVal(e.resultado_pericia);
 
                         // Determinar se o usuário logado tem permissão de escrita/análise para este candidato de cotas
                         let temPermissaoEscritaCotas = false;
@@ -6281,10 +6296,10 @@
             if (resolvedSourceTab === 'criterios_humanos') {
                 // Se as cotas do candidato já estiverem completamente analisadas, trava em modo leitura
                 let isCriteriosHumanosAnalyzed = true;
-                if (temPpni && (e.analisecotas === undefined || e.analisecotas === null || e.analisecotas === '')) {
+                if (temPpni && isEmptyVal(e.analisecotas)) {
                     isCriteriosHumanosAnalyzed = false;
                 }
-                if (temPcd && (e.analisepcd === undefined || e.analisepcd === null || e.analisepcd === '')) {
+                if (temPcd && isEmptyVal(e.analisepcd)) {
                     isCriteriosHumanosAnalyzed = false;
                 }
                 if (!temPpni && !temPcd) {
@@ -9062,12 +9077,12 @@
                 if (phase === 'preliminar') {
                     const approvedCurricular = isSim(e.analisecurricular) || isSim(e.julcurricular);
                     const isPpni = isSim(e.cotas_ppni);
-                    const pendingCota = (e.analisecotas === undefined || e.analisecotas === null || e.analisecotas === '');
+                    const pendingCota = isEmptyVal(e.analisecotas);
                     return approvedCurricular && isPpni && pendingCota;
                 } else {
                     const isPpni = isSim(e.cotas_ppni);
                     const hasCotasAppeal = (e.justreccotas && e.justreccotas.trim() && e.justreccotas !== 'null' && e.justreccotas !== 'undefined');
-                    const pendingAppeal = (e.julcotas === undefined || e.julcotas === null || e.julcotas === '');
+                    const pendingAppeal = isEmptyVal(e.julcotas);
                     return isPpni && hasCotasAppeal && pendingAppeal;
                 }
             });
