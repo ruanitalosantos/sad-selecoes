@@ -1627,15 +1627,19 @@
                         <thead>
                             <tr>
                                 <th onclick="sortTable('criterios-humanos-table', 0)" style="cursor:pointer">Inscrição
-                                    <i class="fas fa-sort small opacity-50"></i></th>
+                                    <i class="fas fa-sort small opacity-50"></i>
+                                </th>
                                 <th onclick="sortTable('criterios-humanos-table', 1)" style="cursor:pointer">Candidato
-                                    <i class="fas fa-sort small opacity-50"></i></th>
+                                    <i class="fas fa-sort small opacity-50"></i>
+                                </th>
                                 <th onclick="sortTable('criterios-humanos-table', 2)" style="cursor:pointer">CPF <i
                                         class="fas fa-sort small opacity-50"></i></th>
                                 <th onclick="sortTable('criterios-humanos-table', 3)" style="cursor:pointer">Categoria
-                                    <i class="fas fa-sort small opacity-50"></i></th>
+                                    <i class="fas fa-sort small opacity-50"></i>
+                                </th>
                                 <th onclick="sortTable('criterios-humanos-table', 4)" style="cursor:pointer">Critérios
-                                    <i class="fas fa-sort small opacity-50"></i></th>
+                                    <i class="fas fa-sort small opacity-50"></i>
+                                </th>
                                 <th onclick="sortTable('criterios-humanos-table', 5)" style="cursor:pointer">Pontos <i
                                         class="fas fa-sort small opacity-50"></i></th>
                                 <th>Status / Motivo</th>
@@ -3077,7 +3081,7 @@
 
             // Inatividade: 15 minutos (900.000 ms)
             let inactivityTimeout;
-            
+
             // Obter URL base do portal atual dinamicamente sem query strings
             const currentBaseUrl = window.location.origin + window.location.pathname;
             const logoutUrl = `https://login.recife.pe.gov.br/auth/realms/prefeitura/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(currentBaseUrl)}`;
@@ -8593,7 +8597,7 @@
                     switchTab('dashboard');
                 }
                 hideLoader();
-                
+
                 // Obter dados da banca de heteroidentificação em background, sem bloquear o dashboard
                 fetchBancaEvaluations().catch(err => console.warn('Erro ao carregar banca em background:', err));
             }
@@ -9035,6 +9039,7 @@
             const query = (window.currentSearchQuery || '').toLowerCase();
             const phase = window.currentBancaFase || 'preliminar';
             const currentUser = getCurrentAnalyst();
+            const currentUserLevel = getAnalystLevel();
 
             // Filter candidates
             const filtered = allEnrollments.filter(e => {
@@ -9108,7 +9113,7 @@
 
                 // Actions button
                 let actionBtn = "";
-                if (hasVoted || votesCount >= 5) {
+                if (hasVoted || votesCount >= 5 || currentUserLevel === 'todos') {
                     actionBtn = `<button class="btn btn-outline-secondary btn-sm btn-action fw-semibold" onclick="openBancaModal('${e.inscricao}')"><i class="fas fa-eye me-1"></i>Visualizar</button>`;
                 } else {
                     actionBtn = `<button class="btn btn-primary btn-sm btn-action fw-bold" onclick="openBancaModal('${e.inscricao}')"><i class="fas fa-user-edit me-1"></i>Avaliar</button>`;
@@ -9163,7 +9168,8 @@
 
             const hasVoted = !!myVote;
             const isConcluded = votesCount >= 5;
-            const isReadOnly = hasVoted || isConcluded;
+            const nivelAnalista = getAnalystLevel();
+            const isReadOnly = hasVoted || isConcluded || nivelAnalista === 'todos';
 
             // Reset Form Fields
             resetBancaForm();
@@ -9172,7 +9178,10 @@
             const alertBanner = document.getElementById('banca-modal-already-voted-alert');
             if (isReadOnly) {
                 alertBanner.classList.remove('d-none');
-                if (isConcluded && !hasVoted) {
+                if (nivelAnalista === 'todos') {
+                    alertBanner.innerHTML = `<i class="fas fa-info-circle text-primary me-2"></i>Você está logado com nível **'todos'**. O formulário da banca de heteroidentificação está em modo **somente leitura**.`;
+                    alertBanner.className = "alert alert-primary border-0 shadow-sm d-flex align-items-center gap-2 p-2";
+                } else if (isConcluded && !hasVoted) {
                     alertBanner.innerHTML = `<i class="fas fa-check-double text-success me-2"></i>A banca para este candidato já atingiu o limite de 5 avaliações. O formulário está em modo **somente leitura**.`;
                     alertBanner.className = "alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 p-2";
                 } else {
