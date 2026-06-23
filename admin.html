@@ -2961,6 +2961,18 @@
                 return;
             }
             window.currentTab = tabId;
+
+            // Resetar busca global e filtros alfabéticos ao alternar de aba para evitar que filtros antigos escondam candidatos
+            window.currentSearchQuery = '';
+            document.querySelectorAll('.global-search').forEach(inp => {
+                inp.value = '';
+            });
+            window.letterFilterStart = '';
+            window.letterFilterEnd = '';
+            document.querySelectorAll('.letter-filter-start, .letter-filter-end').forEach(sel => {
+                sel.value = '';
+            });
+
             navItems.forEach(item => {
                 item.classList.remove('active');
                 if (item.dataset.tab === tabId) item.classList.add('active');
