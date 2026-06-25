@@ -1133,7 +1133,7 @@
                 </div>
                 <div class="flex-grow-1 overflow-hidden">
                     <div class="fw-bold small text-truncate" id="logged-user-name">Admin Root</div>
-                    <div class="text-muted small text-truncate">ID: <span id="logged-user-ad">sas_001</span></div>
+                    <div class="text-muted small" style="word-break: break-word; line-height: 1.2;">ID: <span id="logged-user-ad">sas_001</span></div>
                 </div>
                 <a href="#" id="btn-logout-sidebar"
                     class="text-danger d-flex flex-column align-items-center text-decoration-none opacity-75 hover-opacity-100"
@@ -3461,11 +3461,13 @@
             if (!LOGGED_USER) {
                 window.currentAnalystLevel = localStorage.getItem('sas_mock_level') || 'todos';
                 console.log(`[Local Mock] Nível do analista simulado '${userLogin}':`, window.currentAnalystLevel);
+                updateAnalystDisplay();
                 return;
             }
 
             if (userLogin === 'sas_analista') {
                 console.log('Ambiente local ou sem login detectado. Usando nível padrão "todos".');
+                updateAnalystDisplay();
                 return;
             }
 
