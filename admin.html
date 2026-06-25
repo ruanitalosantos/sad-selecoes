@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<!-- Version: 1.0.2 - Cache Buster: 2026-06-25-1736 -->
+<!-- Version: 1.0.3 - Cache Buster: 2026-06-25-1851 -->
 
 <head>
     <meta charset="UTF-8">
@@ -2578,6 +2578,35 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // Safe Storage Helper to prevent SecurityError when localStorage is blocked
+        const safeStorage = {
+            _data: {},
+            getItem(key) {
+                try {
+                    return localStorage.getItem(key);
+                } catch (e) {
+                    console.warn(`[safeStorage] Fallback getItem for key "${key}":`, e);
+                    return this._data.hasOwnProperty(key) ? this._data[key] : null;
+                }
+            },
+            setItem(key, value) {
+                try {
+                    localStorage.setItem(key, value);
+                } catch (e) {
+                    console.warn(`[safeStorage] Fallback setItem for key "${key}":`, e);
+                    this._data[key] = String(value);
+                }
+            },
+            removeItem(key) {
+                try {
+                    localStorage.removeItem(key);
+                } catch (e) {
+                    console.warn(`[safeStorage] Fallback removeItem for key "${key}":`, e);
+                    delete this._data[key];
+                }
+            }
+        };
+
         // Global State
         let allEnrollments = [];
         let rankingData = []; // Dados do ranking oficial
@@ -3445,7 +3474,7 @@
 
         function getCurrentAnalyst() {
             if (!LOGGED_USER) {
-                return localStorage.getItem('sas_mock_login') || 'sas_analista';
+                return safeStorage.getItem('sas_mock_login') || 'sas_analista';
             }
             return LOGGED_USER.login;
         }
@@ -3464,7 +3493,7 @@
             window.currentAnalystLevel = 'todos';
 
             if (!LOGGED_USER) {
-                window.currentAnalystLevel = localStorage.getItem('sas_mock_level') || 'todos';
+                window.currentAnalystLevel = safeStorage.getItem('sas_mock_level') || 'todos';
                 console.log(`[Local Mock] Nível do analista simulado '${userLogin}':`, window.currentAnalystLevel);
                 updateAnalystDisplay();
                 return;
@@ -3521,8 +3550,8 @@
             const footerEl = document.querySelector('.sidebar-footer .flex-grow-1');
             if (!footerEl) return;
 
-            const currentMockLogin = localStorage.getItem('sas_mock_login') || 'sas_analista';
-            const currentMockLevel = localStorage.getItem('sas_mock_level') || 'todos';
+            const currentMockLogin = safeStorage.getItem('sas_mock_login') || 'sas_analista';
+            const currentMockLevel = safeStorage.getItem('sas_mock_level') || 'todos';
 
             const nameEl = document.getElementById('logged-user-name');
             if (nameEl) nameEl.innerText = getMockNameFor(currentMockLogin);
@@ -3546,9 +3575,9 @@
             const selectEl = document.getElementById('local-user-mock-select');
             selectEl.addEventListener('change', async (e) => {
                 const [login, level] = e.target.value.split('|');
-                localStorage.setItem('sas_mock_login', login);
-                localStorage.setItem('sas_mock_level', level);
-                localStorage.setItem('sas_last_tab', window.currentTab || 'dashboard');
+                safeStorage.setItem('sas_mock_login', login);
+                safeStorage.setItem('sas_mock_level', level);
+                safeStorage.setItem('sas_last_tab', window.currentTab || 'dashboard');
                 window.location.reload();
             });
         }
@@ -8622,10 +8651,10 @@
                 console.error("Erro na inicialização de dados:", err);
             } finally {
                 // Restaurar aba após reload ou definir padrão
-                const lastTab = localStorage.getItem('sas_last_tab');
+                const lastTab = safeStorage.getItem('sas_last_tab');
                 if (lastTab && lastTab !== 'undefined') {
                     switchTab(lastTab);
-                    localStorage.removeItem('sas_last_tab');
+                    safeStorage.removeItem('sas_last_tab');
                 } else {
                     // Dashboard como principal em todas as plataformas
                     switchTab('dashboard');
@@ -8988,7 +9017,7 @@
                             normalized = data;
                         }
                         window.bancaEvaluations = normalized;
-                        localStorage.setItem('sas_banca_evaluations', JSON.stringify(normalized));
+                        safeStorage.setItem('sas_banca_evaluations', JSON.stringify(normalized));
                         return;
                     }
                 }
@@ -8996,13 +9025,13 @@
                 console.warn('Erro ao consultar banca via webhook, utilizando localStorage como fallback:', err);
             }
             // Fallback to localStorage
-            const saved = localStorage.getItem('sas_banca_evaluations');
+            const saved = safeStorage.getItem('sas_banca_evaluations');
             window.bancaEvaluations = saved ? JSON.parse(saved) : {};
         }
 
         async function submitBancaEvaluation(payload) {
             // Save locally first
-            let saved = localStorage.getItem('sas_banca_evaluations');
+            let saved = safeStorage.getItem('sas_banca_evaluations');
             let evaluations = saved ? JSON.parse(saved) : {};
             if (!evaluations[payload.inscricao]) {
                 evaluations[payload.inscricao] = [];
@@ -9020,7 +9049,7 @@
                 enquadra_negro: payload.enquadra_negro,
                 fenotipo: payload.fenotipo
             });
-            localStorage.setItem('sas_banca_evaluations', JSON.stringify(evaluations));
+            safeStorage.setItem('sas_banca_evaluations', JSON.stringify(evaluations));
             window.bancaEvaluations = evaluations;
 
             // Call POST Webhook
@@ -10241,7 +10270,7 @@
                 </div>
                 <div class="modal-footer border-0 p-4">
                     <button id="btn-liberar" class="btn btn-outline-danger me-auto"
-                        onclick="const insc = document.getElementById('analyzer-inscricao').innerText; bootstrap.Modal.getOrCreateInstance(document.getElementById('analyzerModal')).hide(); updateAnalystOnServer(insc, '').then(() => { localStorage.setItem('sas_last_tab', window.currentTab); location.reload(); });">
+                        onclick="const insc = document.getElementById('analyzer-inscricao').innerText; bootstrap.Modal.getOrCreateInstance(document.getElementById('analyzerModal')).hide(); updateAnalystOnServer(insc, '').then(() => { safeStorage.setItem('sas_last_tab', window.currentTab); location.reload(); });">
                         <i class="fas fa-user-minus me-2"></i> Desassociar usuário
                     </button>
                     <button class="btn btn-outline-secondary"
