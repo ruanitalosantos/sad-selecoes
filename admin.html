@@ -3512,7 +3512,7 @@
                     let level = 'todos';
                     if (Array.isArray(data)) {
                         const found = data.find(item => {
-                            const itemLogin = item.login || item.usuario || item.username || item.email || '';
+                            const itemLogin = item.login_rede || item.login || item.usuario || item.username || item.email || '';
                             return itemLogin.toLowerCase().trim() === userLogin.toLowerCase().trim();
                         });
                         if (found) {
