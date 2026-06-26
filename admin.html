@@ -8376,12 +8376,19 @@
             if (iframe) iframe.src = '';
             const img = document.getElementById('media-preview-img');
             if (img) img.src = '';
+            if (typeof window.resetPreviewTransform === 'function') {
+                window.resetPreviewTransform();
+            }
         };
 
         window.viewDocument = function (index) {
             currentDocIndex = index;
             const doc = window.currentDocs[index];
             if (!doc) return;
+
+            if (typeof window.resetPreviewTransform === 'function') {
+                window.resetPreviewTransform();
+            }
 
             const analyzerModalEl = document.getElementById('analyzerModal');
             const isAnalyzerOpen = analyzerModalEl && analyzerModalEl.classList.contains('show');
@@ -8625,21 +8632,81 @@
             }
         };
 
+        window.currentViewerRotation = 0;
+
         window.changeZoom = function (delta) {
             currentZoom = Math.max(0.2, Math.min(5, currentZoom + delta));
             updateZoomUI();
         };
 
-        window.resetZoom = function () {
-            currentZoom = 1;
+        window.rotateViewer = function (degrees) {
+            window.currentViewerRotation = (window.currentViewerRotation + degrees) % 360;
+            if (window.currentViewerRotation < 0) window.currentViewerRotation += 360;
             updateZoomUI();
+        };
+
+        window.resetZoomAndRotation = function () {
+            currentZoom = 1;
+            window.currentViewerRotation = 0;
+            updateZoomUI();
+        };
+
+        window.resetZoom = function () {
+            window.resetZoomAndRotation();
         };
 
         function updateZoomUI() {
             const wrapper = document.getElementById('viewerWrapper');
             const zoomLevel = document.getElementById('zoom-level');
-            if (wrapper) wrapper.style.transform = `scale(${currentZoom})`;
+            if (wrapper) {
+                wrapper.style.transform = `scale(${currentZoom}) rotate(${window.currentViewerRotation}deg)`;
+                wrapper.style.transition = 'transform 0.2s ease-out';
+            }
             if (zoomLevel) zoomLevel.innerText = `${Math.round(currentZoom * 100)}%`;
+        }
+
+        // --- SISTEMA DE ZOOM E ROTAÇÃO PARA A VISUALIZAÇÃO MÉDIA (INLINE PREVIEW) ---
+        window.currentPreviewZoom = 1;
+        window.currentPreviewRotation = 0;
+
+        window.changePreviewZoom = function (delta) {
+            window.currentPreviewZoom = Math.max(0.2, Math.min(5, window.currentPreviewZoom + delta));
+            updatePreviewTransform();
+        };
+
+        window.rotatePreview = function (degrees) {
+            window.currentPreviewRotation = (window.currentPreviewRotation + degrees) % 360;
+            if (window.currentPreviewRotation < 0) window.currentPreviewRotation += 360;
+            updatePreviewTransform();
+        };
+
+        window.resetPreviewTransform = function () {
+            window.currentPreviewZoom = 1;
+            window.currentPreviewRotation = 0;
+            updatePreviewTransform();
+        };
+
+        function updatePreviewTransform() {
+            const iframe = document.getElementById('media-preview-iframe');
+            const img = document.getElementById('media-preview-img');
+            const zoomText = document.getElementById('preview-zoom-level');
+            
+            if (zoomText) {
+                zoomText.innerText = `${Math.round(window.currentPreviewZoom * 100)}%`;
+            }
+
+            const transformStr = `scale(${window.currentPreviewZoom}) rotate(${window.currentPreviewRotation}deg)`;
+            
+            if (iframe && !iframe.classList.contains('d-none')) {
+                iframe.style.transform = transformStr;
+                iframe.style.transformOrigin = 'center center';
+                iframe.style.transition = 'transform 0.2s ease-out';
+            }
+            if (img && !img.classList.contains('d-none')) {
+                img.style.transform = transformStr;
+                img.style.transformOrigin = 'center center';
+                img.style.transition = 'transform 0.2s ease-out';
+            }
         }
 
         window.nextDoc = function () {
@@ -10565,9 +10632,32 @@
                             <!-- Preview de Documento Integrado (Visualização Média) -->
                             <div id="media-preview-box"
                                 class="card-container p-4 mt-4 d-none animate__animated animate__fadeIn">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                                     <span class="fw-bold text-primary" id="media-preview-title"><i
                                             class="fas fa-eye me-2"></i>Visualização Média</span>
+                                    
+                                    <!-- Toolbar de Visualização (Zoom e Rotação) -->
+                                    <div class="d-flex align-items-center gap-2 bg-light rounded-pill px-3 py-1 border shadow-xs" style="font-size: 0.85rem;">
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="changePreviewZoom(-0.2)" title="Diminuir Zoom">
+                                            <i class="fas fa-search-minus"></i>
+                                        </button>
+                                        <span id="preview-zoom-level" class="fw-bold text-dark" style="min-width: 40px; text-align: center;">100%</span>
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="changePreviewZoom(0.2)" title="Aumentar Zoom">
+                                            <i class="fas fa-search-plus"></i>
+                                        </button>
+                                        <div class="vr mx-1" style="height: 16px;"></div>
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="rotatePreview(-90)" title="Rotacionar para a Esquerda">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="rotatePreview(90)" title="Rotacionar para a Direita">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                        <div class="vr mx-1" style="height: 16px;"></div>
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="resetPreviewTransform()" title="Restaurar Padrão">
+                                            <i class="fas fa-compress-arrows-alt"></i>
+                                        </button>
+                                    </div>
+
                                     <button type="button" class="btn btn-sm btn-outline-danger"
                                         onclick="closeMediaPreview()"><i class="fas fa-times me-1"></i>Fechar
                                         Visualização</button>
@@ -10999,14 +11089,19 @@
                     <div class="d-flex align-items-center gap-3">
                         <h6 class="modal-title mb-0" id="viewerTitle">Visualização</h6>
                         <div class="d-flex align-items-center gap-2 bg-secondary bg-opacity-25 rounded-pill px-3 py-1">
-                            <button class="btn btn-sm btn-link text-white p-0" onclick="changeZoom(-0.2)"><i
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="changeZoom(-0.2)" title="Diminuir Zoom"><i
                                     class="fas fa-search-minus"></i></button>
                             <span id="zoom-level" class="small fw-bold"
                                 style="min-width: 40px; text-align: center;">100%</span>
-                            <button class="btn btn-sm btn-link text-white p-0" onclick="changeZoom(0.2)"><i
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="changeZoom(0.2)" title="Aumentar Zoom"><i
                                     class="fas fa-search-plus"></i></button>
                             <div class="vr mx-1"></div>
-                            <button class="btn btn-sm btn-link text-white p-0" onclick="resetZoom()"><i
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="rotateViewer(-90)" title="Rotacionar para a Esquerda"><i
+                                    class="fas fa-undo"></i></button>
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="rotateViewer(90)" title="Rotacionar para a Direita"><i
+                                    class="fas fa-redo"></i></button>
+                            <div class="vr mx-1"></div>
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="resetZoomAndRotation()" title="Restaurar Padrão"><i
                                     class="fas fa-sync-alt"></i></button>
                         </div>
                         <a id="btn-open-new-tab" href="#" target="_blank" class="btn btn-sm btn-outline-light ms-2"
