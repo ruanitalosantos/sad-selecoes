@@ -8345,6 +8345,28 @@
         let currentDocIndex = 0;
         let currentZoom = 1;
 
+        window.fetchBlobWithProxyViewer = async function (url) {
+            try {
+                const r = await fetch(url);
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return await r.blob();
+            } catch (e) {
+                console.warn('Falha no fetch direto. Tentando corsproxy.io...', e);
+                try {
+                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                    const rProxy = await fetch(proxyUrl);
+                    if (!rProxy.ok) throw new Error('Proxy 1 HTTP ' + rProxy.status);
+                    return await rProxy.blob();
+                } catch (e2) {
+                    console.warn('Falha no corsproxy.io. Tentando codetabs...', e2);
+                    const proxyUrl2 = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url);
+                    const rProxy2 = await fetch(proxyUrl2);
+                    if (!rProxy2.ok) throw new Error('Proxy 2 HTTP ' + rProxy2.status);
+                    return await rProxy2.blob();
+                }
+            }
+        };
+
         window.closeMediaPreview = function () {
             const previewBox = document.getElementById('media-preview-box');
             if (previewBox) {
@@ -8412,8 +8434,34 @@
                     img.src = doc._convertedUrl || doc.link;
                     img.classList.remove('d-none');
                 } else if (isPdf) {
-                    iframe.src = doc.link;
-                    iframe.classList.remove('d-none');
+                    // Para evitar bloqueio de origem cruzada no Chrome local (file://),
+                    // baixamos o PDF e o exibimos como Object URL do Blob.
+                    if (window.location.protocol === 'file:' || doc.link.startsWith('http')) {
+                        if (doc._convertedUrl) {
+                            iframe.src = doc._convertedUrl;
+                            iframe.classList.remove('d-none');
+                        } else {
+                            if (loading) loading.classList.remove('d-none');
+                            window.fetchBlobWithProxyViewer(doc.link)
+                                .then(blob => {
+                                    const objectUrl = URL.createObjectURL(blob);
+                                    doc._convertedUrl = objectUrl;
+                                    iframe.src = objectUrl;
+                                    iframe.classList.remove('d-none');
+                                    if (loading) loading.classList.add('d-none');
+                                })
+                                .catch(err => {
+                                    console.error('Erro ao carregar PDF via blob:', err);
+                                    if (loading) loading.classList.add('d-none');
+                                    // Fallback para carregar diretamente
+                                    iframe.src = doc.link;
+                                    iframe.classList.remove('d-none');
+                                });
+                        }
+                    } else {
+                        iframe.src = doc.link;
+                        iframe.classList.remove('d-none');
+                    }
                 } else {
                     iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
                     iframe.classList.remove('d-none');
@@ -8432,6 +8480,7 @@
                 const img = document.getElementById('viewerImage');
                 const isImg = /\.(jpg|jpeg|png)(\?.*)?$/i.test(doc.link) || /\.(jpg|jpeg|png)$/i.test(doc.nomeRaw);
                 const isHeic = /\.heic(\?.*)?$/i.test(doc.link) || /\.heic$/i.test(doc.nomeRaw);
+                const isPdf = /\.pdf(\?.*)?$/i.test(doc.link) || /\.pdf$/i.test(doc.nomeRaw || '') || doc.nome.toLowerCase().includes('pdf') || (doc.nomeRaw && doc.nomeRaw.toLowerCase().includes('pdf'));
 
                 document.getElementById('viewerTitle').innerText = doc.nome;
                 document.getElementById('doc-counter').innerText = `${index + 1} / ${window.currentDocs.length}`;
@@ -8539,6 +8588,34 @@
                         }
                     };
                     viewerModal.show();
+                } else if (isPdf) {
+                    frame.style.display = 'block';
+                    img.style.display = 'none';
+                    if (window.location.protocol === 'file:' || doc.link.startsWith('http')) {
+                        if (doc._convertedUrl) {
+                            frame.src = doc._convertedUrl;
+                            viewerModal.show();
+                        } else {
+                            const loadingEl = document.getElementById('viewer-loading-heic');
+                            if (loadingEl) loadingEl.style.display = 'flex';
+                            viewerModal.show();
+                            window.fetchBlobWithProxyViewer(doc.link)
+                                .then(blob => {
+                                    const objectUrl = URL.createObjectURL(blob);
+                                    doc._convertedUrl = objectUrl;
+                                    frame.src = objectUrl;
+                                    if (loadingEl) loadingEl.style.display = 'none';
+                                })
+                                .catch(err => {
+                                    console.error('Erro ao carregar PDF via blob:', err);
+                                    if (loadingEl) loadingEl.style.display = 'none';
+                                    frame.src = doc.link;
+                                });
+                        }
+                    } else {
+                        frame.src = doc.link;
+                        viewerModal.show();
+                    }
                 } else {
                     frame.style.display = 'block';
                     img.style.display = 'none';
