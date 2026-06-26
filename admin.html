@@ -189,6 +189,79 @@
             border-top: 1px solid var(--border-color);
         }
 
+        #btn-logout-sidebar {
+            min-width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(220, 53, 69, 0.05);
+            border: 1px solid rgba(220, 53, 69, 0.15);
+            border-radius: 8px;
+            color: #dc3545 !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        #btn-logout-sidebar:hover {
+            background: rgba(220, 53, 69, 0.15) !important;
+            border-color: rgba(220, 53, 69, 0.3) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.12);
+        }
+
+        #btn-logout-sidebar:active {
+            transform: translateY(0);
+        }
+
+        /* Estilos da Aba de Níveis de Acesso */
+        .access-card {
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+            padding: 24px;
+        }
+
+        .access-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        }
+
+        .level-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .level-badge.level-todos {
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .level-badge.level-hetero {
+            background: rgba(147, 51, 234, 0.08);
+            color: #9333ea;
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .analysts-list-wrapper {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
         /* Main Content Styling */
         #main-content {
             margin-left: 280px;
@@ -1123,6 +1196,9 @@
                 <i class="fas fa-list-ol"></i> Ranking Geral
             </div>
             <hr class="my-4">
+            <div class="nav-item" data-tab="analistas">
+                <i class="fas fa-user-shield"></i> Níveis de Acesso
+            </div>
             <div class="nav-item" data-tab="cronograma">
                 <i class="fas fa-calendar-alt"></i> Cronograma
             </div>
@@ -1130,21 +1206,15 @@
         </nav>
 
         <div class="sidebar-footer">
-            <div class="d-flex align-items-center gap-3 w-100">
-                <div id="logged-user-avatar"
-                    class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                    style="width: 40px; height: 40px;">
-                    <i class="fas fa-user-tie"></i>
+            <div class="d-flex align-items-center gap-2 w-100 justify-content-between">
+                <div id="logged-user-avatar" style="display: none !important;"></div>
+                <div class="flex-grow-1 overflow-hidden" style="margin-right: 8px;">
+                    <div class="fw-bold" id="logged-user-name" style="font-size: 0.95rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Admin Root</div>
+                    <div class="text-muted small" style="display: none !important;">ID: <span id="logged-user-ad">sas_001</span></div>
                 </div>
-                <div class="flex-grow-1 overflow-hidden">
-                    <div class="fw-bold small text-truncate" id="logged-user-name">Admin Root</div>
-                    <div class="text-muted small" style="word-break: break-word; line-height: 1.2;">ID: <span id="logged-user-ad">sas_001</span></div>
-                </div>
-                <a href="#" id="btn-logout-sidebar"
-                    class="text-danger d-flex flex-column align-items-center text-decoration-none opacity-75 hover-opacity-100"
-                    title="Encerrar sessão (Sair)">
-                    <i class="fas fa-power-off fs-5"></i>
-                    <span style="font-size: 0.65rem; font-weight: 600; margin-top: 2px;">Sair</span>
+                <a href="#" id="btn-logout-sidebar" title="Encerrar sessão (Sair)">
+                    <i class="fas fa-power-off" style="font-size: 0.9rem;"></i>
+                    <span style="font-size: 0.55rem; font-weight: 700; margin-top: 2px;">Sair</span>
                 </a>
             </div>
         </div>
@@ -2548,6 +2618,97 @@
             </div>
         </section>
 
+        <!-- Tab: Níveis de Acesso -->
+        <section id="tab-analistas" class="tab-pane animate__animated animate__fadeIn">
+            <div class="page-header">
+                <div>
+                    <h1 class="fw-bold">Níveis de Acesso & Permissões</h1>
+                    <p class="text-muted small">Controle de autorizações da equipe de analistas baseada em perfis dinâmicos.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Coluna Esquerda: Explicação dos Perfis -->
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #fbfcfd 0%, #f4f6fa 100%);">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3" style="color: #0f172a;"><i class="fas fa-shield-alt text-primary me-2"></i>Regras de Permissão</h5>
+                            <p class="text-muted small mb-4">O sistema define o que cada analista pode realizar com base no nível atribuído no banco de dados.</p>
+
+                            <!-- Perfil: todos -->
+                            <div class="access-card mb-3" style="border-left: 4px solid #2563eb;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="level-badge level-todos">todos</span>
+                                    <span class="text-primary small fw-bold"><i class="fas fa-globe-americas me-1"></i>Acesso Geral</span>
+                                </div>
+                                <p class="small text-muted mb-2">Destinado a administradores, coordenadores e analistas gerais do certame.</p>
+                                <ul class="small text-secondary ps-3 mb-0" style="line-height: 1.5;">
+                                    <li>Acesso completo (leitura/escrita) na Análise Curricular e Recursos Curriculares.</li>
+                                    <li>Lançamento de laudos de Perícia Médica (PCD).</li>
+                                    <li>Configuração de cronograma e envio de convocações.</li>
+                                    <li class="text-danger fw-semibold">Banca de Heteroidentificação: Acesso apenas de leitura.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Perfil: heteroidentificacao -->
+                            <div class="access-card" style="border-left: 4px solid #9333ea;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="level-badge level-hetero">heteroidentificacao</span>
+                                    <span class="text-purple small fw-bold" style="color: #9333ea;"><i class="fas fa-users-cog me-1"></i>Banca Hetero</span>
+                                </div>
+                                <p class="small text-muted mb-2">Destinado exclusivamente aos avaliadores da comissão de heteroidentificação.</p>
+                                <ul class="small text-secondary ps-3 mb-0" style="line-height: 1.5;">
+                                    <li>Voto e avaliação ativa na Banca de Heteroidentificação (Preliminar e Recursos).</li>
+                                    <li>Julgamento e deferimento de Recursos de Cotas PPNI.</li>
+                                    <li class="text-danger fw-semibold">Demais Abas: Acesso restrito apenas de leitura aos candidatos PPNI.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Listagem de Analistas -->
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background: #ffffff;">
+                        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div>
+                                    <h5 class="fw-bold mb-1" style="color: #0f172a;"><i class="fas fa-users text-secondary me-2"></i>Equipe Cadastrada</h5>
+                                    <p class="text-muted small mb-0" id="analysts-count-subtitle">Carregando membros da equipe...</p>
+                                </div>
+                                <!-- Barra de Pesquisa -->
+                                <div class="search-box" style="min-width: 240px; position: relative;">
+                                    <input type="text" id="search-analysts-input" class="form-control form-control-sm ps-4" placeholder="Buscar por nome ou login..." style="border-radius: 8px; font-size: 0.85rem;">
+                                    <i class="fas fa-search text-muted" style="position: absolute; left: 10px; top: 10px; font-size: 0.8rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                        <tr>
+                                            <th class="small fw-bold border-0 text-secondary" style="font-size: 0.75rem;">NOME COMPLETO</th>
+                                            <th class="small fw-bold border-0 text-secondary" style="font-size: 0.75rem;">LOGIN DE REDE</th>
+                                            <th class="small fw-bold border-0 text-secondary text-end" style="font-size: 0.75rem;">NÍVEL DE ACESSO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="analysts-table-body">
+                                        <tr>
+                                            <td colspan="3" class="text-center py-5 text-muted">
+                                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                                Buscando dados da equipe...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Tab: Cronograma -->
         <section id="tab-cronograma" class="tab-pane animate__animated animate__fadeIn">
             <div class="cronograma-container">
@@ -3046,6 +3207,9 @@
                     renderDataForTab('cronograma');
                     hideLoader();
                 }).catch(() => hideLoader());
+            } else if (tabId === 'analistas') {
+                showLoader();
+                fetchAndRenderAnalystTab().then(() => hideLoader()).catch(() => hideLoader());
             } else {
                 renderDataForTab(tabId);
             }
@@ -3544,6 +3708,117 @@
 
         function getAnalystLevel() {
             return window.currentAnalystLevel || 'todos';
+        }
+
+        window.allAnalystsData = [];
+
+        async function fetchAndRenderAnalystTab() {
+            const tableBody = document.getElementById('analysts-table-body');
+            const subtitle = document.getElementById('analysts-count-subtitle');
+            
+            if (tableBody && (!window.allAnalystsData || window.allAnalystsData.length === 0)) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center py-5 text-muted">
+                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                            Buscando dados da equipe...
+                        </td>
+                    </tr>
+                `;
+            }
+
+            try {
+                const response = await fetch('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultarniveisanalistas');
+                if (response.ok) {
+                    const data = await response.json();
+                    window.allAnalystsData = Array.isArray(data) ? data : [];
+                    renderAnalysts(window.allAnalystsData);
+                } else {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+            } catch (err) {
+                console.error("Erro ao carregar analistas:", err);
+                if (tableBody) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar dados da equipe. Por favor, tente novamente.
+                            </td>
+                        </tr>
+                    `;
+                }
+                if (subtitle) {
+                    subtitle.innerText = "Falha na sincronização.";
+                }
+            }
+
+            // Configurar o listener de busca se ainda não foi feito
+            const searchInput = document.getElementById('search-analysts-input');
+            if (searchInput && !searchInput.dataset.hasListener) {
+                searchInput.dataset.hasListener = "true";
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase().trim();
+                    const filtered = window.allAnalystsData.filter(item => {
+                        const nome = (item.nome || '').toLowerCase();
+                        const login = (item.login_rede || item.login || '').toLowerCase();
+                        return nome.includes(query) || login.includes(query);
+                    });
+                    renderAnalysts(filtered);
+                });
+            }
+        }
+
+        function renderAnalysts(analysts) {
+            const tableBody = document.getElementById('analysts-table-body');
+            const subtitle = document.getElementById('analysts-count-subtitle');
+            if (!tableBody) return;
+
+            if (subtitle) {
+                subtitle.innerText = `Total: ${analysts.length} analista(s) cadastrado(s)`;
+            }
+
+            if (analysts.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center py-4 text-muted">
+                            <i class="fas fa-search-minus d-block fs-4 mb-2 text-opacity-25"></i>Nenhum analista correspondente.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = analysts.map(item => {
+                const login = item.login_rede || item.login || '---';
+                const level = item.nivel || 'todos';
+                const badgeClass = level === 'heteroidentificacao' ? 'level-hetero' : 'level-todos';
+                const levelLabel = level === 'heteroidentificacao' ? 'Comissão Hetero' : 'Acesso Geral';
+                
+                const initials = (item.nome || '')
+                    .split(' ')
+                    .filter(n => n.length > 0)
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .substring(0, 2);
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-light text-secondary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.8rem; border: 1px solid rgba(0,0,0,0.05); flex-shrink: 0;">
+                                    ${initials || '<i class="fas fa-user"></i>'}
+                                </div>
+                                <div class="text-truncate">
+                                    <span class="fw-semibold text-dark d-block text-truncate" style="font-size: 0.85rem;" title="${item.nome || '---'}">${item.nome || '---'}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="font-monospace text-muted text-truncate" style="font-size: 0.8rem; max-width: 140px;" title="${login}">${login}</td>
+                        <td class="text-end"><span class="level-badge ${badgeClass}">${levelLabel}</span></td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function setupLocalTestSelector() {
@@ -6133,8 +6408,7 @@
                 return;
             }
 
-            const loggedUserEl = document.getElementById('logged-user-ad');
-            const me = loggedUserEl ? loggedUserEl.innerText : 'sas_001';
+            const me = getCurrentAnalyst();
 
             const { value: formValues } = await Swal.fire({
                 title: 'Avaliação de Perícia Médica (PCD)',
@@ -7500,8 +7774,7 @@
                 const originalText = btnEl.innerHTML;
                 btnEl.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
 
-                const loggedUserEl = document.getElementById('logged-user-ad');
-                const loggedUser = loggedUserEl ? loggedUserEl.innerText : 'sas_001';
+                const loggedUser = getCurrentAnalyst();
 
                 let acatadoVal = false;
                 let justificativaVal = '';
@@ -7748,8 +8021,7 @@
                 this.disabled = true;
                 this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
 
-                const loggedUserEl = document.getElementById('logged-user-ad');
-                const loggedUser = loggedUserEl ? loggedUserEl.innerText : 'sas_001';
+                const loggedUser = getCurrentAnalyst();
 
                 let payload = {};
 
