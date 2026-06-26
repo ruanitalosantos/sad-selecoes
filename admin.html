@@ -8480,7 +8480,7 @@
                 } else if (isPdf) {
                     // Para evitar bloqueio de origem cruzada no Chrome local (file://),
                     // baixamos o PDF e o exibimos como Object URL do Blob.
-                    if (window.location.protocol === 'file:' || doc.link.startsWith('http')) {
+                    if (window.location.protocol === 'file:') {
                         if (doc._convertedUrl) {
                             iframe.src = doc._convertedUrl;
                             iframe.classList.remove('d-none');
@@ -8635,7 +8635,7 @@
                 } else if (isPdf) {
                     frame.style.display = 'block';
                     img.style.display = 'none';
-                    if (window.location.protocol === 'file:' || doc.link.startsWith('http')) {
+                    if (window.location.protocol === 'file:') {
                         if (doc._convertedUrl) {
                             frame.src = doc._convertedUrl;
                             viewerModal.show();
