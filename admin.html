@@ -7010,6 +7010,40 @@
 
                 const nivelAnalista = getAnalystLevel();
 
+                // Info do analista (preliminar e recurso)
+                let analystInfo = '';
+                if (switchId === 'val_is_pcd') {
+                    const prelimAnalyst = e.analista_pcd_id;
+                    const recurAnalyst = e.analista_pcd_recurso_id;
+                    if (resolvedSourceTab === 'recursos_humanos') {
+                        if (recurAnalyst) {
+                            analystInfo = `<div class="text-muted mt-1" style="font-size: 0.72rem; font-weight: normal; line-height: 1.2;"><i class="fas fa-gavel me-1 text-warning"></i>Julgado por: <span class="fw-semibold text-dark">${formatAnalystDisplayName(recurAnalyst)}</span></div>`;
+                        }
+                        if (prelimAnalyst) {
+                            analystInfo += `<div class="text-muted mt-1" style="font-size: 0.65rem; font-weight: normal; line-height: 1.2;"><i class="fas fa-user me-1"></i>Preliminar por: ${formatAnalystDisplayName(prelimAnalyst)}</div>`;
+                        }
+                    } else {
+                        if (prelimAnalyst) {
+                            analystInfo = `<div class="text-muted mt-1" style="font-size: 0.72rem; font-weight: normal; line-height: 1.2;"><i class="fas fa-user-check me-1 text-success"></i>Analisado por: <span class="fw-semibold text-dark">${formatAnalystDisplayName(prelimAnalyst)}</span></div>`;
+                        }
+                    }
+                } else if (switchId === 'val_cotas_ppni') {
+                    const prelimAnalyst = e.analista_heteroidentificacao_id;
+                    const recurAnalyst = e.analista_heteroidentificacao_recurso_id;
+                    if (resolvedSourceTab === 'recursos_humanos') {
+                        if (recurAnalyst) {
+                            analystInfo = `<div class="text-muted mt-1" style="font-size: 0.72rem; font-weight: normal; line-height: 1.2;"><i class="fas fa-gavel me-1 text-warning"></i>Julgado por: <span class="fw-semibold text-dark">${formatAnalystDisplayName(recurAnalyst)}</span></div>`;
+                        }
+                        if (prelimAnalyst) {
+                            analystInfo += `<div class="text-muted mt-1" style="font-size: 0.65rem; font-weight: normal; line-height: 1.2;"><i class="fas fa-user me-1"></i>Preliminar por: ${formatAnalystDisplayName(prelimAnalyst)}</div>`;
+                        }
+                    } else {
+                        if (prelimAnalyst) {
+                            analystInfo = `<div class="text-muted mt-1" style="font-size: 0.72rem; font-weight: normal; line-height: 1.2;"><i class="fas fa-user-check me-1 text-success"></i>Analisado por: <span class="fw-semibold text-dark">${formatAnalystDisplayName(prelimAnalyst)}</span></div>`;
+                        }
+                    }
+                }
+
                 if (switchId === 'val_is_pcd') {
                     if (resolvedSourceTab === 'recursos_humanos') {
                         isChecked = (e.julpcd === 'Sim');
@@ -7127,7 +7161,10 @@
 
                 return `
                 <tr>
-                    <td class="small fw-bold text-wrap" style="max-width:120px">${label}</td>
+                    <td class="small fw-bold text-wrap" style="max-width:120px">
+                        ${label}
+                        ${analystInfo}
+                    </td>
                     <td class="small">${value}</td>
                     <td class="small">${detail}</td>
                     <td class="text-center">
