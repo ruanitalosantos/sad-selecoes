@@ -7651,6 +7651,12 @@
                 window.currentDocs = rawAttachments.map(doc => {
                     let link = doc.medialink || doc.mediaLink || doc.midialink;
                     if (!link) return null;
+
+                    // Forçar HTTPS para evitar bloqueio de conteúdo misto (Mixed Content) pelo Chrome
+                    if (link.startsWith('http://')) {
+                        link = link.replace('http://', 'https://');
+                    }
+
                     if (link.includes('/download/storage/v1/b/')) {
                         try {
                             const parts = link.split('/b/')[1].split('/o/');
