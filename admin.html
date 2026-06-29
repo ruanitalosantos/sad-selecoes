@@ -4734,6 +4734,30 @@
             </span>`;
         }
 
+        function formatAnalystDisplayName(analyst) {
+            if (!analyst) return '';
+            const myId = getCurrentAnalyst();
+            const isMe = analyst === myId;
+
+            if (isMe) {
+                const el = document.getElementById('logged-user-name');
+                const fullName = el ? el.innerText : '';
+                if (fullName) {
+                    const parts = fullName.split(' ');
+                    return parts.length > 1 ? `${parts[0]} ${parts[1]}` : parts[0];
+                }
+            }
+
+            const parts = analyst.split(/[._-]/);
+            if (parts.length > 1) {
+                const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+                const second = parts[1].charAt(0).toUpperCase() + parts[1].slice(1).toLowerCase();
+                return `${first} ${second}`;
+            } else {
+                return analyst.charAt(0).toUpperCase() + analyst.slice(1).toLowerCase();
+            }
+        }
+
         function renderCidadeBadge(e) {
             const cidade = (e.cidade || e.cidadeuc || '').trim();
             if (!cidade) return '<span class="text-muted small">---</span>';
@@ -6930,6 +6954,28 @@
                     toggleCriteriosPontuacao();
                     updatePontuacaoCurricular();
 
+                    // Atualizar info do analista curricular (preliminar e recurso)
+                    const curricularInfoEl = document.getElementById('curricular-analyst-info');
+                    if (curricularInfoEl) {
+                        let infoHtml = '';
+                        const prelimCurricular = e.analista_analise_curricular_id;
+                        const recurCurricular = e.analista_analise_curricular_recurso_id;
+                        
+                        if (prelimCurricular) {
+                            infoHtml += `<span class="badge bg-light text-secondary border me-2" style="font-size: 0.72rem; font-weight: normal;"><i class="fas fa-user-check me-1 text-success"></i>Análise Curricular por: <strong class="text-dark">${formatAnalystDisplayName(prelimCurricular)}</strong></span>`;
+                        }
+                        if (recurCurricular) {
+                            infoHtml += `<span class="badge bg-light text-warning border" style="font-size: 0.72rem; font-weight: normal;"><i class="fas fa-gavel me-1 text-warning"></i>Recurso Julgado por: <strong class="text-dark">${formatAnalystDisplayName(recurCurricular)}</strong></span>`;
+                        }
+                        
+                        if (infoHtml) {
+                            curricularInfoEl.innerHTML = infoHtml;
+                            curricularInfoEl.style.display = 'block';
+                        } else {
+                            curricularInfoEl.style.display = 'none';
+                        }
+                    }
+
                     const selNovaSit = document.getElementById('sel_nova_situacao');
                     if (selNovaSit) {
                         selNovaSit.value = e.nova_situacao || '';
@@ -7285,7 +7331,7 @@
                 recursosItemsContainer.innerHTML = '';
                 let hasAnyRecurso = false;
 
-                const checkAndRenderRecurso = (title, candJust, switchField, analystJustField, switchHtmlId, analystJustHtmlId, motivoIndeferimento) => {
+                const checkAndRenderRecurso = (title, candJust, switchField, analystJustField, switchHtmlId, analystJustHtmlId, motivoIndeferimento, prelimAnalystId, recurAnalystId) => {
                     if (!candJust || candJust.trim() === '' || candJust.trim().toLowerCase() === 'null' || candJust.trim().toLowerCase() === 'undefined') {
                         return;
                     }
@@ -7306,6 +7352,18 @@
                                 <p class="mb-0 bg-white p-2 rounded border small text-danger" style="white-space: pre-wrap; border-color: rgba(220, 53, 69, 0.25) !important; background-color: rgba(220, 53, 69, 0.03) !important;">${motivoIndeferimento}</p>
                             </div>
                         `;
+                    }
+
+                    let analystInfoHtml = '';
+                    if (prelimAnalystId || recurAnalystId) {
+                        analystInfoHtml = '<div class="mt-3 d-flex flex-wrap gap-2 border-top pt-2">';
+                        if (prelimAnalystId) {
+                            analystInfoHtml += `<span class="badge bg-light text-secondary border" style="font-size: 0.7rem; font-weight: normal;"><i class="fas fa-user-check me-1 text-success"></i>Preliminar por: <strong class="text-dark">${formatAnalystDisplayName(prelimAnalystId)}</strong></span>`;
+                        }
+                        if (recurAnalystId) {
+                            analystInfoHtml += `<span class="badge bg-light text-warning border" style="font-size: 0.7rem; font-weight: normal;"><i class="fas fa-gavel me-1 text-warning"></i>Julgado por: <strong class="text-dark">${formatAnalystDisplayName(recurAnalystId)}</strong></span>`;
+                        }
+                        analystInfoHtml += '</div>';
                     }
 
                     const itemHtml = `
@@ -7335,6 +7393,8 @@
                                 <textarea id="${analystJustHtmlId}" class="form-control recurso-justification-input" rows="2"
                                     placeholder="Descreva o motivo do indeferimento do recurso..." ${isReadOnly ? 'disabled' : ''}>${justValue}</textarea>
                             </div>
+                            
+                            ${analystInfoHtml}
                         </div>
                     `;
                     recursosItemsContainer.insertAdjacentHTML('beforeend', itemHtml);
@@ -7348,7 +7408,9 @@
                     'recinscricao',
                     'jul_inscricao',
                     'rec_inscricao',
-                    e.justinscricao
+                    e.justinscricao,
+                    e.analista_analise_curricular_id,
+                    e.analista_analise_curricular_recurso_id
                 );
 
                 checkAndRenderRecurso(
@@ -7358,7 +7420,9 @@
                     'justreccotas',
                     'jul_cotas',
                     'rec_cotas',
-                    e.justppni || e.justificativappni
+                    e.justppni || e.justificativappni,
+                    e.analista_heteroidentificacao_id,
+                    e.analista_heteroidentificacao_recurso_id
                 );
 
                 checkAndRenderRecurso(
@@ -7368,7 +7432,9 @@
                     'justrecpcd',
                     'jul_pcd',
                     'rec_pcd',
-                    e.justpcd || e.justificativapcd
+                    e.justpcd || e.justificativapcd,
+                    e.analista_pcd_id,
+                    e.analista_pcd_recurso_id
                 );
 
                 if (hasAnyRecurso && (e.atividade_habilitada === "ATV-007" || e.atividade_habilitada === "ATV-010")) {
@@ -10576,6 +10642,7 @@
                                         <h6 class="fw-bold text-primary mb-1">ANÁLISE CURRICULAR</h6>
                                         <p class="text-muted small mb-0">Indique se o currículo do candidato atende aos
                                             requisitos mínimos.</p>
+                                        <div id="curricular-analyst-info" class="mt-2" style="display: none;"></div>
                                     </div>
                                     <div class="form-check form-switch p-0 m-0 d-flex align-items-center gap-3">
                                         <label class="form-check-label fw-bold text-primary"
