@@ -7657,12 +7657,7 @@
                         link = link.replace('http://', 'https://');
                     }
 
-                    if (link.includes('/download/storage/v1/b/')) {
-                        try {
-                            const parts = link.split('/b/')[1].split('/o/');
-                            link = `https://storage.googleapis.com/${parts[0]}/${parts[1]}`;
-                        } catch (err) { }
-                    } else if (!link.includes('alt=media')) {
+                    if (!link.includes('alt=media')) {
                         link += (link.includes('?') ? '&' : '?') + 'alt=media';
                     }
 
@@ -8607,6 +8602,26 @@
                 } else if (isImg) {
                     img.src = doc._convertedUrl || doc.link;
                     img.classList.remove('d-none');
+                    img.onerror = function() {
+                        if (!doc._convertedUrl) {
+                            img.src = '';
+                            if (loading) loading.classList.remove('d-none');
+                            const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
+                                const r = await fetch(url);
+                                if (!r.ok) throw new Error('HTTP ' + r.status);
+                                return await r.blob();
+                            };
+                            fetchFn(doc.link).then(blob => {
+                                const objectUrl = URL.createObjectURL(blob);
+                                doc._convertedUrl = objectUrl;
+                                img.src = objectUrl;
+                                if (loading) loading.classList.add('d-none');
+                            }).catch(err => {
+                                console.error('Erro ao carregar imagem via blob:', err);
+                                if (loading) loading.classList.add('d-none');
+                            });
+                        }
+                    };
                 } else if (isPdf) {
                     // Baixamos o PDF e o exibimos como Object URL do Blob para evitar bloqueios de CSP/X-Frame-Options no Chrome
                     if (doc._convertedUrl) {
