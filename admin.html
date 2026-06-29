@@ -1412,7 +1412,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="chart-card h-100">
-                        <div class="chart-title"><i class="fas fa-id-card me-2"></i>Categorias de Habilitação</div>
+                        <div class="chart-title"><i class="fas fa-id-card me-2"></i>Distribuição por Cargo</div>
                         <div id="chart-category"></div>
                     </div>
                 </div>
@@ -2922,33 +2922,21 @@
         })();
 
         /**
-         * Prioridade de exibição e seleção das categorias
+         * Retorna a lista de categorias/cargos únicos dos candidatos carregados
          */
-        const CAT_PRIORITY = {
-            'primeira_a': 1, 'a_primeira': 1, 'a': 1,
-            'primeira_b': 2, 'b_primeira': 2, 'b': 2,
-            'adicao_a': 3, 'a_adicao': 3,
-            'adicao_b': 4, 'b_adicao': 4,
-            'mudanca_c': 5, 'mudanca_d': 6, 'mudanca_e': 7
-        };
-
-        function getCatPrio(cat) {
-            if (!cat) return 99;
-            return CAT_PRIORITY[String(cat).toLowerCase().trim()] || 99;
-        }
-
-        /**
-         * Verifica se o candidato pertence ao grupo dos primeiros 300 (vagas imediatas)
-         */
-        function isTop300(e) {
-            if (!e) return false;
-            const p = getCatPrio(e.categoria);
-            const rank = parseInt(e.rank_geral) || 999999;
-            if (p === 1 && rank <= 125) return true; // 1ª Hab A
-            if (p === 2 && rank <= 125) return true; // 1ª Hab B
-            if (p === 3 && rank <= 25) return true;  // Adição A
-            if (p === 4 && rank <= 25) return true;  // Adição B
-            return false;
+        function getUniqueCategories() {
+            const cats = new Set();
+            if (window.rankingData && rankingData.length > 0) {
+                rankingData.forEach(e => {
+                    if (e.categoria) cats.add(String(e.categoria).trim());
+                });
+            }
+            if (cats.size === 0 && window.allEnrollments && allEnrollments.length > 0) {
+                allEnrollments.forEach(e => {
+                    if (e.categoria) cats.add(String(e.categoria).trim());
+                });
+            }
+            return Array.from(cats).sort();
         }
 
         /**
@@ -3903,17 +3891,8 @@
         }
 
         async function updateAnalystOnServer(inscricao, login) {
-            try {
-                const res = await callWebhook('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/atualizar-analista', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ login, inscricao })
-                });
-                return res.ok;
-            } catch (err) {
-                console.error('Erro ao atualizar analista:', err);
-                return false;
-            }
+            // Removida chamada ao webhook atualizar-analista a pedido do usuário
+            return true;
         }
 
         async function updateActivityOnServer(inscricao) {
@@ -4022,23 +4001,7 @@
 
         function formatCategoria(cat) {
             if (!cat) return '---';
-            const c = cat.toLowerCase().trim();
-            const map = {
-                'primeira_a': '1ª Hab - A',
-                'primeira_b': '1ª Hab - B',
-                'a_primeira': '1ª Hab - A',
-                'b_primeira': '1ª Hab - B',
-                'adicao_a': 'Adição de Categoria - A',
-                'adicao_b': 'Adição de Categoria - B',
-                'a_adicao': 'Adição de Categoria - A',
-                'b_adicao': 'Adição de Categoria - B',
-                'mudanca_c': 'Mudança de Categoria - C',
-                'mudanca_d': 'Mudança de Categoria - D',
-                'mudanca_e': 'Mudança de Categoria - E',
-                'a': '1ª Hab - A',
-                'b': '1ª Hab - B'
-            };
-            return map[c] || cat;
+            return String(cat).trim();
         }
 
         function formatDate(dateStr, showTime = false) {
@@ -4301,8 +4264,8 @@
             if (actions) actions.classList.remove('d-none');
 
             // Identificar categorias disponíveis
+            const allCats = getUniqueCategories();
             const usedCats = Array.from(document.querySelectorAll('.rule-cat')).map(s => s.value);
-            const allCats = ['primeira_a', 'primeira_b', 'adicao_a', 'adicao_b'];
             const nextCat = allCats.find(c => !usedCats.includes(c));
 
             if (!nextCat && container.children.length > 0) {
@@ -4320,14 +4283,17 @@
             const div = document.createElement('div');
             div.className = 'row g-3 align-items-start mb-3 pb-3 border-bottom rule-item';
             div.id = id;
+
+            let optionsHtml = '';
+            allCats.forEach(cat => {
+                optionsHtml += `<option value="${cat}">${formatCategoria(cat)}</option>`;
+            });
+
             div.innerHTML = `
                 <div class="col-md-4">
-                    <label class="form-label small fw-bold text-dark mb-1">Categoria de CNH</label>
+                    <label class="form-label small fw-bold text-dark mb-1">Cargo / Categoria</label>
                     <select class="form-select form-select-sm rule-cat border-primary" onchange="toggleRuleInputs('${id}'); updateCategoryOptions(); selecionarParaConvocacao();">
-                        <option value="primeira_a">1ª Hab - A</option>
-                        <option value="primeira_b">1ª Hab - B</option>
-                        <option value="adicao_a">Adição de Categoria - A</option>
-                        <option value="adicao_b">Adição de Categoria - B</option>
+                        ${optionsHtml}
                     </select>
                 </div>
                 <div class="col-md-3 rule-inputs-box">
@@ -4440,15 +4406,10 @@
             const res = rankingData.filter(e => !(e.convocado === true || e.convocado === "true" || e.convocado === 1));
 
             const getStats = (list) => {
-                const stats = { pA: 0, pB: 0, aA: 0, aB: 0, atip: 0 };
+                const stats = { atip: 0, byCat: {} };
                 list.forEach(e => {
-                    const p = getCatPrio(e.categoria);
-                    if (p === 1) stats.pA++;
-                    else if (p === 2) stats.pB++;
-                    else if (p === 3) stats.aA++;
-                    else if (p === 4) stats.aB++;
-
-                    const sit = (e.situacao_final || "").toUpperCase();
+                    const cat = formatCategoria(e.categoria) || 'Outros';
+                    stats.byCat[cat] = (stats.byCat[cat] || 0) + 1;
                     if (isAtipicaCandidate(e)) {
                         stats.atip++;
                     }
@@ -4459,16 +4420,39 @@
             const sC = getStats(conv);
             const sR = getStats(res);
 
+            // Render stats for unique categories
+            const allCats = getUniqueCategories();
+            
+            let convStatsHtml = '';
+            let resStatsHtml = '';
+            
+            allCats.forEach(cat => {
+                const label = formatCategoria(cat);
+                const countConv = sC.byCat[label] || 0;
+                const countRes = sR.byCat[label] || 0;
+                
+                convStatsHtml += `
+                    <div class="col">
+                        <div class="small text-muted text-truncate" title="${label}">${label}</div>
+                        <div class="h5 mb-0 fw-bold">${countConv}</div>
+                    </div>
+                `;
+                
+                resStatsHtml += `
+                    <div class="col">
+                        <div class="small text-muted text-truncate" title="${label}">${label}</div>
+                        <div class="h5 mb-0 fw-bold text-dark">${countRes}</div>
+                    </div>
+                `;
+            });
+
             container.innerHTML = `
                 <div class="col-md-6">
                     <div class="card border-0 shadow-sm bg-secondary bg-opacity-10 h-100">
                         <div class="card-body p-3">
                             <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-check-circle me-2"></i>Convocados</h6>
-                            <div class="row text-center g-2">
-                                <div class="col-3"><div class="small text-muted">1ª Hab A</div><div class="h5 mb-0 fw-bold">${sC.pA}</div></div>
-                                <div class="col-3"><div class="small text-muted">1ª Hab B</div><div class="h5 mb-0 fw-bold">${sC.pB}</div></div>
-                                <div class="col-3"><div class="small text-muted">Adição A</div><div class="h5 mb-0 fw-bold">${sC.aA}</div></div>
-                                <div class="col-3"><div class="small text-muted">Adição B</div><div class="h5 mb-0 fw-bold">${sC.aB}</div></div>
+                            <div class="row text-center g-2 row-cols-2 row-cols-md-4">
+                                ${convStatsHtml || '<div class="col-12 text-muted small">Nenhum candidato</div>'}
                                 <div class="col-12 border-top mt-2 pt-2 d-flex justify-content-center gap-3">
                                     <span class="small text-primary fw-bold">Cotas:</span> <span class="h6 mb-0 fw-bold text-primary">${sC.atip}</span>
                                 </div>
@@ -4480,11 +4464,8 @@
                     <div class="card border-0 shadow-sm bg-white h-100 border-start border-4 border-primary">
                         <div class="card-body p-3">
                             <h6 class="fw-bold text-primary mb-3"><i class="fas fa-list-ol me-2"></i>Cadastro de Reserva</h6>
-                            <div class="row text-center g-2">
-                                <div class="col-3"><div class="small text-muted">1ª Hab A</div><div class="h5 mb-0 fw-bold text-dark">${sR.pA}</div></div>
-                                <div class="col-3"><div class="small text-muted">1ª Hab B</div><div class="h5 mb-0 fw-bold text-dark">${sR.pB}</div></div>
-                                <div class="col-3"><div class="small text-muted">Adição A</div><div class="h5 mb-0 fw-bold text-dark">${sR.aA}</div></div>
-                                <div class="col-3"><div class="small text-muted">Adição B</div><div class="h5 mb-0 fw-bold text-dark">${sR.aB}</div></div>
+                            <div class="row text-center g-2 row-cols-2 row-cols-md-4">
+                                ${resStatsHtml || '<div class="col-12 text-muted small">Nenhum candidato</div>'}
                                 <div class="col-12 border-top mt-2 pt-2 d-flex justify-content-center gap-3">
                                     <span class="small text-primary fw-bold">Cotas:</span> <span class="h6 mb-0 fw-bold text-primary">${sR.atip}</span>
                                 </div>
@@ -4510,7 +4491,6 @@
 
             rules.forEach(rule => {
                 const catFilter = rule.querySelector('.rule-cat').value;
-                const pFilter = getCatPrio(catFilter);
                 const qtdAmpla = parseInt(rule.querySelector('.rule-qtd-ampla').value) || 0;
                 const qtdAtipica = parseInt(rule.querySelector('.rule-qtd-atipica').value) || 0;
 
@@ -4520,7 +4500,7 @@
                     if (isConv) return false;
                     if (selectedRankingIds.has(e.inscricao)) return false;
 
-                    return getCatPrio(e.categoria) === pFilter;
+                    return String(e.categoria).toLowerCase().trim() === String(catFilter).toLowerCase().trim();
                 });
 
                 // Selecionar Ampla com garantia de no mínimo 10% de cota atípica
@@ -7693,7 +7673,7 @@
                         nome = catDoc.replace('doc_', '').replace(/_/g, ' ');
                         nome = nome.charAt(0).toUpperCase() + nome.slice(1);
                     } else if (nomeRaw) {
-                        nome = nomeRaw.split('-CNH-')[0].split('-')[0]; // Pega antes de -CNH- ou do primeiro hifen
+                        nome = nomeRaw.split('-')[0]; // Pega antes do primeiro hifen
                         nome = nome.replace('doc', '').replace(/([A-Z])/g, ' $1').trim();
                     }
 
@@ -8928,8 +8908,8 @@
 
             // Inscription detection and auto-complete logic:
             // 1. If user entered only digits less than 11 digits -> Auto-complete to SAS-R2026XXXXXX
-            // 2. If starts with/contains CNH, SAS, or R2026 -> Format as Inscription preserving its full form
-            const isCleanInsc = cleanQuery.startsWith('cnh') || cleanQuery.startsWith('sas') || cleanQuery.includes('r2026') || (digitsOnly.length > 0 && digitsOnly.length < 11 && /^\d+$/.test(digitsOnly));
+            // 2. If starts with/contains SAS or R2026 -> Format as Inscription preserving its full form
+            const isCleanInsc = cleanQuery.startsWith('sas') || cleanQuery.includes('r2026') || (digitsOnly.length > 0 && digitsOnly.length < 11 && /^\d+$/.test(digitsOnly));
 
             if (isCleanInsc) {
                 searchType = 'Inscrição';
@@ -8943,7 +8923,7 @@
                     }
                 }
                 const paddedNum = numPart.padStart(6, '0').slice(-6);
-                const prefix = cleanQuery.startsWith('cnh') ? 'CNH' : 'SAS';
+                const prefix = 'SAS';
                 formattedSearch = `${prefix}-R2026${paddedNum}`;
                 searchInput.value = formattedSearch;
             } else if (/^\d+$/.test(digitsOnly) && digitsOnly.length === 11) {
