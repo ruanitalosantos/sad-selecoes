@@ -6409,6 +6409,84 @@
             setVal('det-pcd-tipo', getVal(e.tipo_pcd || e.tipopcd, 'Não informado'));
             setVal('det-pcd-cid', getVal(e.pcd_cid || e.pcdcid, 'Não informado'));
             setVal('det-declara-necessidade', getVal(e.necessidade, 'Não informado'));
+
+            // Atualizar auditoria de analistas no topo do modal
+            updateTopAnalystsUI(e);
+        }
+
+        function updateTopAnalystsUI(e) {
+            const container = document.getElementById('top-analysts-container');
+            if (!container) return;
+
+            const prelimCurricular = e.analista_analise_curricular_id;
+            const recurCurricular = e.analista_analise_curricular_recurso_id;
+            const prelimPcd = e.analista_pcd_id;
+            const recurPcd = e.analista_pcd_recurso_id;
+            const prelimPpni = e.analista_heteroidentificacao_id;
+            const recurPpni = e.analista_heteroidentificacao_recurso_id;
+
+            const hasAny = prelimCurricular || recurCurricular || prelimPcd || recurPcd || prelimPpni || recurPpni;
+
+            if (!hasAny) {
+                container.innerHTML = '';
+                container.style.setProperty('display', 'none', 'important');
+                return;
+            }
+
+            let html = `
+                <div class="d-flex align-items-center flex-wrap gap-2 w-100">
+                    <span class="text-secondary small fw-bold text-uppercase d-flex align-items-center gap-1 me-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        <i class="fas fa-user-shield text-primary fs-6"></i> Auditoria de Analistas:
+                    </span>
+            `;
+
+            if (prelimCurricular) {
+                html += `
+                    <span class="badge border border-primary-subtle text-primary bg-primary bg-opacity-10 px-2 py-1.5 rounded-pill small fw-normal d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-user-edit text-primary-emphasis" style="font-size: 0.8rem;"></i> Curricular Preliminar: <strong>${formatAnalystDisplayName(prelimCurricular)}</strong>
+                    </span>
+                `;
+            }
+            if (recurCurricular) {
+                html += `
+                    <span class="badge border border-warning-subtle text-warning bg-warning bg-opacity-10 px-2 py-1.5 rounded-pill small fw-normal d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-gavel text-warning-emphasis" style="font-size: 0.8rem;"></i> Curricular Recurso: <strong>${formatAnalystDisplayName(recurCurricular)}</strong>
+                    </span>
+                `;
+            }
+            if (prelimPcd) {
+                html += `
+                    <span class="badge border border-info-subtle text-info bg-info bg-opacity-10 px-2 py-1.5 rounded-pill small fw-normal d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-user-check text-info-emphasis" style="font-size: 0.8rem;"></i> PCD Preliminar: <strong>${formatAnalystDisplayName(prelimPcd)}</strong>
+                    </span>
+                `;
+            }
+            if (recurPcd) {
+                html += `
+                    <span class="badge border border-danger-subtle text-danger bg-danger bg-opacity-10 px-2 py-1.5 rounded-pill small fw-normal d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-gavel text-danger-emphasis" style="font-size: 0.8rem;"></i> PCD Recurso: <strong>${formatAnalystDisplayName(recurPcd)}</strong>
+                    </span>
+                `;
+            }
+            if (prelimPpni) {
+                html += `
+                    <span class="badge border border-success-subtle text-success bg-success bg-opacity-10 px-2 py-1.5 rounded-pill small fw-normal d-inline-flex align-items-center gap-1">
+                        <i class="fas fa-user-check text-success-emphasis" style="font-size: 0.8rem;"></i> PPNI Preliminar: <strong>${formatAnalystDisplayName(prelimPpni)}</strong>
+                    </span>
+                `;
+            }
+            if (recurPpni) {
+                html += `
+                    <span class="badge border border-purple-subtle text-purple bg-purple bg-opacity-10 px-2 py-1.5 rounded-pill small fw-normal d-inline-flex align-items-center gap-1" style="color: #6f42c1 !important; border-color: #d63384 !important; background-color: rgba(111, 66, 193, 0.05) !important;">
+                        <i class="fas fa-gavel text-purple-emphasis" style="font-size: 0.8rem;"></i> PPNI Recurso: <strong>${formatAnalystDisplayName(recurPpni)}</strong>
+                    </span>
+                `;
+            }
+
+            html += `</div>`;
+
+            container.innerHTML = html;
+            container.style.display = 'block';
         }
 
         async function openAnalyzer(idOrInsc, forceReadOnly = false, sourceTab = null) {
@@ -10120,6 +10198,9 @@
                     </div>
                 </div>
                 <div class="modal-body p-4 bg-light">
+                    <!-- Linha de Analistas Responsáveis no topo do modal -->
+                    <div id="top-analysts-container" class="mb-4 p-3 bg-white border rounded shadow-sm align-items-center" style="border-radius: 12px; display: none;"></div>
+
                     <div class="row g-4">
                         <div class="col-lg-8">
                             <!-- SESSÃO 1: IDENTIFICAÇÃO DO CANDIDATO -->
