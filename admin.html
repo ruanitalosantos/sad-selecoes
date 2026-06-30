@@ -7635,8 +7635,9 @@
                     }
                 }
 
-                // 2. Filtrar os anexos (são os elementos a partir do índice 1)
-                const rawAttachments = docs.slice(1);
+                // 2. Filtrar os anexos (inclui o primeiro se for um anexo válido com link)
+                const hasValidLink = docs[0] && (docs[0].medialink || docs[0].mediaLink || docs[0].midialink);
+                const rawAttachments = hasValidLink ? docs : docs.slice(1);
 
                 const DOC_NAMES = {
                     'doc_id_frente': 'Identidade (Frente)',
@@ -7663,6 +7664,7 @@
                 window.currentDocs = rawAttachments.map(doc => {
                     let link = doc.medialink || doc.mediaLink || doc.midialink;
                     if (!link) return null;
+                    link = String(link).trim();
 
                     // Forçar HTTPS para evitar bloqueio de conteúdo misto (Mixed Content) pelo Chrome
                     if (link.startsWith('http://')) {
@@ -7673,7 +7675,8 @@
                         link += (link.includes('?') ? '&' : '?') + 'alt=media';
                     }
 
-                    let nomeRaw = doc.name || doc.nome || doc.filename || '';
+                    let nomeRaw = doc.name || doc.nome || doc.filename || doc.nome_arquivo || doc.nomeArquivo || '';
+                    nomeRaw = String(nomeRaw).trim();
                     if (!nomeRaw && link.includes('/o/')) {
                         nomeRaw = link.split('/o/')[1].split('?')[0];
                     }
@@ -7690,8 +7693,8 @@
                         nome = nome.replace('doc', '').replace(/([A-Z])/g, ' $1').trim();
                     }
 
-                    // Apenas permitir PDF, PNG, JPEG, JPG e HEIC
-                    const allowedExts = /\.(pdf|png|jpeg|jpg|heic)(\?.*)?$/i;
+                    // Apenas permitir PDF, PNG, JPEG, JPG, HEIC e MP4 (utiliza limite específico de fim ou início de query)
+                    const allowedExts = /\.(pdf|png|jpeg|jpg|heic|mp4)($|\?|&)/i;
                     if (!allowedExts.test(link) && !allowedExts.test(nomeRaw) && !nome.toLowerCase().includes('pdf') && !nomeRaw.toLowerCase().includes('pdf')) {
                         return null;
                     }
@@ -7701,7 +7704,7 @@
 
                 // Se todos os documentos foram filtrados, mostra a mensagem de vazio
                 if (window.currentDocs.length === 0) {
-                    if (docsContainer) docsContainer.innerHTML = '<div class="alert alert-info w-100 py-2 small">Nenhum anexo suportado encontrado para esta inscrição. (Apenas PDF, PNG, JPEG/JPG e HEIC são aceitos)</div>';
+                    if (docsContainer) docsContainer.innerHTML = '<div class="alert alert-info w-100 py-2 small">Nenhum anexo suportado encontrado para esta inscrição. (Apenas PDF, PNG, JPEG/JPG, HEIC e MP4 são aceitos)</div>';
                     if (wrapperDocsRecursos) wrapperDocsRecursos.classList.add('d-none');
                     return;
                 }
@@ -7711,9 +7714,10 @@
 
                 window.currentDocs.forEach((doc, idx) => {
                     const isRecurso = doc.categoria_doc && doc.categoria_doc.toLowerCase().includes('recurso');
-                    const isImg = /\.(jpg|jpeg|png)(\?.*)?$/i.test(doc.link) || /\.(jpg|jpeg|png)$/i.test(doc.nomeRaw);
-                    const isHeic = /\.heic(\?.*)?$/i.test(doc.link) || /\.heic$/i.test(doc.nomeRaw);
-                    const isPdf = /\.pdf(\?.*)?$/i.test(doc.link) || /\.pdf$/i.test(doc.nomeRaw) || doc.nome.toLowerCase().includes('pdf') || (doc.nomeRaw && doc.nomeRaw.toLowerCase().includes('pdf'));
+                    const isImg = /\.(jpg|jpeg|png)($|\?|&)/i.test(doc.link) || /\.(jpg|jpeg|png)($|\?|&)/i.test(doc.nomeRaw);
+                    const isHeic = /\.heic($|\?|&)/i.test(doc.link) || /\.heic($|\?|&)/i.test(doc.nomeRaw);
+                    const isPdf = /\.pdf($|\?|&)/i.test(doc.link) || /\.pdf($|\?|&)/i.test(doc.nomeRaw) || doc.nome.toLowerCase().includes('pdf') || (doc.nomeRaw && doc.nomeRaw.toLowerCase().includes('pdf'));
+                    const isMp4 = /\.mp4($|\?|&)/i.test(doc.link) || /\.mp4($|\?|&)/i.test(doc.nomeRaw);
 
                     let thumbContent = '';
                     if (isImg) {
@@ -7723,8 +7727,13 @@
                         thumbContent = `<div id="thumb-heic-${idx}" class="thumb-doc d-flex justify-content-center align-items-center" style="background: #f8fafc; cursor: pointer;" onclick="viewDocument(${idx})">
                             <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
                         </div>`;
+                    } else if (isMp4) {
+                        thumbContent = `<a href="${doc.link}" target="_blank" class="thumb-doc d-flex flex-column justify-content-center align-items-center text-decoration-none" style="background: #f8fafc; cursor: pointer; border: 1px solid #e2e8f0; border-radius: 12px; transition: all 0.2s;">
+                            <i class="fas fa-file-video text-primary mb-2" style="font-size: 2.2rem;"></i>
+                            <span class="btn btn-primary fw-bold text-white shadow-sm" style="font-size: 9px; padding: 2px 6px; border-radius: 4px;">Abrir Vídeo</span>
+                        </a>`;
                     } else {
-                        // Se não for imagem nem HEIC, exibe ícone do FontAwesome
+                        // Se não for imagem nem HEIC nem MP4, exibe ícone do FontAwesome
                         const iconClass = isPdf ? 'fa-file-pdf text-danger' : 'fa-file-alt text-secondary';
                         thumbContent = `<div class="thumb-doc d-flex justify-content-center align-items-center" style="font-size: 3rem; background: #f8fafc; cursor: pointer;" onclick="viewDocument(${idx})"><i class="fas ${iconClass}"></i></div>`;
                     }
@@ -8550,15 +8559,28 @@
             if (iframe) iframe.src = '';
             const img = document.getElementById('media-preview-img');
             if (img) img.src = '';
+            const video = document.getElementById('media-preview-video');
+            if (video) {
+                video.pause();
+                video.src = '';
+                video.classList.add('d-none');
+            }
             if (typeof window.resetPreviewTransform === 'function') {
                 window.resetPreviewTransform();
             }
         };
 
         window.viewDocument = function (index) {
-            currentDocIndex = index;
             const doc = window.currentDocs[index];
             if (!doc) return;
+
+            const isMp4 = /\.mp4($|\?|&)/i.test(doc.link) || /\.mp4($|\?|&)/i.test(doc.nomeRaw || '');
+            if (isMp4) {
+                window.open(doc.link, '_blank');
+                return;
+            }
+
+            currentDocIndex = index;
 
             if (typeof window.resetPreviewTransform === 'function') {
                 window.resetPreviewTransform();
@@ -8573,17 +8595,20 @@
                 const loading = document.getElementById('media-preview-loading');
                 const iframe = document.getElementById('media-preview-iframe');
                 const img = document.getElementById('media-preview-img');
+                const video = document.getElementById('media-preview-video');
 
                 if (previewBox) previewBox.classList.remove('d-none');
                 if (title) title.innerHTML = `<i class="fas fa-eye me-2"></i>Visualização Média: ${doc.nome}`;
 
-                const isImg = /\.(jpg|jpeg|png)(\?.*)?$/i.test(doc.link) || /\.(jpg|jpeg|png)$/i.test(doc.nomeRaw);
-                const isHeic = /\.heic(\?.*)?$/i.test(doc.link) || /\.heic$/i.test(doc.nomeRaw);
-                const isPdf = /\.pdf(\?.*)?$/i.test(doc.link) || /\.pdf$/i.test(doc.nomeRaw || '') || doc.nome.toLowerCase().includes('pdf') || (doc.nomeRaw && doc.nomeRaw.toLowerCase().includes('pdf'));
+                const isImg = /\.(jpg|jpeg|png)($|\?|&)/i.test(doc.link) || /\.(jpg|jpeg|png)($|\?|&)/i.test(doc.nomeRaw);
+                const isHeic = /\.heic($|\?|&)/i.test(doc.link) || /\.heic($|\?|&)/i.test(doc.nomeRaw);
+                const isPdf = /\.pdf($|\?|&)/i.test(doc.link) || /\.pdf($|\?|&)/i.test(doc.nomeRaw || '') || doc.nome.toLowerCase().includes('pdf') || (doc.nomeRaw && doc.nomeRaw.toLowerCase().includes('pdf'));
+                const isMp4 = /\.mp4($|\?|&)/i.test(doc.link) || /\.mp4($|\?|&)/i.test(doc.nomeRaw || '');
 
                 if (loading) loading.classList.add('d-none');
                 if (iframe) { iframe.classList.add('d-none'); iframe.src = ''; }
                 if (img) { img.classList.add('d-none'); img.src = ''; }
+                if (video) { video.classList.add('d-none'); video.src = ''; }
 
                 if (isHeic) {
                     if (doc._convertedUrl) {
@@ -8665,6 +8690,11 @@
                         iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
                         iframe.classList.remove('d-none');
                     }
+                } else if (isMp4) {
+                    if (video) {
+                        video.src = doc.link;
+                        video.classList.remove('d-none');
+                    }
                 } else {
                     iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
                     iframe.classList.remove('d-none');
@@ -8681,9 +8711,11 @@
 
                 const frame = document.getElementById('viewerFrame');
                 const img = document.getElementById('viewerImage');
-                const isImg = /\.(jpg|jpeg|png)(\?.*)?$/i.test(doc.link) || /\.(jpg|jpeg|png)$/i.test(doc.nomeRaw);
-                const isHeic = /\.heic(\?.*)?$/i.test(doc.link) || /\.heic$/i.test(doc.nomeRaw);
-                const isPdf = /\.pdf(\?.*)?$/i.test(doc.link) || /\.pdf$/i.test(doc.nomeRaw || '') || doc.nome.toLowerCase().includes('pdf') || (doc.nomeRaw && doc.nomeRaw.toLowerCase().includes('pdf'));
+                const video = document.getElementById('viewerVideo');
+                const isImg = /\.(jpg|jpeg|png)($|\?|&)/i.test(doc.link) || /\.(jpg|jpeg|png)($|\?|&)/i.test(doc.nomeRaw);
+                const isHeic = /\.heic($|\?|&)/i.test(doc.link) || /\.heic($|\?|&)/i.test(doc.nomeRaw);
+                const isPdf = /\.pdf($|\?|&)/i.test(doc.link) || /\.pdf($|\?|&)/i.test(doc.nomeRaw || '') || doc.nome.toLowerCase().includes('pdf') || (doc.nomeRaw && doc.nomeRaw.toLowerCase().includes('pdf'));
+                const isMp4 = /\.mp4($|\?|&)/i.test(doc.link) || /\.mp4($|\?|&)/i.test(doc.nomeRaw || '');
 
                 document.getElementById('viewerTitle').innerText = doc.nome;
                 document.getElementById('doc-counter').innerText = `${index + 1} / ${window.currentDocs.length}`;
@@ -8692,6 +8724,10 @@
 
                 const btnOpenNewTab = document.getElementById('btn-open-new-tab');
                 if (btnOpenNewTab) btnOpenNewTab.href = doc.link;
+
+                if (frame) frame.style.display = 'none';
+                if (img) img.style.display = 'none';
+                if (video) { video.style.display = 'none'; video.src = ''; }
 
                 if (isHeic) {
                     if (doc._convertedUrl) {
@@ -8821,6 +8857,12 @@
                         frame.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
                         viewerModal.show();
                     }
+                } else if (isMp4) {
+                    if (video) {
+                        video.style.display = 'block';
+                        video.src = doc.link;
+                    }
+                    viewerModal.show();
                 } else {
                     frame.style.display = 'block';
                     img.style.display = 'none';
@@ -9281,6 +9323,18 @@
 
             // Auto-refresh a cada 5 minutos
             setInterval(fetchEnrollments, 300000);
+
+            // Pausar vídeo ao fechar o modal
+            const viewerModalEl = document.getElementById('viewerModal');
+            if (viewerModalEl) {
+                viewerModalEl.addEventListener('hidden.bs.modal', function () {
+                    const video = document.getElementById('viewerVideo');
+                    if (video) {
+                        video.pause();
+                        video.src = '';
+                    }
+                });
+            }
         });
 
         // Mobile Toggle logic
@@ -10882,6 +10936,8 @@
                                         style="height: 450px; border: 0;"></iframe>
                                     <img id="media-preview-img" class="img-fluid d-none rounded shadow-sm"
                                         style="max-height: 450px; object-fit: contain;">
+                                    <video id="media-preview-video" class="d-none w-100 rounded shadow-sm"
+                                        style="max-height: 450px; outline: none;" controls></video>
                                 </div>
                             </div>
                         </div>
@@ -11338,6 +11394,7 @@
                             style="width: 100%; height: 80vh; border: none; display: none;"></iframe>
                         <img id="viewerImage" src=""
                             style="max-width: 90%; max-height: 80vh; display: none; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));">
+                        <video id="viewerVideo" style="max-width: 90%; max-height: 80vh; display: none;" controls></video>
                         <!-- Overlay de conversão HEIC -->
                         <div id="viewer-loading-heic"
                             style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.6); flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:10;">
