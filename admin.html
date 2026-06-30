@@ -2768,6 +2768,12 @@
             }
         };
 
+        function isMasterUser(login) {
+            if (!login) return false;
+            const masters = ['indira.dutra', 'melanny.berenguer', 'ruan.santos'];
+            return masters.includes(login.toLowerCase().trim());
+        }
+
         // Global State
         let allEnrollments = [];
         let rankingData = []; // Dados do ranking oficial
@@ -2903,6 +2909,7 @@
 
         function isUserRestricted() {
             const login = getCurrentAnalyst();
+            if (isMasterUser(login)) return false;
             return RESTRICTED_VIEW_ONLY_USERS.includes(login);
         }
 
@@ -3857,7 +3864,8 @@
             if (loginEl) {
                 const userLogin = getCurrentAnalyst();
                 const level = getAnalystLevel();
-                loginEl.innerText = `${userLogin} (Nível: ${level})`;
+                const suffix = isMasterUser(userLogin) ? ' [MASTER]' : '';
+                loginEl.innerText = `${userLogin} (Nível: ${level})${suffix}`;
             }
         }
 
@@ -6633,9 +6641,13 @@
             normalizeCandidateScores(e);
 
             const me = getCurrentAnalyst();
+            const isMaster = isMasterUser(me);
             const isRestricted = isUserRestricted();
-            let isReadOnly = forceReadOnly || isRestricted;
+            let isReadOnly = (forceReadOnly || isRestricted) && !isMaster;
             let currentLock = isRestricted ? "Você possui apenas permissão de visualização (Leitura)." : "Inscrição em modo de visualização (Somente Leitura)";
+            if (isMaster) {
+                currentLock = "";
+            }
 
             // Determina a aba de origem para recarregar após análise
             let resolvedSourceTab = sourceTab;
@@ -6656,7 +6668,7 @@
             const nivelAnalista = getAnalystLevel();
 
             // 1. Restrições Gerais para o nível de 'heteroidentificacao'
-            if (nivelAnalista === 'heteroidentificacao') {
+            if (nivelAnalista === 'heteroidentificacao' && !isMaster) {
                 const abasPermitidas = ['criterios_humanos', 'recursos_humanos'];
                 if (!abasPermitidas.includes(resolvedSourceTab)) {
                     forceReadOnly = true;
@@ -6666,7 +6678,7 @@
             }
 
             // 2. Restrições de Liderança (Presidente e Suplente) para Recursos de Cotas (recursos_humanos)
-            if (resolvedSourceTab === 'recursos_humanos') {
+            if (resolvedSourceTab === 'recursos_humanos' && !isMaster) {
                 if (temPpni) {
                     // Apenas presidente/suplente julgam recurso de cotas PPNI
                     if (!isLeader) {
@@ -6698,13 +6710,13 @@
                     isCriteriosHumanosAnalyzed = true;
                 }
 
-                if (isCriteriosHumanosAnalyzed) {
+                if (isCriteriosHumanosAnalyzed && !isMaster) {
                     forceReadOnly = true;
                     isReadOnly = true;
                     currentLock = "Modo Leitura: A análise de cotas para este candidato já foi concluída e homologada.";
                 } else {
                     // Candidato não analisado ainda. Aplicar regras de permissão adicionais:
-                    if (temPpni) {
+                    if (temPpni && !isMaster) {
                         // Regra de Liderança para PPNI
                         if (!isLeader) {
                             forceReadOnly = true;
@@ -6721,32 +6733,32 @@
                             }
                         }
                     }
-
+ 
                     // Se for analista de nível heteroidentificacao, só pode analisar se for PPNI (não PCD puro)
-                    if (nivelAnalista === 'heteroidentificacao' && !temPpni) {
+                    if (nivelAnalista === 'heteroidentificacao' && !temPpni && !isMaster) {
                         forceReadOnly = true;
                         isReadOnly = true;
                         currentLock = "Modo Leitura: Analista do nível 'heteroidentificacao' só pode avaliar candidatos com cotas PPNI.";
                     }
                 }
-
+ 
                 // Se o analista for de nível 'todos', mas o candidato não possuir cotas PCD nem PPNI
-                if (nivelAnalista === 'todos' && !temPcd && !temPpni) {
+                if (nivelAnalista === 'todos' && !temPcd && !temPpni && !isMaster) {
                     forceReadOnly = true;
                     isReadOnly = true;
                     currentLock = "Modo Leitura: Candidato sem cotas declaradas (PCD / PPNI) para análise.";
                 }
             }
-
+ 
             // Regra específica para abas de cotas: Bloqueado se análise curricular não for Sim
-            if ((resolvedSourceTab === 'criterios_humanos' || resolvedSourceTab === 'recursos_humanos') && !isSim(e.analisecurricular)) {
+            if ((resolvedSourceTab === 'criterios_humanos' || resolvedSourceTab === 'recursos_humanos') && !isSim(e.analisecurricular) && !isMaster) {
                 isReadOnly = true;
                 currentLock = "Apenas visualização: Candidato não elegível para análise nesta etapa pois a Análise Curricular não foi aprovada (diferente de 'Sim').";
             }
-
+ 
             if (!forceReadOnly && !isRestricted) {
                 if (e.analista) {
-                    isReadOnly = (e.analista !== me);
+                    isReadOnly = (e.analista !== me) && !isMaster;
                     currentLock = isReadOnly ? `Esta inscrição está sendo analisada por: ${e.analista}` : "";
                 } else {
                     // Inscrição Livre: Perguntar
@@ -6778,8 +6790,8 @@
                         isReadOnly = false;
                         renderDataForTab(window.currentTab || 'inicio');
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        isReadOnly = true;
-                        currentLock = "Visualização da Inscrição (Modo Somente Leitura)";
+                        isReadOnly = !isMaster;
+                        currentLock = isReadOnly ? "Visualização da Inscrição (Modo Somente Leitura)" : "";
                     } else {
                         return; // Se fechar fora do Swal, cancela a abertura do modal
                     }
@@ -7154,12 +7166,12 @@
                         justification = e.recpcd || '';
                         const temRecursoPcd = !!(e.justrecpcd && e.justrecpcd.trim() && e.justrecpcd !== 'null' && e.justrecpcd !== 'undefined');
                         const jaJulgadoPcd = (e.julpcd === 'Sim' || e.julpcd === 'Não');
-                        isFieldReadOnly = isReadOnly || jaJulgadoPcd || !temRecursoPcd || (nivelAnalista !== 'todos');
+                        isFieldReadOnly = (isReadOnly || jaJulgadoPcd || !temRecursoPcd || (nivelAnalista !== 'todos')) && !isMaster;
                     } else {
                         if (e.analisepcd === 'Sim') isChecked = true;
                         else if (e.analisepcd === 'Não') isChecked = false;
                         justification = e.justpcd || '';
-                        isFieldReadOnly = isReadOnly || isSim(e.analisepcd) || isNao(e.analisepcd) || (nivelAnalista !== 'todos');
+                        isFieldReadOnly = (isReadOnly || isSim(e.analisepcd) || isNao(e.analisepcd) || (nivelAnalista !== 'todos')) && !isMaster;
                     }
                 } else if (switchId === 'val_cotas_ppni') {
                     if (resolvedSourceTab === 'recursos_humanos') {
@@ -7167,12 +7179,12 @@
                         justification = e.recotas || e.recppni || '';
                         const temRecursoPpni = !!(e.justreccotas && e.justreccotas.trim() && e.justreccotas !== 'null' && e.justreccotas !== 'undefined');
                         const jaJulgadoPpni = (e.julcotas === 'Sim' || e.julcotas === 'Não');
-                        isFieldReadOnly = isReadOnly || jaJulgadoPpni || !temRecursoPpni || (nivelAnalista !== 'todos' && nivelAnalista !== 'heteroidentificacao');
+                        isFieldReadOnly = (isReadOnly || jaJulgadoPpni || !temRecursoPpni || (nivelAnalista !== 'todos' && nivelAnalista !== 'heteroidentificacao')) && !isMaster;
                     } else {
                         if (e.analisecotas === 'Sim') isChecked = true;
                         else if (e.analisecotas === 'Não') isChecked = false;
                         justification = e.justcotas || '';
-                        isFieldReadOnly = isReadOnly || isSim(e.analisecotas) || isNao(e.analisecotas) || (nivelAnalista !== 'todos' && nivelAnalista !== 'heteroidentificacao');
+                        isFieldReadOnly = (isReadOnly || isSim(e.analisecotas) || isNao(e.analisecotas) || (nivelAnalista !== 'todos' && nivelAnalista !== 'heteroidentificacao')) && !isMaster;
                     }
                 }
 
@@ -8164,10 +8176,10 @@
                         lockPcd = (e.analisepcd === 'Sim' || e.analisepcd === 'Não');
                     }
 
-                    if (temPpni && !lockPpni && (nivelAnalista === 'todos' || nivelAnalista === 'heteroidentificacao')) {
+                    if (temPpni && (!lockPpni || isMaster)) {
                         createDynamicConcluirBtn('ppni', 'Concluir PPNI', 'btn-primary');
                     }
-                    if (temPcd && !lockPcd && nivelAnalista === 'todos') {
+                    if (temPcd && (!lockPcd || isMaster)) {
                         createDynamicConcluirBtn('pcd', 'Concluir PCD', 'btn-success');
                     }
                 } else {
@@ -9778,7 +9790,7 @@
 
                 // Actions button
                 let actionBtn = "";
-                if (hasVoted || votesCount >= 5 || currentUserLevel === 'todos') {
+                if ((hasVoted || votesCount >= 5 || currentUserLevel === 'todos') && !isMasterUser(currentUser)) {
                     actionBtn = `<button class="btn btn-outline-secondary btn-sm btn-action fw-semibold" onclick="openBancaModal('${e.inscricao}')"><i class="fas fa-eye me-1"></i>Visualizar</button>`;
                 } else {
                     actionBtn = `<button class="btn btn-primary btn-sm btn-action fw-bold" onclick="openBancaModal('${e.inscricao}')"><i class="fas fa-user-edit me-1"></i>Avaliar</button>`;
@@ -9834,7 +9846,7 @@
             const hasVoted = !!myVote;
             const isConcluded = votesCount >= 5;
             const nivelAnalista = getAnalystLevel();
-            const isReadOnly = hasVoted || isConcluded || nivelAnalista === 'todos';
+            const isReadOnly = (hasVoted || isConcluded || nivelAnalista === 'todos') && !isMasterUser(currentUser);
 
             // Reset Form Fields
             resetBancaForm();
@@ -9865,6 +9877,9 @@
             } else {
                 alertBanner.classList.add('d-none');
                 setBancaFormReadOnly(false);
+                if (hasVoted && myVote) {
+                    loadSavedVoteIntoModal(myVote);
+                }
             }
 
             // Render Histórico de Resoluções
