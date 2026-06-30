@@ -7914,8 +7914,8 @@
                     numCapsi = Math.max(0, Math.min(6, numCapsi));
                     document.getElementById('num_semestres_capsi').value = numCapsi;
                 }
-                if (numPsic < 0 || numPsic > 6) {
-                    numPsic = Math.max(0, Math.min(6, numPsic));
+                if (numPsic < 0 || numPsic > 4) {
+                    numPsic = Math.max(0, Math.min(4, numPsic));
                     document.getElementById('num_semestres_psic').value = numPsic;
                 }
 
@@ -10783,18 +10783,13 @@
                                             (Máximo 70 pontos - Não cumulativo)</label>
                                         <select id="sel_pontuacao_formacao" class="form-select"
                                             onchange="updatePontuacaoCurricular()">
-                                            <option value="0">Selecione o título de maior pontuação...</option>
-                                            <option value="70">Residência em Psiquiatria da Infância e Adolescência
-                                                (CNRM) - 70 pts</option>
-                                            <option value="60">Residência em Psiquiatria (CNRM) - 60 pts</option>
-                                            <option value="50">Título de Especialista em Psiquiatria da Infância e
-                                                Adolescência (AMB) - 50 pts</option>
-                                            <option value="40">Título de Especialista em Psiquiatria (AMB) - 40 pts
-                                            </option>
-                                            <option value="30">Especialização em Psiquiatria da Infância e Adolescência
-                                                (mínimo 630h) - 30 pts</option>
-                                            <option value="20">Especialização em Psiquiatria da Infância e Adolescência
-                                                (mínimo 360h) - 20 pts</option>
+                                            <option value="0">0</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                            <option value="40">40</option>
+                                            <option value="50">50</option>
+                                            <option value="60">60</option>
+                                            <option value="70">70</option>
                                         </select>
                                     </div>
 
@@ -10804,19 +10799,31 @@
                                             pontos por semestre - Máximo 30 pontos no total)</label>
 
                                         <div class="col-md-6">
-                                            <label class="small text-muted mb-1" for="num_semestres_capsi">Semestres em
-                                                CAPSi</label>
-                                            <input type="number" id="num_semestres_capsi" class="form-control" min="0"
-                                                max="6" value="0" oninput="updatePontuacaoCurricular()">
+                                            <label class="small text-muted mb-1" for="num_semestres_capsi">Experiência profissional em CAPSi</label>
+                                            <select id="num_semestres_capsi" class="form-select"
+                                                onchange="updatePontuacaoCurricular()">
+                                                <option value="0">0</option>
+                                                <option value="1">5</option>
+                                                <option value="2">10</option>
+                                                <option value="3">15</option>
+                                                <option value="4">20</option>
+                                                <option value="5">25</option>
+                                                <option value="6">30</option>
+                                            </select>
                                             <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_capsi"
                                                     class="fw-semibold text-primary">0</span></div>
                                         </div>
 
                                         <div class="col-md-6">
-                                            <label class="small text-muted mb-1" for="num_semestres_psic">Semestres em
-                                                Assistência em Psiquiatria da infância e adolescência</label>
-                                            <input type="number" id="num_semestres_psic" class="form-control" min="0"
-                                                max="6" value="0" oninput="updatePontuacaoCurricular()">
+                                            <label class="small text-muted mb-1" for="num_semestres_psic">Experiência profissional na área de assistência em Psiquiatria da infância e adolescência</label>
+                                            <select id="num_semestres_psic" class="form-select"
+                                                onchange="updatePontuacaoCurricular()">
+                                                <option value="0">0</option>
+                                                <option value="1">5</option>
+                                                <option value="2">10</option>
+                                                <option value="3">15</option>
+                                                <option value="4">20</option>
+                                            </select>
                                             <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_psic"
                                                     class="fw-semibold text-primary">0</span></div>
                                         </div>
