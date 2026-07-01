@@ -8555,6 +8555,11 @@
             if (previewBox) {
                 previewBox.classList.add('d-none');
             }
+            const btnOpenTab = document.getElementById('btn-preview-open-tab');
+            if (btnOpenTab) {
+                btnOpenTab.classList.add('d-none');
+                btnOpenTab.href = '#';
+            }
             const iframe = document.getElementById('media-preview-iframe');
             if (iframe) iframe.src = '';
             const img = document.getElementById('media-preview-img');
@@ -8596,9 +8601,14 @@
                 const iframe = document.getElementById('media-preview-iframe');
                 const img = document.getElementById('media-preview-img');
                 const video = document.getElementById('media-preview-video');
+                const btnOpenTab = document.getElementById('btn-preview-open-tab');
 
                 if (previewBox) previewBox.classList.remove('d-none');
                 if (title) title.innerHTML = `<i class="fas fa-eye me-2"></i>Visualização Média: ${doc.nome}`;
+                if (btnOpenTab) {
+                    btnOpenTab.href = doc._convertedUrl || doc.link;
+                    btnOpenTab.classList.remove('d-none');
+                }
 
                 const isImg = /\.(jpg|jpeg|png)($|\?|&)/i.test(doc.link) || /\.(jpg|jpeg|png)($|\?|&)/i.test(doc.nomeRaw);
                 const isHeic = /\.heic($|\?|&)/i.test(doc.link) || /\.heic($|\?|&)/i.test(doc.nomeRaw);
@@ -8628,6 +8638,7 @@
                                 doc._convertedUrl = url;
                                 img.src = url;
                                 img.classList.remove('d-none');
+                                if (btnOpenTab) btnOpenTab.href = url;
                                 if (loading) loading.classList.add('d-none');
                             })
                             .catch(err => {
@@ -8660,31 +8671,37 @@
                         }
                     };
                 } else if (isPdf) {
-                    if (doc._convertedUrl) {
-                        iframe.src = doc._convertedUrl;
-                        iframe.classList.remove('d-none');
+                    if (window.location.protocol === 'file:') {
+                        if (doc._convertedUrl) {
+                            iframe.src = doc._convertedUrl;
+                            iframe.classList.remove('d-none');
+                        } else {
+                            if (loading) loading.classList.remove('d-none');
+                            const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
+                                const r = await fetch(url);
+                                if (!r.ok) throw new Error('HTTP ' + r.status);
+                                return await r.blob();
+                            };
+                            fetchFn(doc.link)
+                                .then(blob => {
+                                    const objectUrl = URL.createObjectURL(blob);
+                                    doc._convertedUrl = objectUrl;
+                                    iframe.src = objectUrl;
+                                    iframe.classList.remove('d-none');
+                                    if (loading) loading.classList.add('d-none');
+                                })
+                                .catch(err => {
+                                    console.error('Erro ao carregar PDF via blob, usando link direto:', err);
+                                    if (loading) loading.classList.add('d-none');
+                                    // Fallback para carregar o PDF do GCS diretamente no iframe
+                                    iframe.src = doc.link;
+                                    iframe.classList.remove('d-none');
+                                });
+                        }
                     } else {
-                        if (loading) loading.classList.remove('d-none');
-                        const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
-                            const r = await fetch(url);
-                            if (!r.ok) throw new Error('HTTP ' + r.status);
-                            return await r.blob();
-                        };
-                        fetchFn(doc.link)
-                            .then(blob => {
-                                const objectUrl = URL.createObjectURL(blob);
-                                doc._convertedUrl = objectUrl;
-                                iframe.src = objectUrl;
-                                iframe.classList.remove('d-none');
-                                if (loading) loading.classList.add('d-none');
-                            })
-                            .catch(err => {
-                                console.error('Erro ao carregar PDF via blob, usando link direto:', err);
-                                if (loading) loading.classList.add('d-none');
-                                // Fallback para carregar o PDF do GCS diretamente no iframe
-                                iframe.src = doc.link;
-                                iframe.classList.remove('d-none');
-                            });
+                        // Web, usamos o Google Docs Viewer para evitar bloqueio por CSP e X-Frame-Options
+                        iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
+                        iframe.classList.remove('d-none');
                     }
                 } else if (isMp4) {
                     if (video) {
@@ -8826,31 +8843,36 @@
                 } else if (isPdf) {
                     frame.style.display = 'block';
                     img.style.display = 'none';
-                    if (doc._convertedUrl) {
-                        frame.src = doc._convertedUrl;
-                        viewerModal.show();
+                    if (window.location.protocol === 'file:') {
+                        if (doc._convertedUrl) {
+                            frame.src = doc._convertedUrl;
+                            viewerModal.show();
+                        } else {
+                            const loadingEl = document.getElementById('viewer-loading-heic');
+                            if (loadingEl) loadingEl.style.display = 'flex';
+                            viewerModal.show();
+                            const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
+                                const r = await fetch(url);
+                                if (!r.ok) throw new Error('HTTP ' + r.status);
+                                return await r.blob();
+                            };
+                            fetchFn(doc.link)
+                                .then(blob => {
+                                    const objectUrl = URL.createObjectURL(blob);
+                                    doc._convertedUrl = objectUrl;
+                                    frame.src = objectUrl;
+                                    if (loadingEl) loadingEl.style.display = 'none';
+                                })
+                                .catch(err => {
+                                    console.error('Erro ao carregar PDF via blob, usando link direto:', err);
+                                    if (loadingEl) loadingEl.style.display = 'none';
+                                    frame.src = doc.link;
+                                });
+                        }
                     } else {
-                        const loadingEl = document.getElementById('viewer-loading-heic');
-                        if (loadingEl) loadingEl.style.display = 'flex';
+                        // Web, usamos o Google Docs Viewer para evitar bloqueio por CSP e X-Frame-Options
+                        frame.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
                         viewerModal.show();
-                        const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
-                            const r = await fetch(url);
-                            if (!r.ok) throw new Error('HTTP ' + r.status);
-                            return await r.blob();
-                        };
-                        fetchFn(doc.link)
-                            .then(blob => {
-                                const objectUrl = URL.createObjectURL(blob);
-                                doc._convertedUrl = objectUrl;
-                                frame.src = objectUrl;
-                                if (loadingEl) loadingEl.style.display = 'none';
-                            })
-                            .catch(err => {
-                                console.error('Erro ao carregar PDF via blob, usando link direto:', err);
-                                if (loadingEl) loadingEl.style.display = 'none';
-                                // Fallback para carregar diretamente
-                                frame.src = doc.link;
-                            });
                     }
                 } else if (isMp4) {
                     if (video) {
@@ -10919,9 +10941,14 @@
                                         </button>
                                     </div>
 
-                                    <button type="button" class="btn btn-sm btn-outline-danger"
-                                        onclick="closeMediaPreview()"><i class="fas fa-times me-1"></i>Fechar
-                                        Visualização</button>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a id="btn-preview-open-tab" href="#" target="_blank" class="btn btn-sm btn-outline-primary d-none">
+                                            <i class="fas fa-external-link-alt me-1"></i>Abrir em Nova Aba
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            onclick="closeMediaPreview()"><i class="fas fa-times me-1"></i>Fechar
+                                            Visualização</button>
+                                    </div>
                                 </div>
                                 <div class="media-preview-content d-flex justify-content-center align-items-center bg-light rounded"
                                     style="min-height: 400px; max-height: 500px; overflow: auto; border: 1px dashed var(--border-color);">
