@@ -8660,35 +8660,31 @@
                         }
                     };
                 } else if (isPdf) {
-                    if (window.location.protocol === 'file:') {
-                        // Para evitar bloqueio de origem cruzada no Chrome local (file://),
-                        // baixamos o PDF e o exibimos como Object URL do Blob.
-                        if (doc._convertedUrl) {
-                            iframe.src = doc._convertedUrl;
-                            iframe.classList.remove('d-none');
-                        } else {
-                            if (loading) loading.classList.remove('d-none');
-                            window.fetchBlobWithProxyViewer(doc.link)
-                                .then(blob => {
-                                    const objectUrl = URL.createObjectURL(blob);
-                                    doc._convertedUrl = objectUrl;
-                                    iframe.src = objectUrl;
-                                    iframe.classList.remove('d-none');
-                                    if (loading) loading.classList.add('d-none');
-                                })
-                                .catch(err => {
-                                    console.error('Erro ao carregar PDF via blob:', err);
-                                    if (loading) loading.classList.add('d-none');
-                                    // Fallback para carregar diretamente
-                                    iframe.src = doc.link;
-                                    iframe.classList.remove('d-none');
-                                });
-                        }
-                    } else {
-                        // Em ambiente de produção (web), exibimos usando o Google Docs Viewer para evitar
-                        // restrições de X-Frame-Options no GCS e incompatibilidade de Blob URLs na política do CSP.
-                        iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
+                    if (doc._convertedUrl) {
+                        iframe.src = doc._convertedUrl;
                         iframe.classList.remove('d-none');
+                    } else {
+                        if (loading) loading.classList.remove('d-none');
+                        const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
+                            const r = await fetch(url);
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return await r.blob();
+                        };
+                        fetchFn(doc.link)
+                            .then(blob => {
+                                const objectUrl = URL.createObjectURL(blob);
+                                doc._convertedUrl = objectUrl;
+                                iframe.src = objectUrl;
+                                iframe.classList.remove('d-none');
+                                if (loading) loading.classList.add('d-none');
+                            })
+                            .catch(err => {
+                                console.error('Erro ao carregar PDF via blob, usando link direto:', err);
+                                if (loading) loading.classList.add('d-none');
+                                // Fallback para carregar o PDF do GCS diretamente no iframe
+                                iframe.src = doc.link;
+                                iframe.classList.remove('d-none');
+                            });
                     }
                 } else if (isMp4) {
                     if (video) {
@@ -8830,32 +8826,31 @@
                 } else if (isPdf) {
                     frame.style.display = 'block';
                     img.style.display = 'none';
-                    if (window.location.protocol === 'file:') {
-                        if (doc._convertedUrl) {
-                            frame.src = doc._convertedUrl;
-                            viewerModal.show();
-                        } else {
-                            const loadingEl = document.getElementById('viewer-loading-heic');
-                            if (loadingEl) loadingEl.style.display = 'flex';
-                            viewerModal.show();
-                            window.fetchBlobWithProxyViewer(doc.link)
-                                .then(blob => {
-                                    const objectUrl = URL.createObjectURL(blob);
-                                    doc._convertedUrl = objectUrl;
-                                    frame.src = objectUrl;
-                                    if (loadingEl) loadingEl.style.display = 'none';
-                                })
-                                .catch(err => {
-                                    console.error('Erro ao carregar PDF via blob:', err);
-                                    if (loadingEl) loadingEl.style.display = 'none';
-                                    frame.src = doc.link;
-                                });
-                        }
-                    } else {
-                        // Em ambiente de produção (web), exibimos usando o Google Docs Viewer para evitar
-                        // restrições de X-Frame-Options no GCS e incompatibilidade de Blob URLs na política do CSP.
-                        frame.src = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.link)}&embedded=true`;
+                    if (doc._convertedUrl) {
+                        frame.src = doc._convertedUrl;
                         viewerModal.show();
+                    } else {
+                        const loadingEl = document.getElementById('viewer-loading-heic');
+                        if (loadingEl) loadingEl.style.display = 'flex';
+                        viewerModal.show();
+                        const fetchFn = window.fetchBlobWithProxyViewer || async function (url) {
+                            const r = await fetch(url);
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return await r.blob();
+                        };
+                        fetchFn(doc.link)
+                            .then(blob => {
+                                const objectUrl = URL.createObjectURL(blob);
+                                doc._convertedUrl = objectUrl;
+                                frame.src = objectUrl;
+                                if (loadingEl) loadingEl.style.display = 'none';
+                            })
+                            .catch(err => {
+                                console.error('Erro ao carregar PDF via blob, usando link direto:', err);
+                                if (loadingEl) loadingEl.style.display = 'none';
+                                // Fallback para carregar diretamente
+                                frame.src = doc.link;
+                            });
                     }
                 } else if (isMp4) {
                     if (video) {
