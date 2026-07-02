@@ -3487,11 +3487,16 @@
                         const temPcd = isSim(e.is_pcd) || isSim(e.pcd);
                         let isCriteriosHumanosAnalyzed = true;
 
-                         if (temPpni && isEmptyVal(e.analisecotas)) {
+                         if (temPpni && isEmptyVal(e.analisecotas) && isEmptyVal(e.julcotas)) {
+
                              isCriteriosHumanosAnalyzed = false;
+
                          }
-                         if (temPcd && isEmptyVal(e.analisepcd)) {
+
+                         if (temPcd && isEmptyVal(e.analisepcd) && isEmptyVal(e.julpcd)) {
+
                              isCriteriosHumanosAnalyzed = false;
+
                          }
                          // Se exige perícia médica, só conclui quando a perícia tiver resultado
                          if (temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm)) {
@@ -5083,10 +5088,10 @@
 
                     // Verifica se a análise de cotas dele está concluída
                     let isCriteriosHumanosAnalyzed = true;
-                    if (temPpni && isEmptyVal(e.analisecotas)) {
+                    if (temPpni && isEmptyVal(e.analisecotas) && isEmptyVal(e.julcotas)) {
                         isCriteriosHumanosAnalyzed = false;
                     }
-                    if (temPcd && isEmptyVal(e.analisepcd)) {
+                    if (temPcd && isEmptyVal(e.analisepcd) && isEmptyVal(e.julpcd)) {
                         isCriteriosHumanosAnalyzed = false;
                     }
                     if (!temPpni && !temPcd) {
@@ -6705,10 +6710,10 @@
             if (resolvedSourceTab === 'criterios_humanos') {
                 // Se as cotas do candidato já estiverem completamente analisadas, trava em modo leitura
                 let isCriteriosHumanosAnalyzed = true;
-                if (temPpni && isEmptyVal(e.analisecotas)) {
+                if (temPpni && isEmptyVal(e.analisecotas) && isEmptyVal(e.julcotas)) {
                     isCriteriosHumanosAnalyzed = false;
                 }
-                if (temPcd && isEmptyVal(e.analisepcd)) {
+                if (temPcd && isEmptyVal(e.analisepcd) && isEmptyVal(e.julpcd)) {
                     isCriteriosHumanosAnalyzed = false;
                 }
                 if (!temPpni && !temPcd) {
@@ -9865,7 +9870,7 @@
                 if (phase === 'preliminar') {
                     const approvedCurricular = isSim(e.analisecurricular) || isSim(e.julcurricular);
                     const isPpni = isSim(e.cotas_ppni);
-                    const pendingCota = isEmptyVal(e.analisecotas);
+                    const pendingCota = isEmptyVal(e.analisecotas) && isEmptyVal(e.julcotas);
                     return approvedCurricular && isPpni && pendingCota;
                 } else {
                     const isPpni = isSim(e.cotas_ppni);
