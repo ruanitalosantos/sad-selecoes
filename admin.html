@@ -5047,9 +5047,8 @@
                     }
                     const flagHtml = `<span class="badge ${flagClass}">${flagText}</span>`;
 
-                                        const isAlreadyAnalyzed = hasAnalisecurricularSim || hasAnalisecurricularNao;
-                    const isReadOnly = (isAlreadyAnalyzed || !podeAnalisarCurricular) && !isMasterUser(me);
-                    const actionButton = isReadOnly
+                    const isAlreadyAnalyzed = hasAnalisecurricularSim || hasAnalisecurricularNao;
+                    const actionButton = (isAlreadyAnalyzed || !podeAnalisarCurricular)
                         ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'humano')" title="Visualizar Inscrição"><i class="fas fa-eye me-1"></i>Visualizar</button>`
                         : `<button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'humano')">Analisar</button>`;
 
@@ -5155,10 +5154,8 @@
                         const aguardandoPericia = temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm) && isEmptyVal(e.resultado_pericia);
 
                         // Determinar se o usuário logado tem permissão de escrita/análise para este candidato de cotas
-                                                let temPermissaoEscritaCotas = false;
-                        if (isMasterUser(me)) {
-                            temPermissaoEscritaCotas = true;
-                        } else if (temPpni) {
+                        let temPermissaoEscritaCotas = false;
+                        if (temPpni) {
                             temPermissaoEscritaCotas = isLeader && !aguardandoVotosBanca;
                         } else if (temPcd) {
                             temPermissaoEscritaCotas = (nivelAnalista === 'todos' && !isLeader);
@@ -5171,9 +5168,9 @@
                                     <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
                                 </div>
                             `;
-                                                } else if (!isCriteriosHumanosAnalyzed || isMasterUser(me)) {
-                            if (aguardandoVotosBanca && !isMasterUser(me)) {
-                                // Se for lÃ­der, avisa que aguarda banca. Se nÃ£o for lÃ­der, mostra apenas botÃ£o normal de Visualizar
+                        } else if (!isCriteriosHumanosAnalyzed) {
+                            if (aguardandoVotosBanca) {
+                                // Se for líder, avisa que aguarda banca. Se não for líder, mostra apenas botão normal de Visualizar
                                 if (isLeader) {
                                     actionsHtml = `
                                         <div class="d-flex gap-1">
@@ -5266,9 +5263,9 @@
                             forceReadOnlyForAppeal = (status === 'Deferido' || status === 'Indeferido');
                         }
 
-                                                const me = getCurrentAnalyst().trim();
+                        const me = getCurrentAnalyst().trim();
                         const isMeOrFree = !e.analisa || e.analisa === me;
-                        const isReadOnly = (!isMeOrFree || forceReadOnlyForAppeal) && !isMasterUser(me);
+                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal;
 
                         const actionBtn = isReadOnly
                             ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'recursos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
@@ -5344,17 +5341,15 @@
                         const isLeader = BANCA_LEADERS.includes(me);
                         const nivelAnalista = getAnalystLevel();
 
-                                                let temPermissaoEscritaRecurso = false;
-                        if (isMasterUser(me)) {
-                            temPermissaoEscritaRecurso = true;
-                        } else if (temRecPpni) {
+                        let temPermissaoEscritaRecurso = false;
+                        if (temRecPpni) {
                             temPermissaoEscritaRecurso = isLeader;
                         } else if (temRecPcd) {
                             temPermissaoEscritaRecurso = (nivelAnalista === 'todos' && !isLeader);
                         }
 
                         const isMeOrFree = !e.analisa || e.analisa === me;
-                        const isReadOnly = (!isMeOrFree || forceReadOnlyForAppeal || !temPermissaoEscritaRecurso) && !isMasterUser(me);
+                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal || !temPermissaoEscritaRecurso;
 
                         const actionBtn = isReadOnly
                             ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'recursos_humanos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
@@ -6994,7 +6989,7 @@
                     const isAprovadoCurriculo = isSim(e.analisecurricular);
                     const isRejeitadoCurriculo = isNao(e.analisecurricular);
 
-                                        // Atualizar Banner Global de Defesa do Candidato no Topo do Modal
+                    // Atualizar Banner Global de Defesa do Candidato no Topo do Modal
                     const globalAppealContainer = document.getElementById('global-candidate-appeal-container');
                     const globalAppealText = document.getElementById('global-candidate-appeal-text');
                     const globalAppealHeader = document.querySelector('#global-candidate-appeal-container strong');
@@ -7628,7 +7623,7 @@
                     const isAprovadoCurriculo = isSim(e.analisecurricular);
                     const isRejeitadoCurriculo = isNao(e.analisecurricular);
 
-                                        // Atualizar Banner Global de Defesa do Candidato no Topo do Modal
+                    // Atualizar Banner Global de Defesa do Candidato no Topo do Modal
                     const globalAppealContainer = document.getElementById('global-candidate-appeal-container');
                     const globalAppealText = document.getElementById('global-candidate-appeal-text');
                     const globalAppealHeader = document.querySelector('#global-candidate-appeal-container strong');
