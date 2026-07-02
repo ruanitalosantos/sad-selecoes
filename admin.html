@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br">
 <!-- Version: 1.0.3 - Cache Buster: 2026-06-25-1851 -->
 
@@ -2770,7 +2770,7 @@
 
         function isMasterUser(login) {
             if (!login) return false;
-            const masters = ['indira.dutra', 'melanny.berenguer', 'ruan.santos'];
+            const masters = ['indira.dutra', 'melanny.berenguer', 'ruan.santos', 'marcio.arruda', 'gabriel.barbosa', 'thiago.cavalcanti', 'diego.c.martins', 'tercio.santos', 'sas_001'];
             return masters.includes(login.toLowerCase().trim());
         }
 
@@ -5042,8 +5042,9 @@
                     }
                     const flagHtml = `<span class="badge ${flagClass}">${flagText}</span>`;
 
-                    const isAlreadyAnalyzed = hasAnalisecurricularSim || hasAnalisecurricularNao;
-                    const actionButton = (isAlreadyAnalyzed || !podeAnalisarCurricular)
+                                        const isAlreadyAnalyzed = hasAnalisecurricularSim || hasAnalisecurricularNao;
+                    const isReadOnly = (isAlreadyAnalyzed || !podeAnalisarCurricular) && !isMasterUser(me);
+                    const actionButton = isReadOnly
                         ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'humano')" title="Visualizar Inscrição"><i class="fas fa-eye me-1"></i>Visualizar</button>`
                         : `<button class="btn btn-primary btn-sm" onclick="openAnalyzer('${e.inscricao}', false, 'humano')">Analisar</button>`;
 
@@ -5149,8 +5150,10 @@
                         const aguardandoPericia = temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm) && isEmptyVal(e.resultado_pericia);
 
                         // Determinar se o usuário logado tem permissão de escrita/análise para este candidato de cotas
-                        let temPermissaoEscritaCotas = false;
-                        if (temPpni) {
+                                                let temPermissaoEscritaCotas = false;
+                        if (isMasterUser(me)) {
+                            temPermissaoEscritaCotas = true;
+                        } else if (temPpni) {
                             temPermissaoEscritaCotas = isLeader && !aguardandoVotosBanca;
                         } else if (temPcd) {
                             temPermissaoEscritaCotas = (nivelAnalista === 'todos' && !isLeader);
@@ -5163,9 +5166,9 @@
                                     <button class="btn btn-outline-secondary btn-sm btn-action btn-view" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Apenas Visualizar Inscrição"><i class="fas fa-eye text-muted"></i></button>
                                 </div>
                             `;
-                        } else if (!isCriteriosHumanosAnalyzed) {
-                            if (aguardandoVotosBanca) {
-                                // Se for líder, avisa que aguarda banca. Se não for líder, mostra apenas botão normal de Visualizar
+                                                } else if (!isCriteriosHumanosAnalyzed || isMasterUser(me)) {
+                            if (aguardandoVotosBanca && !isMasterUser(me)) {
+                                // Se for lÃ­der, avisa que aguarda banca. Se nÃ£o for lÃ­der, mostra apenas botÃ£o normal de Visualizar
                                 if (isLeader) {
                                     actionsHtml = `
                                         <div class="d-flex gap-1">
@@ -5258,9 +5261,9 @@
                             forceReadOnlyForAppeal = (status === 'Deferido' || status === 'Indeferido');
                         }
 
-                        const me = getCurrentAnalyst().trim();
+                                                const me = getCurrentAnalyst().trim();
                         const isMeOrFree = !e.analisa || e.analisa === me;
-                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal;
+                        const isReadOnly = (!isMeOrFree || forceReadOnlyForAppeal) && !isMasterUser(me);
 
                         const actionBtn = isReadOnly
                             ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'recursos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
@@ -5336,15 +5339,17 @@
                         const isLeader = BANCA_LEADERS.includes(me);
                         const nivelAnalista = getAnalystLevel();
 
-                        let temPermissaoEscritaRecurso = false;
-                        if (temRecPpni) {
+                                                let temPermissaoEscritaRecurso = false;
+                        if (isMasterUser(me)) {
+                            temPermissaoEscritaRecurso = true;
+                        } else if (temRecPpni) {
                             temPermissaoEscritaRecurso = isLeader;
                         } else if (temRecPcd) {
                             temPermissaoEscritaRecurso = (nivelAnalista === 'todos' && !isLeader);
                         }
 
                         const isMeOrFree = !e.analisa || e.analisa === me;
-                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal || !temPermissaoEscritaRecurso;
+                        const isReadOnly = (!isMeOrFree || forceReadOnlyForAppeal || !temPermissaoEscritaRecurso) && !isMasterUser(me);
 
                         const actionBtn = isReadOnly
                             ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'recursos_humanos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
@@ -6980,9 +6985,40 @@
                 const numCapsi = document.getElementById('num_semestres_capsi');
                 const numPsic = document.getElementById('num_semestres_psic');
 
-                if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
+                                if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
                     const isAprovadoCurriculo = isSim(e.analisecurricular);
                     const isRejeitadoCurriculo = isNao(e.analisecurricular);
+
+                                        // Atualizar Banner Global de Defesa do Candidato no Topo do Modal
+                    const globalAppealContainer = document.getElementById('global-candidate-appeal-container');
+                    const globalAppealText = document.getElementById('global-candidate-appeal-text');
+                    const globalAppealHeader = document.querySelector('#global-candidate-appeal-container strong');
+
+                    if (globalAppealContainer && globalAppealText) {
+                        let appealTitle = '';
+                        let appealContent = '';
+
+                        if (resolvedSourceTab === 'recursos' && e.justreccurriculo && e.justreccurriculo.trim() && e.justreccurriculo !== 'null' && e.justreccurriculo !== 'undefined') {
+                            appealTitle = 'DEFESA DO CANDIDATO (RECURSO CURRICULAR)';
+                            appealContent = e.justreccurriculo.trim();
+                        } else if (resolvedSourceTab === 'recursos_humanos') {
+                            if (temPpni && e.justreccotas && e.justreccotas.trim() && e.justreccotas !== 'null' && e.justreccotas !== 'undefined') {
+                                appealTitle = 'DEFESA DO CANDIDATO (RECURSO DE COTAS PPNI)';
+                                appealContent = e.justreccotas.trim();
+                            } else if (temPcd && e.justrecpcd && e.justrecpcd.trim() && e.justrecpcd !== 'null' && e.justrecpcd !== 'undefined') {
+                                appealTitle = 'DEFESA DO CANDIDATO (RECURSO DE COTAS PCD)';
+                                appealContent = e.justrecpcd.trim();
+                            }
+                        }
+
+                        if (appealContent) {
+                            if (globalAppealHeader) globalAppealHeader.innerText = appealTitle;
+                            globalAppealText.innerText = appealContent;
+                            globalAppealContainer.style.display = 'block';
+                        } else {
+                            globalAppealContainer.style.display = 'none';
+                        }
+                    }
 
                     const isRecursoJulgado = (e.julcurricular === 'Sim' || e.julcurricular === 'Não');
                     if (resolvedSourceTab === 'recursos' && isRecursoJulgado) {
@@ -7583,9 +7619,40 @@
                         const numCapsi = document.getElementById('num_semestres_capsi');
                         const numPsic = document.getElementById('num_semestres_psic');
 
-                        if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
-                            const isAprovadoCurriculo = isSim(e.analisecurricular);
-                            const isRejeitadoCurriculo = isNao(e.analisecurricular);
+                                        if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
+                    const isAprovadoCurriculo = isSim(e.analisecurricular);
+                    const isRejeitadoCurriculo = isNao(e.analisecurricular);
+
+                                        // Atualizar Banner Global de Defesa do Candidato no Topo do Modal
+                    const globalAppealContainer = document.getElementById('global-candidate-appeal-container');
+                    const globalAppealText = document.getElementById('global-candidate-appeal-text');
+                    const globalAppealHeader = document.querySelector('#global-candidate-appeal-container strong');
+
+                    if (globalAppealContainer && globalAppealText) {
+                        let appealTitle = '';
+                        let appealContent = '';
+
+                        if (resolvedSourceTab === 'recursos' && e.justreccurriculo && e.justreccurriculo.trim() && e.justreccurriculo !== 'null' && e.justreccurriculo !== 'undefined') {
+                            appealTitle = 'DEFESA DO CANDIDATO (RECURSO CURRICULAR)';
+                            appealContent = e.justreccurriculo.trim();
+                        } else if (resolvedSourceTab === 'recursos_humanos') {
+                            if (temPpni && e.justreccotas && e.justreccotas.trim() && e.justreccotas !== 'null' && e.justreccotas !== 'undefined') {
+                                appealTitle = 'DEFESA DO CANDIDATO (RECURSO DE COTAS PPNI)';
+                                appealContent = e.justreccotas.trim();
+                            } else if (temPcd && e.justrecpcd && e.justrecpcd.trim() && e.justrecpcd !== 'null' && e.justrecpcd !== 'undefined') {
+                                appealTitle = 'DEFESA DO CANDIDATO (RECURSO DE COTAS PCD)';
+                                appealContent = e.justrecpcd.trim();
+                            }
+                        }
+
+                        if (appealContent) {
+                            if (globalAppealHeader) globalAppealHeader.innerText = appealTitle;
+                            globalAppealText.innerText = appealContent;
+                            globalAppealContainer.style.display = 'block';
+                        } else {
+                            globalAppealContainer.style.display = 'none';
+                        }
+                    }
                             const isRecursoJulgado = (e.julcurricular === 'Sim' || e.julcurricular === 'Não');
 
                             if (resolvedSourceTab === 'recursos' && isRecursoJulgado) {
@@ -10291,6 +10358,14 @@
                 <div class="modal-body p-4 bg-light">
                     <!-- Linha de Analistas Responsáveis no topo do modal -->
                     <div id="top-analysts-container" class="mb-4 p-3 bg-white border rounded shadow-sm align-items-center" style="border-radius: 12px; display: none;"></div>
+
+                    <!-- Div de Recursos Gerais do Candidato no topo -->
+                    <div id="global-candidate-appeal-container" class="mb-4" style="display: none;">
+                        <div class="p-3 bg-light border-start border-warning border-4 rounded text-dark" style="background-color: #fffbeb !important; border-radius: 12px !important; border-color: #ffc107 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <strong class="text-warning-emphasis small d-block mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px; font-weight: 700; color: #856404 !important;">DEFESA DO CANDIDATO (RECURSO CURRICULAR)</strong>
+                            <span id="global-candidate-appeal-text" style="white-space: pre-wrap; font-size: 0.95rem; font-weight: 500; color: #333333 !important;"></span>
+                        </div>
+                    </div>
 
                     <div class="row g-4">
                         <div class="col-lg-8">
