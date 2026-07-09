@@ -5056,8 +5056,9 @@
                 const me = getCurrentAnalyst();
                 const nivelAnalista = getAnalystLevel();
                 const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
-                const isLeader = BANCA_LEADERS.includes(me);
-                const podeAnalisarCurricular = (nivelAnalista === 'todos' && !isLeader);
+                const isLeader = BANCA_LEADERS.includes(me.toLowerCase().trim());
+                const isMaster = isMasterUser(me);
+                const podeAnalisarCurricular = (nivelAnalista === 'todos' && !isLeader) || isMaster;
 
                 humanBody.innerHTML = humanList.map(e => {
                     const hasAnalisecurricularSim = isSim(e.analisecurricular);
@@ -5101,7 +5102,8 @@
                 const me = getCurrentAnalyst();
                 const nivelAnalista = getAnalystLevel();
                 const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
-                const isLeader = BANCA_LEADERS.includes(me);
+                const isLeader = BANCA_LEADERS.includes(me.toLowerCase().trim());
+                const isMaster = isMasterUser(me);
 
                 criteriaList.sort(prioritySort);
 
@@ -5182,9 +5184,9 @@
                         // Determinar se o usuário logado tem permissão de escrita/análise para este candidato de cotas
                         let temPermissaoEscritaCotas = false;
                         if (temPpni) {
-                            temPermissaoEscritaCotas = isLeader && !aguardandoVotosBanca;
+                            temPermissaoEscritaCotas = (isLeader || isMaster) && !aguardandoVotosBanca;
                         } else if (temPcd) {
-                            temPermissaoEscritaCotas = (nivelAnalista === 'todos' && !isLeader);
+                            temPermissaoEscritaCotas = (nivelAnalista === 'todos' && !isLeader) || isMaster;
                         }
 
                         if (aguardandoPericia) {
@@ -5196,8 +5198,8 @@
                             `;
                         } else if (!isCriteriosHumanosAnalyzed) {
                             if (aguardandoVotosBanca) {
-                                // Se for líder, avisa que aguarda banca. Se não for líder, mostra apenas botão normal de Visualizar
-                                if (isLeader) {
+                                // Se for líder ou master, avisa que aguarda banca. Se não for líder, mostra apenas botão normal de Visualizar
+                                if (isLeader || isMaster) {
                                     actionsHtml = `
                                         <div class="d-flex gap-1">
                                             <button class="btn btn-outline-warning btn-sm btn-action fw-semibold" onclick="openAnalyzer('${e.inscricao}', true, 'criterios_humanos')" title="Aguardando 5 votos da banca (Atual: ${totalBancaVotes}/5)"><i class="fas fa-lock me-1"></i>Banca (${totalBancaVotes}/5)</button>
@@ -5364,18 +5366,19 @@
 
                         const me = getCurrentAnalyst().trim();
                         const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
-                        const isLeader = BANCA_LEADERS.includes(me);
+                        const isLeader = BANCA_LEADERS.includes(me.toLowerCase().trim());
+                        const isMaster = isMasterUser(me);
                         const nivelAnalista = getAnalystLevel();
 
                         let temPermissaoEscritaRecurso = false;
                         if (temRecPpni) {
-                            temPermissaoEscritaRecurso = isLeader;
+                            temPermissaoEscritaRecurso = isLeader || isMaster;
                         } else if (temRecPcd) {
-                            temPermissaoEscritaRecurso = (nivelAnalista === 'todos' && !isLeader);
+                            temPermissaoEscritaRecurso = (nivelAnalista === 'todos' && !isLeader) || isMaster;
                         }
 
-                        const isMeOrFree = !e.analisa || e.analisa === me;
-                        const isReadOnly = !isMeOrFree || forceReadOnlyForAppeal || !temPermissaoEscritaRecurso;
+                        const isMeOrFree = !e.analisa || e.analisa === me || isMaster;
+                        const isReadOnly = (!isMeOrFree || forceReadOnlyForAppeal || !temPermissaoEscritaRecurso) && !isMaster;
 
                         const actionBtn = isReadOnly
                             ? `<button class="btn btn-outline-secondary btn-sm" onclick="openAnalyzer('${e.inscricao}', true, 'recursos_humanos')" title="Apenas Visualizar"><i class="fas fa-eye me-1"></i> Visualizar</button>`
@@ -6712,7 +6715,7 @@
             const temPcd = (forcarPcd !== null) ? forcarPcd : (isSim(e.is_pcd) || isSim(e.pcd));
 
             const BANCA_LEADERS = ['cristina.cavalcant', 'larissa.leite'];
-            const isLeader = BANCA_LEADERS.includes(me);
+            const isLeader = BANCA_LEADERS.includes(me.toLowerCase().trim());
             const nivelAnalista = getAnalystLevel();
 
             // 1. Restrições Gerais para o nível de 'heteroidentificacao'
