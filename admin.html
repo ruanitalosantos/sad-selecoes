@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <!-- Version: 1.0.3 - Cache Buster: 2026-06-25-1851 -->
 
@@ -1209,8 +1209,11 @@
             <div class="d-flex align-items-center gap-2 w-100 justify-content-between">
                 <div id="logged-user-avatar" style="display: none !important;"></div>
                 <div class="flex-grow-1 overflow-hidden" style="margin-right: 8px;">
-                    <div class="fw-bold" id="logged-user-name" style="font-size: 0.95rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Admin Root</div>
-                    <div class="text-muted small" style="display: none !important;">ID: <span id="logged-user-ad">sas_001</span></div>
+                    <div class="fw-bold" id="logged-user-name"
+                        style="font-size: 0.95rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        Admin Root</div>
+                    <div class="text-muted small" style="display: none !important;">ID: <span
+                            id="logged-user-ad">sas_001</span></div>
                 </div>
                 <a href="#" id="btn-logout-sidebar" title="Encerrar sessão (Sair)">
                     <i class="fas fa-power-off" style="font-size: 0.9rem;"></i>
@@ -2623,30 +2626,38 @@
             <div class="page-header">
                 <div>
                     <h1 class="fw-bold">Níveis de Acesso & Permissões</h1>
-                    <p class="text-muted small">Controle de autorizações da equipe de analistas baseada em perfis dinâmicos.</p>
+                    <p class="text-muted small">Controle de autorizações da equipe de analistas baseada em perfis
+                        dinâmicos.</p>
                 </div>
             </div>
 
             <div class="row g-4">
                 <!-- Coluna Esquerda: Explicação dos Perfis -->
                 <div class="col-lg-5">
-                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #fbfcfd 0%, #f4f6fa 100%);">
+                    <div class="card border-0 shadow-sm mb-4"
+                        style="border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #fbfcfd 0%, #f4f6fa 100%);">
                         <div class="card-body p-4">
-                            <h5 class="fw-bold mb-3" style="color: #0f172a;"><i class="fas fa-shield-alt text-primary me-2"></i>Regras de Permissão</h5>
-                            <p class="text-muted small mb-4">O sistema define o que cada analista pode realizar com base no nível atribuído no banco de dados.</p>
+                            <h5 class="fw-bold mb-3" style="color: #0f172a;"><i
+                                    class="fas fa-shield-alt text-primary me-2"></i>Regras de Permissão</h5>
+                            <p class="text-muted small mb-4">O sistema define o que cada analista pode realizar com base
+                                no nível atribuído no banco de dados.</p>
 
                             <!-- Perfil: todos -->
                             <div class="access-card mb-3" style="border-left: 4px solid #2563eb;">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="level-badge level-todos">todos</span>
-                                    <span class="text-primary small fw-bold"><i class="fas fa-globe-americas me-1"></i>Acesso Geral</span>
+                                    <span class="text-primary small fw-bold"><i
+                                            class="fas fa-globe-americas me-1"></i>Acesso Geral</span>
                                 </div>
-                                <p class="small text-muted mb-2">Destinado a administradores, coordenadores e analistas gerais do certame.</p>
+                                <p class="small text-muted mb-2">Destinado a administradores, coordenadores e analistas
+                                    gerais do certame.</p>
                                 <ul class="small text-secondary ps-3 mb-0" style="line-height: 1.5;">
-                                    <li>Acesso completo (leitura/escrita) na Análise Curricular e Recursos Curriculares.</li>
+                                    <li>Acesso completo (leitura/escrita) na Análise Curricular e Recursos Curriculares.
+                                    </li>
                                     <li>Lançamento de laudos de Perícia Médica (PCD).</li>
                                     <li>Configuração de cronograma e envio de convocações.</li>
-                                    <li class="text-danger fw-semibold">Banca de Heteroidentificação: Acesso apenas de leitura.</li>
+                                    <li class="text-danger fw-semibold">Banca de Heteroidentificação: Acesso apenas de
+                                        leitura.</li>
                                 </ul>
                             </div>
 
@@ -2654,13 +2665,17 @@
                             <div class="access-card" style="border-left: 4px solid #9333ea;">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="level-badge level-hetero">heteroidentificacao</span>
-                                    <span class="text-purple small fw-bold" style="color: #9333ea;"><i class="fas fa-users-cog me-1"></i>Banca Hetero</span>
+                                    <span class="text-purple small fw-bold" style="color: #9333ea;"><i
+                                            class="fas fa-users-cog me-1"></i>Banca Hetero</span>
                                 </div>
-                                <p class="small text-muted mb-2">Destinado exclusivamente aos avaliadores da comissão de heteroidentificação.</p>
+                                <p class="small text-muted mb-2">Destinado exclusivamente aos avaliadores da comissão de
+                                    heteroidentificação.</p>
                                 <ul class="small text-secondary ps-3 mb-0" style="line-height: 1.5;">
-                                    <li>Voto e avaliação ativa na Banca de Heteroidentificação (Preliminar e Recursos).</li>
+                                    <li>Voto e avaliação ativa na Banca de Heteroidentificação (Preliminar e Recursos).
+                                    </li>
                                     <li>Julgamento e deferimento de Recursos de Cotas PPNI.</li>
-                                    <li class="text-danger fw-semibold">Demais Abas: Acesso restrito apenas de leitura aos candidatos PPNI.</li>
+                                    <li class="text-danger fw-semibold">Demais Abas: Acesso restrito apenas de leitura
+                                        aos candidatos PPNI.</li>
                                 </ul>
                             </div>
                         </div>
@@ -2669,17 +2684,24 @@
 
                 <!-- Coluna Direita: Listagem de Analistas -->
                 <div class="col-lg-7">
-                    <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background: #ffffff;">
+                    <div class="card border-0 shadow-sm"
+                        style="border-radius: 16px; overflow: hidden; background: #ffffff;">
                         <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                                 <div>
-                                    <h5 class="fw-bold mb-1" style="color: #0f172a;"><i class="fas fa-users text-secondary me-2"></i>Equipe Cadastrada</h5>
-                                    <p class="text-muted small mb-0" id="analysts-count-subtitle">Carregando membros da equipe...</p>
+                                    <h5 class="fw-bold mb-1" style="color: #0f172a;"><i
+                                            class="fas fa-users text-secondary me-2"></i>Equipe Cadastrada</h5>
+                                    <p class="text-muted small mb-0" id="analysts-count-subtitle">Carregando membros da
+                                        equipe...</p>
                                 </div>
                                 <!-- Barra de Pesquisa -->
                                 <div class="search-box" style="min-width: 240px; position: relative;">
-                                    <input type="text" id="search-analysts-input" class="form-control form-control-sm ps-4" placeholder="Buscar por nome ou login..." style="border-radius: 8px; font-size: 0.85rem;">
-                                    <i class="fas fa-search text-muted" style="position: absolute; left: 10px; top: 10px; font-size: 0.8rem;"></i>
+                                    <input type="text" id="search-analysts-input"
+                                        class="form-control form-control-sm ps-4"
+                                        placeholder="Buscar por nome ou login..."
+                                        style="border-radius: 8px; font-size: 0.85rem;">
+                                    <i class="fas fa-search text-muted"
+                                        style="position: absolute; left: 10px; top: 10px; font-size: 0.8rem;"></i>
                                 </div>
                             </div>
                         </div>
@@ -2688,15 +2710,19 @@
                                 <table class="table table-hover align-middle mb-0">
                                     <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                         <tr>
-                                            <th class="small fw-bold border-0 text-secondary" style="font-size: 0.75rem;">NOME COMPLETO</th>
-                                            <th class="small fw-bold border-0 text-secondary" style="font-size: 0.75rem;">LOGIN DE REDE</th>
-                                            <th class="small fw-bold border-0 text-secondary text-end" style="font-size: 0.75rem;">NÍVEL DE ACESSO</th>
+                                            <th class="small fw-bold border-0 text-secondary"
+                                                style="font-size: 0.75rem;">NOME COMPLETO</th>
+                                            <th class="small fw-bold border-0 text-secondary"
+                                                style="font-size: 0.75rem;">LOGIN DE REDE</th>
+                                            <th class="small fw-bold border-0 text-secondary text-end"
+                                                style="font-size: 0.75rem;">NÍVEL DE ACESSO</th>
                                         </tr>
                                     </thead>
                                     <tbody id="analysts-table-body">
                                         <tr>
                                             <td colspan="3" class="text-center py-5 text-muted">
-                                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                                <div class="spinner-border spinner-border-sm text-primary me-2"
+                                                    role="status"></div>
                                                 Buscando dados da equipe...
                                             </td>
                                         </tr>
@@ -3487,23 +3513,23 @@
                         const temPcd = isSim(e.is_pcd) || isSim(e.pcd);
                         let isCriteriosHumanosAnalyzed = true;
 
-                         if (temPpni && isEmptyVal(e.analisecotas) && isEmptyVal(e.julcotas)) {
+                        if (temPpni && isEmptyVal(e.analisecotas) && isEmptyVal(e.julcotas)) {
 
-                             isCriteriosHumanosAnalyzed = false;
+                            isCriteriosHumanosAnalyzed = false;
 
-                         }
+                        }
 
-                         if (temPcd && isEmptyVal(e.analisepcd) && isEmptyVal(e.julpcd)) {
+                        if (temPcd && isEmptyVal(e.analisepcd) && isEmptyVal(e.julpcd)) {
 
-                             isCriteriosHumanosAnalyzed = false;
+                            isCriteriosHumanosAnalyzed = false;
 
-                         }
-                         // Se exige perícia médica, só conclui quando a perícia tiver resultado
-                         if (temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm)) {
-                             if (isEmptyVal(e.resultado_pericia)) {
-                                 isCriteriosHumanosAnalyzed = false;
-                             }
-                         }
+                        }
+                        // Se exige perícia médica, só conclui quando a perícia tiver resultado
+                        if (temPcd && e.analisepcd === 'Sim' && isSim(e.avaliarpm)) {
+                            if (isEmptyVal(e.resultado_pericia)) {
+                                isCriteriosHumanosAnalyzed = false;
+                            }
+                        }
                         if (!temPpni && !temPcd) {
                             isCriteriosHumanosAnalyzed = true;
                         }
@@ -3715,7 +3741,7 @@
         async function fetchAndRenderAnalystTab() {
             const tableBody = document.getElementById('analysts-table-body');
             const subtitle = document.getElementById('analysts-count-subtitle');
-            
+
             if (tableBody && (!window.allAnalystsData || window.allAnalystsData.length === 0)) {
                 tableBody.innerHTML = `
                     <tr>
@@ -3793,7 +3819,7 @@
                 const level = item.nivel || 'todos';
                 const badgeClass = level === 'heteroidentificacao' ? 'level-hetero' : 'level-todos';
                 const levelLabel = level === 'heteroidentificacao' ? 'Comissão Hetero' : 'Acesso Geral';
-                
+
                 const initials = (item.nome || '')
                     .split(' ')
                     .filter(n => n.length > 0)
@@ -4435,22 +4461,22 @@
 
             // Render stats for unique categories
             const allCats = getUniqueCategories();
-            
+
             let convStatsHtml = '';
             let resStatsHtml = '';
-            
+
             allCats.forEach(cat => {
                 const label = formatCategoria(cat);
                 const countConv = sC.byCat[label] || 0;
                 const countRes = sR.byCat[label] || 0;
-                
+
                 convStatsHtml += `
                     <div class="col">
                         <div class="small text-muted text-truncate" title="${label}">${label}</div>
                         <div class="h5 mb-0 fw-bold">${countConv}</div>
                     </div>
                 `;
-                
+
                 resStatsHtml += `
                     <div class="col">
                         <div class="small text-muted text-truncate" title="${label}">${label}</div>
@@ -5100,7 +5126,7 @@
                     // Determinar o statusCotasHtml em cascata
                     const bancaVotesPreliminar = (window.bancaEvaluations && window.bancaEvaluations[e.inscricao])?.filter(v => v.fase === 'preliminar') || [];
                     const totalBancaVotes = bancaVotesPreliminar.length;
-                    const aguardandoVotosBanca = temPpni && totalBancaVotes < 5;
+                    const aguardandoVotosBanca = temPpni && totalBancaVotes < 5 && !hasBancaMajority(bancaVotesPreliminar);
 
                     let statusCotasHtml = "";
                     if (!isElegivel) {
@@ -6245,6 +6271,23 @@
             return s === 'não' || s === 'nao' || s === '0' || s === 'false' || s === 'n';
         }
 
+        function hasBancaMajority(votes) {
+            if (!votes || !Array.isArray(votes)) return false;
+            let simVotes = 0;
+            let naoVotes = 0;
+            votes.forEach(v => {
+                const isSimVote = (v.classificacao === 'Indigena' && v.enquadra_indigena === 'Considerado(a)') ||
+                    (v.classificacao === 'Negro' && v.enquadra_negro === 'Sim');
+                if (isSimVote) simVotes++;
+                else {
+                    const isNaoVote = (v.classificacao === 'Indigena' && v.enquadra_indigena === 'Não considerado(a)') ||
+                        (v.classificacao === 'Negro' && v.enquadra_negro === 'Não');
+                    if (isNaoVote) naoVotes++;
+                }
+            });
+            return simVotes >= 3 || naoVotes >= 3;
+        }
+
         function normalizeCandidateScores(item) {
             if (!item) return item;
 
@@ -6728,17 +6771,17 @@
                             isReadOnly = true;
                             currentLock = "Modo Leitura: Apenas o Presidente (cristina.cavalcant) e seu Suplente (larissa.leite) podem analisar candidatos PPNI.";
                         } else {
-                            // Regra dos 5 Votos da Banca na Fase Preliminar
+                            // Regra dos 5 Votos da Banca na Fase Preliminar (ou maioria de 3 votos)
                             const bancaVotesPreliminar = (window.bancaEvaluations && window.bancaEvaluations[e.inscricao])?.filter(v => v.fase === 'preliminar') || [];
                             const totalBancaVotes = bancaVotesPreliminar.length;
-                            if (totalBancaVotes < 5) {
+                            if (totalBancaVotes < 5 && !hasBancaMajority(bancaVotesPreliminar)) {
                                 forceReadOnly = true;
                                 isReadOnly = true;
-                                currentLock = `Apenas Visualização: O candidato possui apenas ${totalBancaVotes} de 5 votos da banca na fase preliminar. A análise de critérios humanos só fica disponível após 5 votos.`;
+                                currentLock = `Apenas Visualização: O candidato possui apenas ${totalBancaVotes} de 5 votos da banca na fase preliminar (sem maioria de 3 votos Sim/Não ainda). A análise de critérios humanos só fica disponível após 5 votos ou decisão por maioria de 3 votos.`;
                             }
                         }
                     }
- 
+
                     // Se for analista de nível heteroidentificacao, só pode analisar se for PPNI (não PCD puro)
                     if (nivelAnalista === 'heteroidentificacao' && !temPpni && !isMaster) {
                         forceReadOnly = true;
@@ -6746,7 +6789,7 @@
                         currentLock = "Modo Leitura: Analista do nível 'heteroidentificacao' só pode avaliar candidatos com cotas PPNI.";
                     }
                 }
- 
+
                 // Se o analista for de nível 'todos', mas o candidato não possuir cotas PCD nem PPNI
                 if (nivelAnalista === 'todos' && !temPcd && !temPpni && !isMaster) {
                     forceReadOnly = true;
@@ -6754,13 +6797,13 @@
                     currentLock = "Modo Leitura: Candidato sem cotas declaradas (PCD / PPNI) para análise.";
                 }
             }
- 
+
             // Regra específica para abas de cotas: Bloqueado se análise curricular não for Sim
             if ((resolvedSourceTab === 'criterios_humanos' || resolvedSourceTab === 'recursos_humanos') && !isSim(e.analisecurricular) && !isMaster) {
                 isReadOnly = true;
                 currentLock = "Apenas visualização: Candidato não elegível para análise nesta etapa pois a Análise Curricular não foi aprovada (diferente de 'Sim').";
             }
- 
+
             if (!forceReadOnly && !isRestricted) {
                 if (e.analista) {
                     isReadOnly = (e.analista !== me) && !isMaster;
@@ -6985,7 +7028,7 @@
                 const numCapsi = document.getElementById('num_semestres_capsi');
                 const numPsic = document.getElementById('num_semestres_psic');
 
-                                if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
+                if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
                     const isAprovadoCurriculo = isSim(e.analisecurricular);
                     const isRejeitadoCurriculo = isNao(e.analisecurricular);
 
@@ -7066,14 +7109,14 @@
                         let infoHtml = '';
                         const prelimCurricular = e.analista_analise_curricular_id;
                         const recurCurricular = e.analista_analise_curricular_recurso_id;
-                        
+
                         if (prelimCurricular) {
                             infoHtml += `<span class="badge bg-light text-secondary border me-2" style="font-size: 0.72rem; font-weight: normal;"><i class="fas fa-user-check me-1 text-success"></i>Análise Curricular por: <strong class="text-dark">${formatAnalystDisplayName(prelimCurricular)}</strong></span>`;
                         }
                         if (recurCurricular) {
                             infoHtml += `<span class="badge bg-light text-warning border" style="font-size: 0.72rem; font-weight: normal;"><i class="fas fa-gavel me-1 text-warning"></i>Recurso Julgado por: <strong class="text-dark">${formatAnalystDisplayName(recurCurricular)}</strong></span>`;
                         }
-                        
+
                         if (infoHtml) {
                             curricularInfoEl.innerHTML = infoHtml;
                             curricularInfoEl.style.display = 'block';
@@ -7619,40 +7662,40 @@
                         const numCapsi = document.getElementById('num_semestres_capsi');
                         const numPsic = document.getElementById('num_semestres_psic');
 
-                                        if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
-                    const isAprovadoCurriculo = isSim(e.analisecurricular);
-                    const isRejeitadoCurriculo = isNao(e.analisecurricular);
+                        if (acatarCurriculoSwitch && justCurriculoText && selFormacao && numCapsi && numPsic) {
+                            const isAprovadoCurriculo = isSim(e.analisecurricular);
+                            const isRejeitadoCurriculo = isNao(e.analisecurricular);
 
-                    // Atualizar Banner Global de Defesa do Candidato no Topo do Modal
-                    const globalAppealContainer = document.getElementById('global-candidate-appeal-container');
-                    const globalAppealText = document.getElementById('global-candidate-appeal-text');
-                    const globalAppealHeader = document.querySelector('#global-candidate-appeal-container strong');
+                            // Atualizar Banner Global de Defesa do Candidato no Topo do Modal
+                            const globalAppealContainer = document.getElementById('global-candidate-appeal-container');
+                            const globalAppealText = document.getElementById('global-candidate-appeal-text');
+                            const globalAppealHeader = document.querySelector('#global-candidate-appeal-container strong');
 
-                    if (globalAppealContainer && globalAppealText) {
-                        let appealTitle = '';
-                        let appealContent = '';
+                            if (globalAppealContainer && globalAppealText) {
+                                let appealTitle = '';
+                                let appealContent = '';
 
-                        if (resolvedSourceTab === 'recursos' && e.justreccurriculo && e.justreccurriculo.trim() && e.justreccurriculo !== 'null' && e.justreccurriculo !== 'undefined') {
-                            appealTitle = 'DEFESA DO CANDIDATO (RECURSO CURRICULAR)';
-                            appealContent = e.justreccurriculo.trim();
-                        } else if (resolvedSourceTab === 'recursos_humanos') {
-                            if (temPpni && e.justreccotas && e.justreccotas.trim() && e.justreccotas !== 'null' && e.justreccotas !== 'undefined') {
-                                appealTitle = 'DEFESA DO CANDIDATO (RECURSO DE COTAS PPNI)';
-                                appealContent = e.justreccotas.trim();
-                            } else if (temPcd && e.justrecpcd && e.justrecpcd.trim() && e.justrecpcd !== 'null' && e.justrecpcd !== 'undefined') {
-                                appealTitle = 'DEFESA DO CANDIDATO (RECURSO DE COTAS PCD)';
-                                appealContent = e.justrecpcd.trim();
+                                if (resolvedSourceTab === 'recursos' && e.justreccurriculo && e.justreccurriculo.trim() && e.justreccurriculo !== 'null' && e.justreccurriculo !== 'undefined') {
+                                    appealTitle = 'DEFESA DO CANDIDATO (RECURSO CURRICULAR)';
+                                    appealContent = e.justreccurriculo.trim();
+                                } else if (resolvedSourceTab === 'recursos_humanos') {
+                                    if (temPpni && e.justreccotas && e.justreccotas.trim() && e.justreccotas !== 'null' && e.justreccotas !== 'undefined') {
+                                        appealTitle = 'DEFESA DO CANDIDATO (RECURSO DE COTAS PPNI)';
+                                        appealContent = e.justreccotas.trim();
+                                    } else if (temPcd && e.justrecpcd && e.justrecpcd.trim() && e.justrecpcd !== 'null' && e.justrecpcd !== 'undefined') {
+                                        appealTitle = 'DEFESA DO CANDIDATO (RECURSO DE COTAS PCD)';
+                                        appealContent = e.justrecpcd.trim();
+                                    }
+                                }
+
+                                if (appealContent) {
+                                    if (globalAppealHeader) globalAppealHeader.innerText = appealTitle;
+                                    globalAppealText.innerText = appealContent;
+                                    globalAppealContainer.style.display = 'block';
+                                } else {
+                                    globalAppealContainer.style.display = 'none';
+                                }
                             }
-                        }
-
-                        if (appealContent) {
-                            if (globalAppealHeader) globalAppealHeader.innerText = appealTitle;
-                            globalAppealText.innerText = appealContent;
-                            globalAppealContainer.style.display = 'block';
-                        } else {
-                            globalAppealContainer.style.display = 'none';
-                        }
-                    }
                             const isRecursoJulgado = (e.julcurricular === 'Sim' || e.julcurricular === 'Não');
 
                             if (resolvedSourceTab === 'recursos' && isRecursoJulgado) {
@@ -8717,7 +8760,7 @@
                 } else if (isImg) {
                     img.src = doc._convertedUrl || doc.link;
                     img.classList.remove('d-none');
-                    img.onerror = function() {
+                    img.onerror = function () {
                         if (!doc._convertedUrl) {
                             img.src = '';
                             if (loading) loading.classList.remove('d-none');
@@ -9014,13 +9057,13 @@
             const iframe = document.getElementById('media-preview-iframe');
             const img = document.getElementById('media-preview-img');
             const zoomText = document.getElementById('preview-zoom-level');
-            
+
             if (zoomText) {
                 zoomText.innerText = `${Math.round(window.currentPreviewZoom * 100)}%`;
             }
 
             const transformStr = `scale(${window.currentPreviewZoom}) rotate(${window.currentPreviewRotation}deg)`;
-            
+
             if (iframe && !iframe.classList.contains('d-none')) {
                 iframe.style.transform = transformStr;
                 iframe.style.transformOrigin = 'center center';
@@ -10357,13 +10400,19 @@
                 </div>
                 <div class="modal-body p-4 bg-light">
                     <!-- Linha de Analistas Responsáveis no topo do modal -->
-                    <div id="top-analysts-container" class="mb-4 p-3 bg-white border rounded shadow-sm align-items-center" style="border-radius: 12px; display: none;"></div>
+                    <div id="top-analysts-container"
+                        class="mb-4 p-3 bg-white border rounded shadow-sm align-items-center"
+                        style="border-radius: 12px; display: none;"></div>
 
                     <!-- Div de Recursos Gerais do Candidato no topo -->
                     <div id="global-candidate-appeal-container" class="mb-4" style="display: none;">
-                        <div class="p-3 bg-light border-start border-warning border-4 rounded text-dark" style="background-color: #fffbeb !important; border-radius: 12px !important; border-color: #ffc107 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                            <strong class="text-warning-emphasis small d-block mb-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px; font-weight: 700; color: #856404 !important;">DEFESA DO CANDIDATO (RECURSO CURRICULAR)</strong>
-                            <span id="global-candidate-appeal-text" style="white-space: pre-wrap; font-size: 0.95rem; font-weight: 500; color: #333333 !important;"></span>
+                        <div class="p-3 bg-light border-start border-warning border-4 rounded text-dark"
+                            style="background-color: #fffbeb !important; border-radius: 12px !important; border-color: #ffc107 !important; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <strong class="text-warning-emphasis small d-block mb-1 text-uppercase"
+                                style="font-size: 0.75rem; letter-spacing: 0.5px; font-weight: 700; color: #856404 !important;">DEFESA
+                                DO CANDIDATO (RECURSO CURRICULAR)</strong>
+                            <span id="global-candidate-appeal-text"
+                                style="white-space: pre-wrap; font-size: 0.95rem; font-weight: 500; color: #333333 !important;"></span>
                         </div>
                     </div>
 
@@ -10945,7 +10994,8 @@
                                             pontos por semestre - Máximo 30 pontos no total)</label>
 
                                         <div class="col-md-6">
-                                            <label class="small text-muted mb-1" for="num_semestres_capsi">Experiência profissional em CAPSi</label>
+                                            <label class="small text-muted mb-1" for="num_semestres_capsi">Experiência
+                                                profissional em CAPSi</label>
                                             <select id="num_semestres_capsi" class="form-select"
                                                 onchange="updatePontuacaoCurricular()">
                                                 <option value="0">0</option>
@@ -10961,7 +11011,9 @@
                                         </div>
 
                                         <div class="col-md-6">
-                                            <label class="small text-muted mb-1" for="num_semestres_psic">Experiência profissional na área de assistência em Psiquiatria da infância e adolescência</label>
+                                            <label class="small text-muted mb-1" for="num_semestres_psic">Experiência
+                                                profissional na área de assistência em Psiquiatria da infância e
+                                                adolescência</label>
                                             <select id="num_semestres_psic" class="form-select"
                                                 onchange="updatePontuacaoCurricular()">
                                                 <option value="0">0</option>
@@ -10993,31 +11045,39 @@
                                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                                     <span class="fw-bold text-primary" id="media-preview-title"><i
                                             class="fas fa-eye me-2"></i>Visualização Média</span>
-                                    
+
                                     <!-- Toolbar de Visualização (Zoom e Rotação) -->
-                                    <div class="d-flex align-items-center gap-2 bg-light rounded-pill px-3 py-1 border shadow-xs" style="font-size: 0.85rem;">
-                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="changePreviewZoom(-0.2)" title="Diminuir Zoom">
+                                    <div class="d-flex align-items-center gap-2 bg-light rounded-pill px-3 py-1 border shadow-xs"
+                                        style="font-size: 0.85rem;">
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0"
+                                            onclick="changePreviewZoom(-0.2)" title="Diminuir Zoom">
                                             <i class="fas fa-search-minus"></i>
                                         </button>
-                                        <span id="preview-zoom-level" class="fw-bold text-dark" style="min-width: 40px; text-align: center;">100%</span>
-                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="changePreviewZoom(0.2)" title="Aumentar Zoom">
+                                        <span id="preview-zoom-level" class="fw-bold text-dark"
+                                            style="min-width: 40px; text-align: center;">100%</span>
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0"
+                                            onclick="changePreviewZoom(0.2)" title="Aumentar Zoom">
                                             <i class="fas fa-search-plus"></i>
                                         </button>
                                         <div class="vr mx-1" style="height: 16px;"></div>
-                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="rotatePreview(-90)" title="Rotacionar para a Esquerda">
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0"
+                                            onclick="rotatePreview(-90)" title="Rotacionar para a Esquerda">
                                             <i class="fas fa-undo"></i>
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="rotatePreview(90)" title="Rotacionar para a Direita">
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0"
+                                            onclick="rotatePreview(90)" title="Rotacionar para a Direita">
                                             <i class="fas fa-redo"></i>
                                         </button>
                                         <div class="vr mx-1" style="height: 16px;"></div>
-                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0" onclick="resetPreviewTransform()" title="Restaurar Padrão">
+                                        <button type="button" class="btn btn-sm btn-link text-secondary p-0"
+                                            onclick="resetPreviewTransform()" title="Restaurar Padrão">
                                             <i class="fas fa-compress-arrows-alt"></i>
                                         </button>
                                     </div>
 
                                     <div class="d-flex align-items-center gap-2">
-                                        <a id="btn-preview-open-tab" href="#" target="_blank" class="btn btn-sm btn-outline-primary d-none">
+                                        <a id="btn-preview-open-tab" href="#" target="_blank"
+                                            class="btn btn-sm btn-outline-primary d-none">
                                             <i class="fas fa-external-link-alt me-1"></i>Abrir em Nova Aba
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger"
@@ -11454,20 +11514,20 @@
                     <div class="d-flex align-items-center gap-3">
                         <h6 class="modal-title mb-0" id="viewerTitle">Visualização</h6>
                         <div class="d-flex align-items-center gap-2 bg-secondary bg-opacity-25 rounded-pill px-3 py-1">
-                            <button class="btn btn-sm btn-link text-white p-0" onclick="changeZoom(-0.2)" title="Diminuir Zoom"><i
-                                    class="fas fa-search-minus"></i></button>
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="changeZoom(-0.2)"
+                                title="Diminuir Zoom"><i class="fas fa-search-minus"></i></button>
                             <span id="zoom-level" class="small fw-bold"
                                 style="min-width: 40px; text-align: center;">100%</span>
-                            <button class="btn btn-sm btn-link text-white p-0" onclick="changeZoom(0.2)" title="Aumentar Zoom"><i
-                                    class="fas fa-search-plus"></i></button>
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="changeZoom(0.2)"
+                                title="Aumentar Zoom"><i class="fas fa-search-plus"></i></button>
                             <div class="vr mx-1"></div>
-                            <button class="btn btn-sm btn-link text-white p-0" onclick="rotateViewer(-90)" title="Rotacionar para a Esquerda"><i
-                                    class="fas fa-undo"></i></button>
-                            <button class="btn btn-sm btn-link text-white p-0" onclick="rotateViewer(90)" title="Rotacionar para a Direita"><i
-                                    class="fas fa-redo"></i></button>
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="rotateViewer(-90)"
+                                title="Rotacionar para a Esquerda"><i class="fas fa-undo"></i></button>
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="rotateViewer(90)"
+                                title="Rotacionar para a Direita"><i class="fas fa-redo"></i></button>
                             <div class="vr mx-1"></div>
-                            <button class="btn btn-sm btn-link text-white p-0" onclick="resetZoomAndRotation()" title="Restaurar Padrão"><i
-                                    class="fas fa-sync-alt"></i></button>
+                            <button class="btn btn-sm btn-link text-white p-0" onclick="resetZoomAndRotation()"
+                                title="Restaurar Padrão"><i class="fas fa-sync-alt"></i></button>
                         </div>
                         <a id="btn-open-new-tab" href="#" target="_blank" class="btn btn-sm btn-outline-light ms-2"
                             title="Abrir documento em uma nova guia">
@@ -11491,7 +11551,8 @@
                             style="width: 100%; height: 80vh; border: none; display: none;"></iframe>
                         <img id="viewerImage" src=""
                             style="max-width: 90%; max-height: 80vh; display: none; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));">
-                        <video id="viewerVideo" style="max-width: 90%; max-height: 80vh; display: none;" controls></video>
+                        <video id="viewerVideo" style="max-width: 90%; max-height: 80vh; display: none;"
+                            controls></video>
                         <!-- Overlay de conversão HEIC -->
                         <div id="viewer-loading-heic"
                             style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.6); flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:10;">
