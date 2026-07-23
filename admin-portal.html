@@ -1335,9 +1335,17 @@
                 <div class="modal-body">
                     <input type="hidden" id="aviso-edit-id" value="">
                     <div class="mb-3">
-                        <label class="form-label">Mensagem</label>
+                        <label class="form-label d-flex justify-content-between align-items-center">
+                            <span>Mensagem</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" title="Negrito"
+                                onclick="toggleAvisoBold()">
+                                <i class="fas fa-bold"></i>
+                            </button>
+                        </label>
                         <textarea class="form-control" id="aviso-mensagem" rows="4"
                             placeholder="Texto que será exibido no alerta inicial do portal do candidato"></textarea>
+                        <div class="form-text">Selecione um trecho do texto e clique em <i class="fas fa-bold"></i>
+                            para deixá-lo em negrito.</div>
                     </div>
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="aviso-ativo" checked>
@@ -3255,6 +3263,29 @@
         function editAviso(id) {
             const a = avisos.find(x => String(x.id) === String(id));
             if (a) openAvisoModal(a);
+        }
+
+        function toggleAvisoBold() {
+            const textarea = document.getElementById('aviso-mensagem');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            if (start === end) {
+                showToast('Selecione o trecho do texto que deseja deixar em negrito.', 'warning');
+                return;
+            }
+
+            const value = textarea.value;
+            const selected = value.slice(start, end);
+            const before = value.slice(0, start);
+            const after = value.slice(end);
+
+            const boldMatch = selected.match(/^<strong>([\s\S]*)<\/strong>$/);
+            const newSelected = boldMatch ? boldMatch[1] : `<strong>${selected}</strong>`;
+
+            textarea.value = before + newSelected + after;
+            textarea.focus();
+            textarea.setSelectionRange(start, start + newSelected.length);
         }
 
         async function salvarAviso() {
