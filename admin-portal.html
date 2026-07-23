@@ -674,7 +674,12 @@
             </div>
             <div class="nav-item">
                 <a href="#" class="nav-link" data-page="comunicados">
-                    <i class="fas fa-bullhorn"></i><span>Comunicados e Publicações</span>
+                    <i class="fas fa-file-alt"></i><span>Publicações</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-page="avisos">
+                    <i class="fas fa-bullhorn"></i><span>Comunicados</span>
                 </a>
             </div>
         </div>
@@ -1206,6 +1211,57 @@
             </div>
         </section>
 
+        <!-- ========== PAGE: AVISOS (COMUNICADOS) ========== -->
+        <section id="page-avisos" class="page-content">
+            <div class="section-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h2 class="section-title">Comunicados</h2>
+                    <p class="text-muted mb-0">Gerencie os avisos personalizados exibidos aos candidatos no alerta
+                        inicial "Atenção, Candidato!" do portal.</p>
+                </div>
+                <button class="btn btn-primary" id="btn-novo-aviso" onclick="openAvisoModal()" disabled>
+                    <i class="fas fa-plus me-2"></i>Novo Comunicado
+                </button>
+            </div>
+
+            <!-- Seletor -->
+            <div class="card">
+                <div class="card-body py-3">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-6">
+                            <label class="form-label mb-1">Seleção</label>
+                            <select class="form-select" id="aviso-selecao" onchange="loadAvisos()">
+                                <option value="">-- Escolha uma seleção --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista -->
+            <div class="card" id="aviso-list-card" style="display:none;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-list me-2"></i>Comunicados Cadastrados</span>
+                    <span class="badge bg-primary rounded-pill" id="aviso-count">0</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-admin mb-0">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1rem 1.5rem;">Mensagem</th>
+                                <th>Status</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="aviso-table-body"></tbody>
+                    </table>
+                </div>
+                <div class="card-body text-center py-4 d-none" id="aviso-empty">
+                    <p class="text-muted mb-0">Nenhum comunicado cadastrado para esta seleção.</p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ========== MODAL: PREVIEW PORTAL ========== -->
@@ -1260,6 +1316,37 @@
                 <div class="modal-footer">
                     <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button class="btn btn-primary" onclick="salvarComunicado()">
+                        <i class="fas fa-save me-2"></i>Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: AVISO (COMUNICADO) ========== -->
+    <div class="modal fade" id="avisoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aviso-modal-title"><i class="fas fa-bullhorn me-2"></i>Novo
+                        Comunicado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="aviso-edit-id" value="">
+                    <div class="mb-3">
+                        <label class="form-label">Mensagem</label>
+                        <textarea class="form-control" id="aviso-mensagem" rows="4"
+                            placeholder="Texto que será exibido no alerta inicial do portal do candidato"></textarea>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="aviso-ativo" checked>
+                        <label class="form-check-label" for="aviso-ativo">Ativo (visível no portal)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary" onclick="salvarAviso()">
                         <i class="fas fa-save me-2"></i>Salvar
                     </button>
                 </div>
@@ -1326,7 +1413,7 @@
                     </div>
                     <p class="mb-1">Você está prestes a excluir definitivamente a seleção:</p>
                     <p class="fw-bold fs-6 mb-3" id="excluir-selecao-nome"></p>
-                    <p class="text-muted small mb-0">Todos os dados vinculados — cronograma, comunicados, formulários e portal — também serão removidos do banco de dados e <strong>não poderão ser recuperados</strong>.</p>
+                    <p class="text-muted small mb-0">Todos os dados vinculados — cronograma, comunicados, avisos, formulários e portal — também serão removidos do banco de dados e <strong>não poderão ser recuperados</strong>.</p>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -1359,6 +1446,7 @@
             TIMEOUT: 15000,
             WEBHOOKS: {
                 comunicados: 'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/comunicados-sadselecao1',
+                avisos: 'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/avisos-sadselecao1',
                 cronogramas: 'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/cronogramas-sadselecao1',
                 forms: 'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/estrutura_html_forms-sadselecao1',
                 portais: 'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/estrutura_html_portais-sadselecao1',
@@ -1824,9 +1912,51 @@
                 });
             },
 
+            async getAvisos(idSelecao) {
+                const data = await this.request(CONFIG.WEBHOOKS.avisos, {
+                    query: { id_selecao: idSelecao }
+                });
+
+                const wantedId = String(idSelecao);
+                return this.unwrapCollection(data)
+                    .map(row => (row && typeof row === 'object' && row.json && typeof row.json === 'object') ? row.json : row)
+                    .filter(row => row && typeof row === 'object')
+                    .filter(row => String(row.id_selecao ?? row.selecao_id ?? '') === wantedId);
+            },
+
+            saveAviso(payload) {
+                const d = sanitize.aviso(payload);
+                let avisoSql;
+                if (d.is_new) {
+                    avisoSql =
+                        `INSERT INTO "sad-selecoes".avisos (id_selecao, mensagem, ativo)` +
+                        ` VALUES (${d.id_selecao}, ${sql.escape(d.mensagem)}, ${sql.escape(d.ativo)})` +
+                        ` RETURNING id`;
+                } else {
+                    avisoSql =
+                        `UPDATE "sad-selecoes".avisos` +
+                        ` SET mensagem = ${sql.escape(d.mensagem)}, ativo = ${sql.escape(d.ativo)}, updated_at = CURRENT_TIMESTAMP` +
+                        ` WHERE id = ${d.id}` +
+                        ` RETURNING id`;
+                }
+                return this.request(CONFIG.WEBHOOKS.avisos, {
+                    method: 'POST',
+                    body: { query: avisoSql }
+                });
+            },
+
+            deleteAviso(id) {
+                const delSql = `DELETE FROM "sad-selecoes".avisos WHERE id = ${sql.escape(String(id))}`;
+                return this.request(CONFIG.WEBHOOKS.avisos, {
+                    method: 'POST',
+                    body: { query: delSql }
+                });
+            },
+
             deleteSelecao(id) {
                 const delSql =
                     `WITH del_comunicados AS (DELETE FROM "sad-selecoes".comunicados WHERE id_selecao = ${id}),` +
+                    ` del_avisos AS (DELETE FROM "sad-selecoes".avisos WHERE id_selecao = ${id}),` +
                     ` del_cronograma AS (DELETE FROM "sad-selecoes".cronograma WHERE id_selecao = ${id}),` +
                     ` del_forms AS (DELETE FROM "sad-selecoes".estrutura_html_forms WHERE id_selecao = ${id}),` +
                     ` del_portais AS (DELETE FROM "sad-selecoes".estrutura_html_portais WHERE id_selecao = ${id})` +
@@ -1943,6 +2073,17 @@
                     url: this.url(data.url),
                     mimetype: this.text(data.mimetype)
                 };
+            },
+
+            /** Sanitiza payload de aviso (comunicado exibido no alerta inicial do portal) */
+            aviso(data) {
+                return {
+                    id: data.id ? parseInt(data.id) || null : null,
+                    is_new: !!data.is_new,
+                    id_selecao: parseInt(data.id_selecao),
+                    mensagem: this.text(data.mensagem),
+                    ativo: !!data.ativo
+                };
             }
         };
 
@@ -1951,6 +2092,7 @@
         // ===========================
         let selecoes = [];
         let comunicados = [];
+        let avisos = [];
         let currentView = 'table';
         let cargoCounter = 0;
         let cronogramaExiste = false;
@@ -2024,6 +2166,11 @@
             { id: 1, id_selecao: 1, descricao: 'Edital de Abertura', url: 'https://drive.google.com/edital', mimetype: 'application/pdf' },
             { id: 2, id_selecao: 1, descricao: 'Errata do Edital', url: 'https://drive.google.com/errata', mimetype: 'application/pdf' },
             { id: 3, id_selecao: 3, descricao: 'Resultado Final', url: 'https://drive.google.com/resultado', mimetype: 'application/pdf' }
+        ];
+
+        const mockAvisos = [
+            { id: 1, id_selecao: 1, mensagem: 'Leia atentamente o Edital antes de se inscrever.', ativo: true },
+            { id: 2, id_selecao: 1, mensagem: 'Recomendamos que a inscrição seja realizada por um computador.', ativo: true }
         ];
 
         const mockCronogramas = {
@@ -2216,7 +2363,10 @@
                             <a href="#" class="action-btn" title="Gerenciar Cronograma" onclick="gotoCronograma(${s.id})">
                                 <i class="fas fa-calendar-alt"></i>
                             </a>
-                            <a href="#" class="action-btn" title="Gerenciar Comunicados" onclick="gotoComunicados(${s.id})">
+                            <a href="#" class="action-btn" title="Gerenciar Publicações" onclick="gotoComunicados(${s.id})">
+                                <i class="fas fa-file-alt"></i>
+                            </a>
+                            <a href="#" class="action-btn" title="Gerenciar Comunicados" onclick="gotoAvisos(${s.id})">
                                 <i class="fas fa-bullhorn"></i>
                             </a>
                             <a href="#" class="action-btn" title="Preview" onclick="previewSelecao(${s.id})">
@@ -2263,7 +2413,10 @@
                                 <a href="#" class="action-btn flex-fill justify-content-center" title="Cronograma" onclick="gotoCronograma(${s.id})">
                                     <i class="fas fa-calendar-alt"></i>
                                 </a>
-                                <a href="#" class="action-btn flex-fill justify-content-center" title="Comunicados" onclick="gotoComunicados(${s.id})">
+                                <a href="#" class="action-btn flex-fill justify-content-center" title="Publicações" onclick="gotoComunicados(${s.id})">
+                                    <i class="fas fa-file-alt"></i>
+                                </a>
+                                <a href="#" class="action-btn flex-fill justify-content-center" title="Comunicados" onclick="gotoAvisos(${s.id})">
                                     <i class="fas fa-bullhorn"></i>
                                 </a>
                                 <a href="#" class="action-btn flex-fill justify-content-center" title="Preview" onclick="previewSelecao(${s.id})">
@@ -2287,6 +2440,7 @@
             const base = '<option value="">-- Escolha uma seleção --</option>';
             document.getElementById('crono-selecao').innerHTML = base + opts;
             document.getElementById('com-selecao').innerHTML = base + opts;
+            document.getElementById('aviso-selecao').innerHTML = base + opts;
         }
 
         // ===========================
@@ -3018,6 +3172,156 @@
             navigateTo('comunicados');
             document.getElementById('com-selecao').value = id;
             loadComunicados();
+        }
+
+        // ===========================
+        // AVISOS (COMUNICADOS DO ALERTA INICIAL)
+        // ===========================
+        async function loadAvisos() {
+            const id = document.getElementById('aviso-selecao').value;
+            const btn = document.getElementById('btn-novo-aviso');
+            const card = document.getElementById('aviso-list-card');
+
+            if (!id) {
+                btn.disabled = true;
+                card.style.display = 'none';
+                return;
+            }
+
+            btn.disabled = false;
+            card.style.display = 'block';
+
+            if (CONFIG.MOCK) {
+                avisos = mockAvisos.filter(a => String(a.id_selecao) === String(id));
+            } else {
+                try {
+                    const data = await api.getAvisos(id);
+                    avisos = Array.isArray(data)
+                        ? data.filter(a => String(a.id_selecao ?? a.selecao_id ?? '') === String(id))
+                        : [];
+                } catch (e) {
+                    console.error('Erro ao carregar comunicados:', e);
+                    avisos = [];
+                }
+            }
+
+            renderAvisos();
+        }
+
+        function renderAvisos() {
+            const tbody = document.getElementById('aviso-table-body');
+            const empty = document.getElementById('aviso-empty');
+            const count = document.getElementById('aviso-count');
+
+            count.textContent = avisos.length;
+
+            if (!avisos.length) {
+                tbody.innerHTML = '';
+                empty.classList.remove('d-none');
+                return;
+            }
+            empty.classList.add('d-none');
+
+            tbody.innerHTML = avisos.map(a => `
+                <tr>
+                    <td style="padding: 1rem 1.5rem;"><div class="fw-500">${a.mensagem}</div></td>
+                    <td>
+                        <span class="badge ${a.ativo ? 'bg-success' : 'bg-secondary'}">${a.ativo ? 'Ativo' : 'Inativo'}</span>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="#" class="action-btn" title="Editar" onclick='editAviso(${JSON.stringify(a.id)})'>
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" class="action-btn" title="Excluir" onclick='deleteAviso(${JSON.stringify(a.id)})' style="color:#dc3545;">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAvisoModal(data) {
+            document.getElementById('aviso-modal-title').innerHTML = data
+                ? '<i class="fas fa-edit me-2"></i>Editar Comunicado'
+                : '<i class="fas fa-bullhorn me-2"></i>Novo Comunicado';
+            document.getElementById('aviso-edit-id').value = data?.id ?? '';
+            document.getElementById('aviso-mensagem').value = data?.mensagem || '';
+            document.getElementById('aviso-ativo').checked = data ? !!data.ativo : true;
+            new bootstrap.Modal(document.getElementById('avisoModal')).show();
+        }
+
+        function editAviso(id) {
+            const a = avisos.find(x => String(x.id) === String(id));
+            if (a) openAvisoModal(a);
+        }
+
+        async function salvarAviso() {
+            const idSelecao = document.getElementById('aviso-selecao').value;
+            const existingId = document.getElementById('aviso-edit-id').value || null;
+            const payload = {
+                id: existingId,
+                is_new: !existingId,
+                id_selecao: idSelecao,
+                mensagem: document.getElementById('aviso-mensagem').value,
+                ativo: document.getElementById('aviso-ativo').checked
+            };
+
+            if (!payload.mensagem.trim()) {
+                showToast('Preencha a mensagem do comunicado.', 'warning');
+                return;
+            }
+
+            if (CONFIG.MOCK) {
+                const idx = mockAvisos.findIndex(a => String(a.id) === String(payload.id));
+                if (idx >= 0) {
+                    Object.assign(mockAvisos[idx], payload);
+                } else {
+                    payload.id = mockAvisos.length ? Math.max(...mockAvisos.map(a => a.id)) + 1 : 1;
+                    payload.id_selecao = parseInt(idSelecao);
+                    mockAvisos.push(payload);
+                }
+                bootstrap.Modal.getInstance(document.getElementById('avisoModal')).hide();
+                showToast('Comunicado salvo!');
+                loadAvisos();
+                return;
+            }
+
+            try {
+                await api.saveAviso(payload);
+                bootstrap.Modal.getInstance(document.getElementById('avisoModal')).hide();
+                showToast('Comunicado salvo!');
+                loadAvisos();
+            } catch (e) {
+                showToast('Erro ao salvar comunicado: ' + e.message, 'danger');
+            }
+        }
+
+        async function deleteAviso(id) {
+            if (!confirm('Deseja realmente excluir este comunicado?')) return;
+
+            if (CONFIG.MOCK) {
+                const idx = mockAvisos.findIndex(a => String(a.id) === String(id));
+                if (idx >= 0) mockAvisos.splice(idx, 1);
+                showToast('Comunicado excluído.');
+                loadAvisos();
+                return;
+            }
+
+            try {
+                await api.deleteAviso(id);
+                showToast('Comunicado excluído.');
+                loadAvisos();
+            } catch (e) {
+                showToast('Erro ao excluir: ' + e.message, 'danger');
+            }
+        }
+
+        function gotoAvisos(id) {
+            navigateTo('avisos');
+            document.getElementById('aviso-selecao').value = id;
+            loadAvisos();
         }
 
         // ===========================

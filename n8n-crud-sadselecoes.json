@@ -1,0 +1,731 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.body.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -528,
+        160
+      ],
+      "id": "3bfab27c-4346-4184-be68-249fee93b805",
+      "name": "Execute a SQL query8",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "sad-selecoes",
+          "mode": "list",
+          "cachedResultName": "sad-selecoes"
+        },
+        "table": {
+          "__rl": true,
+          "value": "comunicados",
+          "mode": "list",
+          "cachedResultName": "comunicados"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -528,
+        16
+      ],
+      "id": "e5f73615-3f1c-4cf6-b238-e410f1463aa2",
+      "name": "Select rows from a table9",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.body.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        144
+      ],
+      "id": "10a5d6c5-9968-4fee-936e-589b2ca4ba1f",
+      "name": "Execute a SQL query9",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "sad-selecoes",
+          "mode": "list",
+          "cachedResultName": "sad-selecoes"
+        },
+        "table": {
+          "__rl": true,
+          "value": "cronograma",
+          "mode": "list",
+          "cachedResultName": "cronograma"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "01490eaf-a50a-4cb4-88fc-9e297a9c127c",
+      "name": "Select rows from a table10",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "comunicados-sadselecao1",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        96
+      ],
+      "id": "7fa16134-3125-4718-9c98-4c98f6467277",
+      "name": "Comunicados",
+      "webhookId": "a4aa6992-fafb-467d-94e1-5ed95b9f8824"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "cronogramas-sadselecao1",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -224,
+        80
+      ],
+      "id": "6f413ad9-586f-4335-b1a8-fe85dc5915cb",
+      "name": "Cronograma",
+      "webhookId": "a4aa6992-fafb-467d-94e1-5ed95b9f8824"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.body.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        528,
+        144
+      ],
+      "id": "582fb15b-d9fd-49ae-972e-ca47a5fdf25f",
+      "name": "Execute a SQL query10",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "sad-selecoes",
+          "mode": "list",
+          "cachedResultName": "sad-selecoes"
+        },
+        "table": {
+          "__rl": true,
+          "value": "estrutura_html_forms",
+          "mode": "list",
+          "cachedResultName": "estrutura_html_forms"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        528,
+        0
+      ],
+      "id": "a1209dc2-16ca-4428-891e-fd6e60ddb638",
+      "name": "Select rows from a table11",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "estrutura_html_forms-sadselecao1",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        304,
+        80
+      ],
+      "id": "84175a1d-b597-472f-bfdc-2b84fd9b2429",
+      "name": "estrutura_html_forms",
+      "webhookId": "a4aa6992-fafb-467d-94e1-5ed95b9f8824"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.body.query.replace(/\\\\\"/g, '\"').replace('conteudo_html', 'conteudo').replace('url_edital', 'edital') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1024,
+        144
+      ],
+      "id": "4843b9c7-bd67-4f9e-aef5-6352c9366f9b",
+      "name": "Execute a SQL query11",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "sad-selecoes",
+          "mode": "list",
+          "cachedResultName": "sad-selecoes"
+        },
+        "table": {
+          "__rl": true,
+          "value": "estrutura_html_portais",
+          "mode": "list",
+          "cachedResultName": "estrutura_html_portais"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "975c37b0-4434-4bcd-80ef-1289d0e1e749",
+      "name": "Select rows from a table12",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.body.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -528,
+        512
+      ],
+      "id": "bd4f619f-0abe-4d99-8288-1e1454e19774",
+      "name": "Execute a SQL query12",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "sad-selecoes",
+          "mode": "list",
+          "cachedResultName": "sad-selecoes"
+        },
+        "table": {
+          "__rl": true,
+          "value": "selecoes_cadastradas",
+          "mode": "list",
+          "cachedResultName": "selecoes_cadastradas"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -528,
+        368
+      ],
+      "id": "d7abad35-8abc-471f-afeb-5e4a13ffcfff",
+      "name": "Select rows from a table13",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "estrutura_html_portais-sadselecao1",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        80
+      ],
+      "id": "34310796-9002-414c-8734-483e7e3da470",
+      "name": "estrutura_html_portais",
+      "webhookId": "a4aa6992-fafb-467d-94e1-5ed95b9f8824"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "selecoes_cadastradas-sadselecao1",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        448
+      ],
+      "id": "eb3e6c47-6c05-4db8-b08f-5f5c496738f0",
+      "name": "selecoes_cadastradas",
+      "webhookId": "a4aa6992-fafb-467d-94e1-5ed95b9f8824"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "avisos-sadselecao1",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        650
+      ],
+      "id": "7dec92c9-f1ad-41b1-a329-77bef133736e",
+      "name": "avisos",
+      "webhookId": "f7037164-7a0d-4613-93be-2dce0d767dd7"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "sad-selecoes",
+          "mode": "list",
+          "cachedResultName": "sad-selecoes"
+        },
+        "table": {
+          "__rl": true,
+          "value": "avisos",
+          "mode": "list",
+          "cachedResultName": "avisos"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -528,
+        600
+      ],
+      "id": "387abec9-9b0a-460e-be2b-cf9048f5e8fd",
+      "name": "Select rows from a table14",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.body.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -528,
+        750
+      ],
+      "id": "5af7c6f7-4f79-43eb-b616-45250904dd3c",
+      "name": "Execute a SQL query13",
+      "credentials": {
+        "postgres": {
+          "id": "WARBY5NZ0OfQDVuN",
+          "name": "Postgres PROD"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Comunicados": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table9",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cronograma": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table10",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estrutura_html_forms": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table11",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estrutura_html_portais": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table12",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "selecoes_cadastradas": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table13",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "avisos": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table14",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Comunicados": [
+      {
+        "headers": {
+          "host": "webhook-n8n-dev-conectarecife.recife.pe.gov.br",
+          "x-forwarded-scheme": "https",
+          "x-forwarded-proto": "https",
+          "x-forwarded-for": "192.207.206.130",
+          "x-real-ip": "192.207.206.130",
+          "content-length": "0",
+          "pragma": "no-cache",
+          "cache-control": "no-cache",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+          "sec-ch-ua-mobile": "?0",
+          "accept": "*/*",
+          "origin": "null",
+          "sec-fetch-site": "cross-site",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-dest": "empty",
+          "accept-encoding": "gzip, deflate, br, zstd",
+          "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+          "priority": "u=1, i"
+        },
+        "params": {},
+        "query": {
+          "sql": "SELECT h.*, u.nome as usuario_nome \n                            FROM \"gerenciador_secti\".\"historico_solicitacao\" h\n                            LEFT JOIN \"gerenciador_secti\".\"usuario\" u ON h.usuario_id = u.id\n                            WHERE h.solicitacao_id = 1 AND h.tipo_solicitacao = 'sistemas'\n                            ORDER BY h.criado_em DESC"
+        },
+        "body": {},
+        "webhookUrl": "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/historico-gersecti",
+        "executionMode": "production"
+      }
+    ],
+    "Cronograma": [
+      {
+        "headers": {
+          "host": "webhook-n8n-dev-conectarecife.recife.pe.gov.br",
+          "x-forwarded-scheme": "https",
+          "x-forwarded-proto": "https",
+          "x-forwarded-for": "192.207.206.130",
+          "x-real-ip": "192.207.206.130",
+          "content-length": "0",
+          "pragma": "no-cache",
+          "cache-control": "no-cache",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+          "sec-ch-ua-mobile": "?0",
+          "accept": "*/*",
+          "origin": "null",
+          "sec-fetch-site": "cross-site",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-dest": "empty",
+          "accept-encoding": "gzip, deflate, br, zstd",
+          "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+          "priority": "u=1, i"
+        },
+        "params": {},
+        "query": {
+          "sql": "SELECT h.*, u.nome as usuario_nome \n                            FROM \"gerenciador_secti\".\"historico_solicitacao\" h\n                            LEFT JOIN \"gerenciador_secti\".\"usuario\" u ON h.usuario_id = u.id\n                            WHERE h.solicitacao_id = 1 AND h.tipo_solicitacao = 'sistemas'\n                            ORDER BY h.criado_em DESC"
+        },
+        "body": {},
+        "webhookUrl": "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/historico-gersecti",
+        "executionMode": "production"
+      }
+    ],
+    "estrutura_html_forms": [
+      {
+        "headers": {
+          "host": "webhook-n8n-dev-conectarecife.recife.pe.gov.br",
+          "x-forwarded-scheme": "https",
+          "x-forwarded-proto": "https",
+          "x-forwarded-for": "192.207.206.130",
+          "x-real-ip": "192.207.206.130",
+          "content-length": "282",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+          "content-type": "application/json",
+          "sec-ch-ua-mobile": "?0",
+          "accept": "*/*",
+          "origin": "null",
+          "sec-fetch-site": "cross-site",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-dest": "empty",
+          "accept-encoding": "gzip, deflate, br, zstd",
+          "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+          "priority": "u=1, i"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "query": "INSERT INTO \"sad-selecoes\".estrutura_html_forms (id_selecao, multiplas_inscricoes, cargos) VALUES (4,  TRUE, '[\"Fundamental|tESTE|TESTE\"]'::jsonb) ON CONFLICT (id_selecao) DO UPDATE SET  multiplas_inscricoes = EXCLUDED.multiplas_inscricoes,  cargos = EXCLUDED.cargos"
+        },
+        "webhookUrl": "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/estrutura_html_forms-sadselecao1",
+        "executionMode": "production"
+      }
+    ],
+    "estrutura_html_portais": [
+      {
+        "headers": {
+          "host": "webhook-n8n-dev-conectarecife.recife.pe.gov.br",
+          "x-forwarded-scheme": "https",
+          "x-forwarded-proto": "https",
+          "x-forwarded-for": "192.207.206.130",
+          "x-real-ip": "192.207.206.130",
+          "content-length": "218",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+          "content-type": "application/json",
+          "sec-ch-ua-mobile": "?0",
+          "accept": "*/*",
+          "origin": "null",
+          "sec-fetch-site": "cross-site",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-dest": "empty",
+          "accept-encoding": "gzip, deflate, br, zstd",
+          "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+          "priority": "u=1, i"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "query": "UPDATE \"sad-selecoes\".estrutura_html_portais SET selecao = 'Rede de Atenção Psicossocial • RAPS', conteudo_html = 'Esta é uma seleção de testes', url_edital = 'Edital 001/2026' WHERE id_selecao = 2"
+        },
+        "webhookUrl": "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/estrutura_html_portais-sadselecao1",
+        "executionMode": "production"
+      }
+    ],
+    "selecoes_cadastradas": [
+      {
+        "headers": {
+          "host": "webhook-n8n-dev-conectarecife.recife.pe.gov.br",
+          "x-forwarded-scheme": "https",
+          "x-forwarded-proto": "https",
+          "x-forwarded-for": "192.207.206.130",
+          "x-real-ip": "192.207.206.130",
+          "content-length": "312",
+          "pragma": "no-cache",
+          "cache-control": "no-cache",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+          "content-type": "application/json",
+          "sec-ch-ua-mobile": "?0",
+          "accept": "*/*",
+          "origin": "null",
+          "sec-fetch-site": "cross-site",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-dest": "empty",
+          "accept-encoding": "gzip, deflate, br, zstd",
+          "accept-language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+          "priority": "u=1, i"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "query": "INSERT INTO \"sad-selecoes\".selecoes_cadastradas (id, nome, status, hash_drive) VALUES (5, 'Seleção Simplificada Emprel 3', 'Ativo', '1wyBE9x0KiexFZVVeG2mly55_s7C_fBMO') ON CONFLICT (id) DO UPDATE SET  nome = EXCLUDED.nome,  status = EXCLUDED.status,  hash_drive = EXCLUDED.hash_drive RETURNING id"
+        },
+        "webhookUrl": "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/selecoes_cadastradas-sadselecao1",
+        "executionMode": "production"
+      }
+    ],
+    "avisos": [
+      {
+        "headers": {
+          "host": "webhook-n8n-dev-conectarecife.recife.pe.gov.br",
+          "content-type": "application/json"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "query": "INSERT INTO \"sad-selecoes\".avisos (id_selecao, mensagem, ativo) VALUES (2, 'Leia atentamente o Edital antes de se inscrever.', TRUE) RETURNING id"
+        },
+        "webhookUrl": "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/avisos-sadselecao1",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dd7e6fb68ae212e4dcd161ecd63467f28e795609e668a6efcdeb6ef3f2cc4e36"
+  }
+}

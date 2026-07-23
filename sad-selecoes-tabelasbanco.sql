@@ -27,6 +27,38 @@ COMMENT ON COLUMN "sad-selecoes"."comunicados"."data" IS 'Data e hora de publica
 COMMENT ON COLUMN "sad-selecoes"."comunicados"."id_selecao" IS 'Identificador da seleção. Valores conhecidos: 1. Este campo estabelece uma relação com a entidade de seleções, permitindo vincular cada comunicado a uma seleção específica.';
 
 
+DROP TABLE IF EXISTS "avisos";
+DROP SEQUENCE IF EXISTS "sad-selecoes".avisos_id_seq;
+CREATE SEQUENCE "sad-selecoes".avisos_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
+
+CREATE TABLE "sad-selecoes"."avisos" (
+    "id" integer DEFAULT nextval('avisos_id_seq') NOT NULL,
+    "id_selecao" integer NOT NULL,
+    "mensagem" text NOT NULL,
+    "ativo" boolean DEFAULT true NOT NULL,
+    "created_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" timestamptz DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "avisos_pkey" PRIMARY KEY ("id")
+)
+WITH (oids = false);
+
+COMMENT ON TABLE "sad-selecoes"."avisos" IS 'Tabela que armazena os comunicados (avisos) personalizados exibidos aos candidatos no alerta inicial "Atenção, Candidato!" do portal.';
+
+COMMENT ON COLUMN "sad-selecoes"."avisos"."id" IS 'Identificador único do aviso.';
+
+COMMENT ON COLUMN "sad-selecoes"."avisos"."id_selecao" IS 'Identificador da seleção à qual o aviso pertence. Foreign key que referencia a tabela de seleções.';
+
+COMMENT ON COLUMN "sad-selecoes"."avisos"."mensagem" IS 'Texto do comunicado exibido no alerta inicial do portal do candidato.';
+
+COMMENT ON COLUMN "sad-selecoes"."avisos"."ativo" IS 'Flag que indica se o comunicado está visível no portal (true) ou oculto (false).';
+
+COMMENT ON COLUMN "sad-selecoes"."avisos"."created_at" IS 'Data e hora de criação do comunicado.';
+
+COMMENT ON COLUMN "sad-selecoes"."avisos"."updated_at" IS 'Data e hora da última atualização do comunicado.';
+
+CREATE INDEX idx_avisos_id_selecao ON "sad-selecoes".avisos USING btree (id_selecao);
+
+
 DROP TABLE IF EXISTS "cronograma";
 DROP SEQUENCE IF EXISTS "sad-selecoes".cronograma_id_seq;
 CREATE SEQUENCE "sad-selecoes".cronograma_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
@@ -237,6 +269,8 @@ DELIMITER ;;
 CREATE TRIGGER "trg_etapa_atual_selecao" BEFORE INSERT ON "sad-selecoes"."selecoes_cadastradas" FOR EACH ROW EXECUTE FUNCTION trg_fn_etapa_atual_selecao();;
 
 DELIMITER ;
+
+ALTER TABLE ONLY "sad-selecoes"."avisos" ADD CONSTRAINT "fk_avisos_selecoes_cadastradas" FOREIGN KEY (id_selecao) REFERENCES selecoes_cadastradas(id);
 
 ALTER TABLE ONLY "sad-selecoes"."cronograma" ADD CONSTRAINT "fk_cronograma_selecoes_cadastradas" FOREIGN KEY (id_selecao) REFERENCES selecoes_cadastradas(id);
 
