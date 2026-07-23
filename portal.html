@@ -799,13 +799,14 @@
         <span>Atenção, Candidato!</span>
       </h4>
       <div class="feedback-modal-message" id="attention-modal-message">
-        {{ Array.isArray($json.avisos) && $json.avisos.length ? $json.avisos.map(a => '<p class="mb-0">' + (a.mensagem || a.texto || '') + '</p>').join('') : '<p class="mb-0">Leia atentamente o Edital! Recomendamos que a inscrição seja realizada, preferencialmente, por meio de um computador.</p>' }}
+        <p class="mb-0">Leia atentamente o Edital! Recomendamos que a inscrição seja realizada, preferencialmente, por meio de um computador.</p>
       </div>
       <div class="d-flex justify-content-end gap-2 mt-4">
         <button type="button" class="btn btn-outline-secondary" data-attention-close>Fechar</button>
       </div>
     </div>
   </div>
+  <div id="avisos-html-data" style="display:none">{{ $json.avisos_html }}</div>
   <div class="feedback-modal-backdrop" id="feedback-modal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="feedback-modal">
       <h4 class="feedback-modal-title" id="feedback-modal-title"></h4>
@@ -1176,6 +1177,17 @@
             hidePopup();
           }
         });
+      }
+
+      var avisosHtmlDataEl = document.getElementById("avisos-html-data");
+      if (avisosHtmlDataEl) {
+        var avisosHtmlRaw = avisosHtmlDataEl.innerHTML.trim();
+        if (avisosHtmlRaw && avisosHtmlRaw.indexOf("{{") === -1) {
+          var attentionMessageEl = document.getElementById("attention-modal-message");
+          if (attentionMessageEl) {
+            attentionMessageEl.innerHTML = avisosHtmlRaw;
+          }
+        }
       }
 
       if (attentionModal) {
