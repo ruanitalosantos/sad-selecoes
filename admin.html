@@ -1195,6 +1195,9 @@
             <div class="nav-item" data-tab="ranking_geral">
                 <i class="fas fa-list-ol"></i> Ranking Geral
             </div>
+            <div class="nav-item" data-tab="dados_gerais">
+                <i class="fas fa-table"></i> Dados Gerais
+            </div>
             <hr class="my-4">
             <div class="nav-item" data-tab="analistas">
                 <i class="fas fa-user-shield"></i> Níveis de Acesso
@@ -2558,6 +2561,57 @@
             </div>
         </section>
 
+        <!-- Tab: Dados Gerais -->
+        <section id="tab-dados_gerais" class="tab-pane animate__animated animate__fadeIn">
+            <div class="page-header">
+                <h1>Dados Gerais das Pessoas</h1>
+                <p class="text-muted small">Visualização e exportação completa dos dados cadastrais e notas de todos os inscritos.</p>
+            </div>
+            <div class="card-container p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <h5 class="fw-bold mb-0">Inscrições Completas</h5>
+                    <div class="d-flex gap-3 align-items-center flex-grow-1" style="max-width: 800px;">
+                        <div class="input-group flex-grow-1">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 global-search" placeholder="Buscar por CPF, nome, inscrição, cargo ou especialidade...">
+                        </div>
+                        <button class="btn btn-success d-flex align-items-center gap-2 px-3 fw-bold shadow-sm text-nowrap" onclick="exportDadosGeraisToExcel()" style="border-radius: 12px; font-size: 0.9rem;">
+                            <i class="fas fa-file-excel fs-5"></i>
+                            <span>Exportar Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle text-nowrap" id="dados-gerais-table">
+                        <thead>
+                            <tr class="align-middle">
+                                <th>Classif.</th>
+                                <th>Inscrição</th>
+                                <th>CPF</th>
+                                <th>Nome</th>
+                                <th>Cargo</th>
+                                <th>Especialidade</th>
+                                <th>Telefone 1</th>
+                                <th>Telefone 2</th>
+                                <th>E-mail</th>
+                                <th>Nome da Mãe</th>
+                                <th>PCD</th>
+                                <th>PPNI</th>
+                                <th>Nota Título</th>
+                                <th>Nota Exp.</th>
+                                <th>Nota Geral</th>
+                                <th>Data Inscrição</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dados-gerais-table-body">
+                            <!-- Dados carregados via API -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <!-- Tab: Administração de Usuários -->
         <section id="tab-usuarios" class="tab-pane animate__animated animate__fadeIn">
             <div class="page-header">
@@ -3216,6 +3270,15 @@
                     fetchBancaEvaluations().catch(err => console.warn(err));
                 }
                 fetchEnrollments();
+            } else if (tabId === 'dados_gerais') {
+                showLoader();
+                Promise.all([
+                    fetchEnrollments(),
+                    fetchRankingGeral()
+                ]).finally(() => {
+                    renderDataForTab('dados_gerais');
+                    hideLoader();
+                });
             } else if (tabId === 'ranking_geral') {
                 showLoader();
                 fetchRankingGeral().then(() => {
@@ -5420,6 +5483,72 @@
                 renderDashboardCharts();
             }
 
+            if (tabId === 'dados_gerais' && document.getElementById('dados-gerais-table-body')) {
+                const tableBody = document.getElementById('dados-gerais-table-body');
+                let filtered = allEnrollments.filter(e => {
+                    const term = query.trim();
+                    if (!term) return true;
+                    return (e.inscricao || '').toLowerCase().includes(term) ||
+                        (e.nomecompleto || e.nome || '').toLowerCase().includes(term) ||
+                        (e.cpf || '').toLowerCase().includes(term) ||
+                        (e.cargo || e.categoria || '').toLowerCase().includes(term) ||
+                        (e.especialidade || '').toLowerCase().includes(term);
+                });
+
+                const getClassification = (e) => {
+                    const rankItem = rankingGeralData.find(r => r.inscricao === e.inscricao || (r.cpf && e.cpf && String(r.cpf).replace(/\D/g, '') === String(e.cpf).replace(/\D/g, '')));
+                    return rankItem ? (parseInt(rankItem.classificacao_geral) || 999999) : 999999;
+                };
+
+                filtered.sort((a, b) => {
+                    const classA = getClassification(a);
+                    const classB = getClassification(b);
+                    if (classA !== classB) return classA - classB;
+                    return (a.nomecompleto || a.nome || '').localeCompare(b.nomecompleto || b.nome || '');
+                });
+
+                tableBody.innerHTML = filtered.map(e => {
+                    const rankItem = rankingGeralData.find(r => r.inscricao === e.inscricao || (r.cpf && e.cpf && String(r.cpf).replace(/\D/g, '') === String(e.cpf).replace(/\D/g, '')));
+                    const classGeral = rankItem ? (rankItem.classificacao_geral || '---') : '---';
+
+                    const formatPcd = isSim(e.is_pcd) || isSim(e.pcd) || isSim(e.ispcd) || isSim(e.criispcd) ? 'SIM' : 'NÃO';
+                    const formatPpni = isSim(e.cotas_ppni) || isSim(e.criisppni) || isSim(e.is_ppni) ? 'SIM' : 'NÃO';
+
+                    const pcdBadge = formatPcd === 'SIM' ? '<span class="badge bg-success">SIM</span>' : '<span class="badge bg-light text-muted">NÃO</span>';
+                    const ppniBadge = formatPpni === 'SIM' ? '<span class="badge bg-primary">SIM</span>' : '<span class="badge bg-light text-muted">NÃO</span>';
+
+                    const notaTitulo = e.notacurricular || e.pontuacao_formacao || '0';
+                    const notaExp = e.notaexperiencia || e.pontuacao_experiencia || '0';
+                    const notaGeral = e.nota || e.nota_total || '0';
+
+                    let dtInsc = '---';
+                    if (e.created_at) {
+                        dtInsc = formatDate(e.created_at, true);
+                    }
+
+                    return `
+                        <tr>
+                            <td class="fw-bold text-primary">#${classGeral}</td>
+                            <td class="small fw-bold">${e.inscricao || '---'}</td>
+                            <td class="small font-monospace">${e.cpf || '---'}</td>
+                            <td class="fw-semibold">${e.nomecompleto || e.nome || '---'}</td>
+                            <td><span class="badge bg-secondary bg-opacity-75">${formatCategoria(e.cargo || e.categoria) || '---'}</span></td>
+                            <td>${e.especialidade || '---'}</td>
+                            <td>${e.tel1 || e.telefone || '---'}</td>
+                            <td>${e.tel2 || '---'}</td>
+                            <td>${e.email || '---'}</td>
+                            <td>${e.mae || '---'}</td>
+                            <td>${pcdBadge}</td>
+                            <td>${ppniBadge}</td>
+                            <td class="text-center">${notaTitulo}</td>
+                            <td class="text-center">${notaExp}</td>
+                            <td class="fw-bold text-success text-center">${notaGeral} pts</td>
+                            <td class="small text-muted">${dtInsc}</td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="16" class="text-center py-4 text-muted">Nenhum candidato encontrado.</td></tr>';
+            }
+
             if (tabId === 'ranking_geral' && document.getElementById('ranking-geral-table-body')) {
                 const rankingBody = document.getElementById('ranking-geral-table-body');
                 const query = (window.currentSearchQuery || '').toLowerCase();
@@ -5602,6 +5731,106 @@
                 icon: 'success',
                 title: 'Exportado!',
                 text: 'A planilha do ranking geral foi gerada com sucesso.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+
+        function exportDadosGeraisToExcel() {
+            if (allEnrollments.length === 0) {
+                Swal.fire('Atenção', 'Não há dados de inscrições para exportar.', 'warning');
+                return;
+            }
+
+            const query = (window.currentSearchQuery || '').toLowerCase();
+            let filtered = allEnrollments.filter(e => {
+                const term = query.trim();
+                if (!term) return true;
+                return (e.inscricao || '').toLowerCase().includes(term) ||
+                    (e.nomecompleto || e.nome || '').toLowerCase().includes(term) ||
+                    (e.cpf || '').toLowerCase().includes(term) ||
+                    (e.cargo || e.categoria || '').toLowerCase().includes(term) ||
+                    (e.especialidade || '').toLowerCase().includes(term);
+            });
+
+            const getClassification = (e) => {
+                const rankItem = rankingGeralData.find(r => r.inscricao === e.inscricao || (r.cpf && e.cpf && String(r.cpf).replace(/\D/g, '') === String(e.cpf).replace(/\D/g, '')));
+                return rankItem ? (parseInt(rankItem.classificacao_geral) || 999999) : 999999;
+            };
+
+            filtered.sort((a, b) => {
+                const classA = getClassification(a);
+                const classB = getClassification(b);
+                if (classA !== classB) return classA - classB;
+                return (a.nomecompleto || a.nome || '').localeCompare(b.nomecompleto || b.nome || '');
+            });
+
+            if (filtered.length === 0) {
+                Swal.fire('Atenção', 'Nenhum dado encontrado para exportar com o filtro atual.', 'warning');
+                return;
+            }
+
+            const excelData = filtered.map(e => {
+                const rankItem = rankingGeralData.find(r => r.inscricao === e.inscricao || (r.cpf && e.cpf && String(r.cpf).replace(/\D/g, '') === String(e.cpf).replace(/\D/g, '')));
+                const classGeral = rankItem ? (rankItem.classificacao_geral || '---') : '---';
+
+                const formatPcd = isSim(e.is_pcd) || isSim(e.pcd) || isSim(e.ispcd) || isSim(e.criispcd) ? 'SIM' : 'NÃO';
+                const formatPpni = isSim(e.cotas_ppni) || isSim(e.criisppni) || isSim(e.is_ppni) ? 'SIM' : 'NÃO';
+
+                const notaTitulo = e.notacurricular || e.pontuacao_formacao || '0';
+                const notaExp = e.notaexperiencia || e.pontuacao_experiencia || '0';
+                const notaGeral = e.nota || e.nota_total || '0';
+
+                let dtInsc = '---';
+                if (e.created_at) {
+                    try {
+                        const dateObj = new Date(e.created_at);
+                        if (!isNaN(dateObj.getTime())) {
+                            dtInsc = dateObj.toLocaleString('pt-BR');
+                        }
+                    } catch (err) {}
+                }
+
+                return {
+                    'Classificação': classGeral,
+                    'Data de Inscrição': dtInsc,
+                    'Inscrição': e.inscricao || '---',
+                    'CPF': e.cpf || '---',
+                    'Nome': e.nomecompleto || e.nome || '---',
+                    'Cargo': formatCategoria(e.cargo || e.categoria) || '---',
+                    'Especialidade': e.especialidade || '---',
+                    'Telefone 1': e.tel1 || e.telefone || '---',
+                    'Telefone 2': e.tel2 || '---',
+                    'E-mail': e.email || '---',
+                    'Nome da Mãe': e.mae || '---',
+                    'PCD': formatPcd,
+                    'PPNI': formatPpni,
+                    'Nota de Título': parseFloat(notaTitulo) || 0,
+                    'Nota de Experiência': parseFloat(notaExp) || 0,
+                    'Nota Geral': parseFloat(notaGeral) || 0
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Dados Gerais");
+            
+            const maxLens = {};
+            excelData.forEach(row => {
+                Object.keys(row).forEach(key => {
+                    const valStr = String(row[key]);
+                    maxLens[key] = Math.max(maxLens[key] || key.length, valStr.length);
+                });
+            });
+            worksheet['!cols'] = Object.keys(maxLens).map(key => ({ wch: maxLens[key] + 3 }));
+
+            const dataHora = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(workbook, `Dados_Gerais_Candidatos_${dataHora}.xlsx`);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Exportado!',
+                text: 'Os dados gerais foram gerados em XLSX com sucesso.',
                 timer: 1500,
                 showConfirmButton: false
             });
