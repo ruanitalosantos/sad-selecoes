@@ -515,6 +515,17 @@
       color: #c2410c;
     }
 
+    .upload-card.is-missing {
+      border-color: #dc2626;
+      border-style: solid;
+      background: rgba(254, 226, 226, 0.55);
+      box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.12);
+    }
+
+    .upload-card.is-missing::after {
+      color: #dc2626;
+    }
+
     .upload-card .upload-emoji {
       font-size: 2.4rem;
       line-height: 1;
@@ -2832,6 +2843,12 @@
 
     const getFieldLabel = (field) => {
       if (!field) return '';
+      const uploadCard = field.closest?.('[data-upload-card]');
+      if (uploadCard) {
+        // O <label> do card e o botao "Selecionar arquivo": usar o titulo do documento.
+        const uploadTitle = uploadCard.querySelector('.upload-title')?.textContent?.trim();
+        if (uploadTitle) return uploadTitle;
+      }
       if (field.labels && field.labels.length > 0) {
         const labelText = Array.from(field.labels)
           .map((label) => label.textContent?.trim())
@@ -2895,36 +2912,40 @@
           }
           return;
         }
+        if (field.type === 'file') return; // anexos sao tratados abaixo, pelo card
         if (!ignoreVisibility && !isElementVisible(field)) return;
         if (!field.checkValidity()) {
           items.push({ field, label: getFieldLabel(field), section: getSectionName(field) });
         }
       });
 
-      // Check required file upload cards
-      root.querySelectorAll('.upload-card.required').forEach((card) => {
-        if (!ignoreVisibility && card.closest('.hidden')) return;
+      // Anexos obrigatorios: o input e display:none, entao a validacao nativa nunca
+      // consegue exibir a bolha do navegador. A checagem e feita pelo card, cobrindo
+      // tanto os obrigatorios fixos quanto os condicionais (militar, jurado, PPNI, PCD).
+      root.querySelectorAll('[data-upload-card]').forEach((card) => {
         const input = card.querySelector('.upload-input');
-        if (!input) return;
+        if (!input || input.disabled) return;
+        const isRequired = input.required || card.classList.contains('required');
+        if (!isRequired) return;
+        if (!ignoreVisibility && (card.closest('.hidden') || !isElementVisible(card))) return;
         const hasFile = input.files && input.files.length > 0;
-        if (!hasFile) {
-          const label = card.querySelector('.upload-label, .form-label, label');
-          const labelText = label?.textContent?.trim() || input.name || 'Documento obrigatório';
-          items.push({
-            field: input,
-            label: labelText,
-            section: getSectionName(input),
-          });
-        }
+        if (hasFile) return;
+        items.push({
+          field: input,
+          label: getFieldLabel(input),
+          section: getSectionName(input),
+        });
       });
 
       return items;
     };
 
-    const buildMissingFieldsAlertContent = (items) => {
+    const MISSING_DOCS_INTRO = 'Para avançar, anexe os documentos obrigatórios que ainda estão pendentes:';
+
+    const buildMissingFieldsAlertContent = (items, { introText } = {}) => {
       const container = document.createElement('div');
       const intro = document.createElement('p');
-      intro.textContent = 'Os seguintes campos obrigatórios ainda precisam ser preenchidos:';
+      intro.textContent = introText || 'Os seguintes campos obrigatórios ainda precisam ser preenchidos:';
       container.appendChild(intro);
       const list = document.createElement('ul');
       list.className = 'mb-0';
@@ -2960,6 +2981,22 @@
       }
       container.appendChild(list);
       return container;
+    };
+
+    // Marca em vermelho os cards de anexo pendentes e limpa os que ja foram resolvidos.
+    const highlightMissingUploads = (items) => {
+      document.querySelectorAll('[data-upload-card].is-missing')
+        .forEach((card) => card.classList.remove('is-missing'));
+      items.forEach(({ field }) => {
+        const card = field?.closest?.('[data-upload-card]');
+        if (card) card.classList.add('is-missing');
+      });
+    };
+
+    // Alvo de rolagem/foco: o input do anexo e display:none, use o card visivel.
+    const focusTargetFor = (field) => {
+      if (!field) return null;
+      return (field.type === 'file' && field.closest('[data-upload-card]')) || field;
     };
 
     const stepHasPendingRequired = (index) => {
@@ -3242,6 +3279,7 @@
       const names = Array.from(input.files).map((file) => file.name);
       output.textContent = input.multiple ? names.join(', ') : names[0];
       card.classList.add('has-file');
+      card.classList.remove('is-missing');
       input.classList.remove('is-invalid');
     };
 
@@ -3389,10 +3427,24 @@
       const panel = stepPanels[currentStep];
       const inputs = Array.from(panel.querySelectorAll('input, select, textarea'));
       for (const field of inputs) {
+        // Anexos e campos ocultos nao exibem a bolha nativa do navegador; se
+        // dependessem de reportValidity() o avanco ficaria bloqueado sem aviso algum.
+        if (field.type === 'file' || !isElementVisible(field)) continue;
         if (!field.checkValidity()) {
           field.reportValidity();
           return false;
         }
+      }
+      const pendingFields = collectInvalidFields(panel);
+      highlightMissingUploads(pendingFields);
+      if (pendingFields.length > 0) {
+        const onlyDocs = pendingFields.every(({ field }) => field.type === 'file');
+        _firstInvalidField = focusTargetFor(pendingFields[0].field);
+        showFriendlyAlert(
+          buildMissingFieldsAlertContent(pendingFields, { introText: onlyDocs ? MISSING_DOCS_INTRO : undefined }),
+          { title: onlyDocs ? '📎 Documentos pendentes' : 'Campos obrigatórios pendentes' }
+        );
+        return false;
       }
       if (currentStep === 1 && !validateEmailsMatch(true)) {
         document.getElementById('email_confirm').reportValidity();
@@ -3437,9 +3489,10 @@
         const invalidFields = collectInvalidFields(docTab);
         
         if (invalidFields.length > 0) {
-            _firstInvalidField = invalidFields[0]?.field || null;
-            const content = buildMissingFieldsAlertContent(invalidFields);
-            showFriendlyAlert(content, { title: 'Documentos Pendentes' });
+            highlightMissingUploads(invalidFields);
+            _firstInvalidField = focusTargetFor(invalidFields[0]?.field);
+            const content = buildMissingFieldsAlertContent(invalidFields, { introText: MISSING_DOCS_INTRO });
+            showFriendlyAlert(content, { title: '📎 Documentos Pendentes' });
             return;
         }
 
@@ -3447,6 +3500,16 @@
         if (form) {
             form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
         }
+    };
+
+    // Mantem o selo "Obrigatório" do card de upload em sincronia com o atributo
+    // required, que e ligado/desligado conforme as respostas das etapas anteriores.
+    const syncUploadCardRequired = (field) => {
+      if (!field || field.type !== 'file') return;
+      const card = field.closest('[data-upload-card]');
+      if (!card) return;
+      card.classList.toggle('required', field.required);
+      if (!field.required) card.classList.remove('is-missing');
     };
 
     const toggleHiddenGroup = (condition, element) => {
@@ -3458,6 +3521,7 @@
         if (!condition) {
           field.classList.remove('is-invalid');
         }
+        syncUploadCardRequired(field);
       });
     };
 
@@ -4946,9 +5010,20 @@
           }
         }
         updateWizardStepStates();
-        const alertContent = buildMissingFieldsAlertContent(pendingFields);
+        highlightMissingUploads(pendingFields);
+        const onlyDocs = pendingFields.every(({ field }) => field.type === 'file');
+        const focusTarget = focusTargetFor(firstInvalid);
+        const alertContent = buildMissingFieldsAlertContent(pendingFields, {
+          introText: onlyDocs ? MISSING_DOCS_INTRO : undefined,
+        });
         showSubmissionSuspense(() => {
           showFriendlyAlert(alertContent, { title: '❌ Aviso!', titleClass: 'text-danger' });
+          // Input de anexo e display:none: reportValidity()/focus() nao surtem efeito,
+          // entao rolamos ate o card destacado em vermelho.
+          if (focusTarget && focusTarget !== firstInvalid) {
+            setTimeout(() => focusTarget.scrollIntoView({ behavior: 'smooth', block: 'center' }), 0);
+            return;
+          }
           if (firstInvalid && typeof firstInvalid.reportValidity === 'function') {
             firstInvalid.reportValidity();
           }
@@ -5061,7 +5136,11 @@
       }
       document.querySelectorAll('.upload-input').forEach((input) => {
         updateUploadIndicator(input);
-        input.addEventListener('change', () => updateUploadIndicator(input));
+        syncUploadCardRequired(input);
+        input.addEventListener('change', () => {
+          updateUploadIndicator(input);
+          input.closest('[data-upload-card]')?.classList.remove('is-missing');
+        });
       });
 
       document.querySelectorAll('[data-upload-card]').forEach((card) => {
