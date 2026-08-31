@@ -3232,7 +3232,7 @@
             _data: {},
             getItem(key) {
                 try {
-                    return localStorage.getItem(key);
+                    return sessionStorage.getItem(key) || localStorage.getItem(key);
                 } catch (e) {
                     console.warn(`[safeStorage] Fallback getItem for key "${key}":`, e);
                     return this._data.hasOwnProperty(key) ? this._data[key] : null;
@@ -3240,6 +3240,7 @@
             },
             setItem(key, value) {
                 try {
+                    sessionStorage.setItem(key, value);
                     localStorage.setItem(key, value);
                 } catch (e) {
                     console.warn(`[safeStorage] Fallback setItem for key "${key}":`, e);
@@ -3248,6 +3249,7 @@
             },
             removeItem(key) {
                 try {
+                    sessionStorage.removeItem(key);
                     localStorage.removeItem(key);
                 } catch (e) {
                     console.warn(`[safeStorage] Fallback removeItem for key "${key}":`, e);
@@ -3457,7 +3459,14 @@
 
         function getSelectedSelecaoId() {
             const saved = safeStorage.getItem('sas_selected_selecao_id');
-            return saved ? Number(saved) : null;
+            if (saved && saved !== 'null' && saved !== 'undefined') {
+                return Number(saved);
+            }
+            const obj = getSelectedSelecaoObj();
+            if (obj && (obj.id || obj.id_selecao)) {
+                return Number(obj.id || obj.id_selecao);
+            }
+            return null;
         }
 
         function getSelectedSelecaoObj() {
@@ -3472,14 +3481,21 @@
 
         function updateSelecaoHeaderUI() {
             const selecao = getSelectedSelecaoObj();
+            const selecaoId = selecao ? (selecao.id || selecao.id_selecao) : null;
             const nomeEl = document.getElementById('selecao-ativa-nome');
             const statusEl = document.getElementById('selecao-ativa-status-badge');
             const etapaEl = document.getElementById('selecao-ativa-etapa');
+            const mobileNomeEl = document.getElementById('mobile-top-selecao-nome');
 
-            if (selecao && selecao.id) {
+            if (selecao && selecaoId) {
+                const selecaoNome = selecao.nome || ('Seleção #' + selecaoId);
                 if (nomeEl) {
-                    nomeEl.innerText = selecao.nome || 'Seleção #' + selecao.id;
-                    nomeEl.title = selecao.nome || '';
+                    nomeEl.innerText = selecaoNome;
+                    nomeEl.title = selecaoNome;
+                }
+                if (mobileNomeEl) {
+                    mobileNomeEl.innerText = selecaoNome;
+                    mobileNomeEl.title = selecaoNome;
                 }
                 if (statusEl) {
                     const st = (selecao.status || 'Ativo').toUpperCase();
@@ -3492,6 +3508,7 @@
                 }
             } else {
                 if (nomeEl) nomeEl.innerText = 'Selecione um processo...';
+                if (mobileNomeEl) mobileNomeEl.innerText = 'SAD Seleções';
                 if (statusEl) {
                     statusEl.innerText = 'NENHUMA';
                     statusEl.className = 'badge bg-warning text-dark';
@@ -3750,6 +3767,10 @@
             if (modalEl) {
                 const modal = bootstrap.Modal.getInstance(modalEl);
                 if (modal) modal.hide();
+                document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
             }
 
             if (forceReload) {
@@ -11312,35 +11333,38 @@
                     fetchConfigVinculosList()
                 ]);
                 const activeId = getSelectedSelecaoId();
-                const currentUser = (getCurrentAnalyst() || '').toLowerCase().trim();
-                const isMasterAdmin = typeof isConfigAdminUser === 'function' ? isConfigAdminUser(currentUser) : false;
+                const storedObj = getSelectedSelecaoObj();
 
-                // Verificar se a seleção salva na sessão existe e se o usuário possui acesso ativo na Base 2
+                // Verificar se a seleção salva na sessão existe ou se há objeto salvo no safeStorage
                 let validSelecao = null;
                 if (activeId && selecoes && selecoes.length > 0) {
-                    const found = selecoes.find(s => Number(s.id || s.id_selecao) === Number(activeId));
-                    if (found) {
-                        const vinc = (configVinculosList || []).find(v => 
-                            String(v.id_analista || v.login_rede || v.login || '').toLowerCase().trim() === currentUser &&
-                            String(v.id_selecao) === String(found.id || found.id_selecao)
-                        );
-                        const isVinculoActive = vinc && (
-                            String(vinc.ativo).toLowerCase() === 'sim' ||
-                            vinc.ativo === true ||
-                            String(vinc.status).toLowerCase() === 'ativo'
-                        );
-                        if (isMasterAdmin || isVinculoActive || !configVinculosList || configVinculosList.length === 0) {
-                            validSelecao = found;
-                        } else {
-                            validSelecao = found;
-                        }
-                    }
+                    validSelecao = selecoes.find(s => Number(s.id || s.id_selecao) === Number(activeId));
+                }
+                
+                // Fallback para o objeto salvo diretamente no safeStorage caso a lista do webhook venha vazia ou em atraso
+                if (!validSelecao && storedObj && (storedObj.id || storedObj.id_selecao)) {
+                    validSelecao = storedObj;
                 }
 
                 if (validSelecao) {
                     // Seleção já salva na sessão e válida: atualizar objeto e carregar dados
+                    const validId = validSelecao.id || validSelecao.id_selecao;
+                    safeStorage.setItem('sas_selected_selecao_id', String(validId));
+                    safeStorage.setItem('sas_selected_selecao_nome', validSelecao.nome || '');
                     safeStorage.setItem('sas_selected_selecao_data', JSON.stringify(validSelecao));
                     updateSelecaoHeaderUI();
+
+                    // Garantir que o modal não permaneça aberto se o DOM já tiver renderizado
+                    const modalEl = document.getElementById('modalSelecoes');
+                    if (modalEl) {
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }
+
                     await Promise.all([fetchRPAMapping(), fetchEnrollments(), fetchRankingGeral(), fetchAnalystLevel()]);
 
                     // Restaurar aba após reload ou definir padrão
