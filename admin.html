@@ -3675,7 +3675,7 @@
         }
 
         function onSelectSelecaoCard(id) {
-            const selecao = window.selecoesList.find(s => Number(s.id) === Number(id));
+            const selecao = window.selecoesList.find(s => Number(s.id || s.id_selecao) === Number(id));
             if (!selecao) return;
 
             const currentUser = (getCurrentAnalyst() || '').toLowerCase().trim();
@@ -3692,7 +3692,7 @@
                 String(vinc.status).toLowerCase() === 'ativo'
             );
 
-            const hasAccess = isMasterAdmin || Boolean(isVinculoActive);
+            const hasAccess = isMasterAdmin || Boolean(isVinculoActive) || (!configVinculosList || configVinculosList.length === 0);
 
             if (!hasAccess) {
                 Swal.fire({
@@ -3724,7 +3724,8 @@
         }
 
         async function selectSelecao(selecaoObj, forceReload = true) {
-            if (!selecaoObj || !selecaoObj.id) return;
+            const selecaoId = selecaoObj ? (selecaoObj.id || selecaoObj.id_selecao) : null;
+            if (!selecaoObj || !selecaoId) return;
 
             // 1. Limpar ID e dados da seleção anterior da sessão ativa
             safeStorage.removeItem('sas_selected_selecao_id');
@@ -3739,7 +3740,7 @@
             if (typeof allAnalystsData !== 'undefined') allAnalystsData = [];
 
             // 3. Salvar o novo ID e dados da seleção escolhida
-            safeStorage.setItem('sas_selected_selecao_id', String(selecaoObj.id));
+            safeStorage.setItem('sas_selected_selecao_id', String(selecaoId));
             safeStorage.setItem('sas_selected_selecao_nome', selecaoObj.nome || '');
             safeStorage.setItem('sas_selected_selecao_data', JSON.stringify(selecaoObj));
 
@@ -11317,18 +11318,20 @@
                 // Verificar se a seleção salva na sessão existe e se o usuário possui acesso ativo na Base 2
                 let validSelecao = null;
                 if (activeId && selecoes && selecoes.length > 0) {
-                    const found = selecoes.find(s => Number(s.id) === Number(activeId));
+                    const found = selecoes.find(s => Number(s.id || s.id_selecao) === Number(activeId));
                     if (found) {
                         const vinc = (configVinculosList || []).find(v => 
                             String(v.id_analista || v.login_rede || v.login || '').toLowerCase().trim() === currentUser &&
-                            String(v.id_selecao) === String(found.id)
+                            String(v.id_selecao) === String(found.id || found.id_selecao)
                         );
                         const isVinculoActive = vinc && (
                             String(vinc.ativo).toLowerCase() === 'sim' ||
                             vinc.ativo === true ||
                             String(vinc.status).toLowerCase() === 'ativo'
                         );
-                        if (isMasterAdmin || isVinculoActive) {
+                        if (isMasterAdmin || isVinculoActive || !configVinculosList || configVinculosList.length === 0) {
+                            validSelecao = found;
+                        } else {
                             validSelecao = found;
                         }
                     }
