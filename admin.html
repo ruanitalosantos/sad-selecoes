@@ -3721,7 +3721,7 @@
                 return;
             }
 
-            selectSelecao(selecao, true);
+            selectSelecao(selecao, false);
         }
 
         function filterSelecoesCards() {
@@ -3740,29 +3740,19 @@
             });
         }
 
-        async function selectSelecao(selecaoObj, forceReload = true) {
+        async function selectSelecao(selecaoObj, forceReload = false) {
             const selecaoId = selecaoObj ? (selecaoObj.id || selecaoObj.id_selecao) : null;
             if (!selecaoObj || !selecaoId) return;
 
-            // 1. Limpar ID e dados da seleção anterior da sessão ativa
-            safeStorage.removeItem('sas_selected_selecao_id');
-            safeStorage.removeItem('sas_selected_selecao_nome');
-            safeStorage.removeItem('sas_selected_selecao_data');
-
-            // 2. Esvaziar estruturas de dados em memória para não exibir dados de outra seleção
-            allEnrollments = [];
-            if (typeof rankingData !== 'undefined') rankingData = [];
-            if (typeof rankingGeralData !== 'undefined') rankingGeralData = [];
-            if (typeof bancaEvaluationsData !== 'undefined') bancaEvaluationsData = [];
-            if (typeof allAnalystsData !== 'undefined') allAnalystsData = [];
-
-            // 3. Salvar o novo ID e dados da seleção escolhida
+            // 1. Salvar o novo ID e dados da seleção escolhida
             safeStorage.setItem('sas_selected_selecao_id', String(selecaoId));
             safeStorage.setItem('sas_selected_selecao_nome', selecaoObj.nome || '');
             safeStorage.setItem('sas_selected_selecao_data', JSON.stringify(selecaoObj));
 
+            // 2. Atualizar UI do cabeçalho
             updateSelecaoHeaderUI();
 
+            // 3. Fechar modal de seleções
             const modalEl = document.getElementById('modalSelecoes');
             if (modalEl) {
                 const modal = bootstrap.Modal.getInstance(modalEl);
@@ -3777,6 +3767,30 @@
                 showLoader();
                 window.location.reload();
                 return;
+            }
+
+            // 4. Carregar os dados in-place suavemente sem dar reload completo na página web
+            showLoader();
+            try {
+                allEnrollments = [];
+                if (typeof rankingData !== 'undefined') rankingData = [];
+                if (typeof rankingGeralData !== 'undefined') rankingGeralData = [];
+                if (typeof bancaEvaluationsData !== 'undefined') bancaEvaluationsData = [];
+                if (typeof allAnalystsData !== 'undefined') allAnalystsData = [];
+
+                await Promise.all([
+                    fetchRPAMapping(),
+                    fetchEnrollments(),
+                    fetchRankingGeral(),
+                    fetchAnalystLevel()
+                ]);
+
+                switchTab('dashboard');
+                fetchBancaEvaluations().catch(err => console.warn('Erro ao carregar banca em background:', err));
+            } catch (err) {
+                console.error("Erro ao carregar dados da seleção:", err);
+            } finally {
+                hideLoader();
             }
         }
 
