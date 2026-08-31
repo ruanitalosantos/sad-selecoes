@@ -1364,6 +1364,14 @@
           entries = [];
         }
 
+        // Ordenar pela data de criação mais recente (created_at DESC)
+        entries = entries.slice().sort(function (a, b) {
+          var timeA = a && (a.created_at || a.updated_at) ? new Date(a.created_at || a.updated_at).getTime() || 0 : (Number(a && a.id) || 0);
+          var timeB = b && (b.created_at || b.updated_at) ? new Date(b.created_at || b.updated_at).getTime() || 0 : (Number(b && b.id) || 0);
+          if (timeB !== timeA) return timeB - timeA;
+          return (Number(b && b.id) || 0) - (Number(a && a.id) || 0);
+        });
+
         return entries
           .map(function (item) {
             if (!item) {

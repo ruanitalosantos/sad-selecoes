@@ -4827,6 +4827,27 @@
             if (loader) loader.classList.add('hidden');
         }
 
+        function parseCandidateTimestamp(item) {
+            if (!item) return 0;
+            const val = item.created_at || item.updated_at || item.criado_em || item.data_inscricao || item.data_cadastro;
+            if (!val) {
+                const numId = Number(item.id || item.id_cadastro || item.idcadastro);
+                return !isNaN(numId) ? numId : 0;
+            }
+            if (val instanceof Date) return isNaN(val.getTime()) ? 0 : val.getTime();
+            if (typeof val === 'number') return val;
+            let s = String(val).trim();
+            if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+                const [dPart, tPart] = s.split(' ');
+                const [day, month, year] = dPart.split('/');
+                s = `${year}-${month}-${day}` + (tPart ? `T${tPart}` : 'T00:00:00');
+            }
+            const t = new Date(s).getTime();
+            if (!isNaN(t) && t > 0) return t;
+            const numId = Number(item.id || item.id_cadastro || item.idcadastro);
+            return !isNaN(numId) ? numId : 0;
+        }
+
         async function fetchEnrollments() {
             try {
                 const response = await callWebhook(ENDPOINT + '?t=' + Date.now());
@@ -4848,22 +4869,26 @@
                     };
                     return normalizeCandidateScores(mapped);
                 });
+
+                // Ordenar por created_at mais novo primeiro (DESC) e id como critério de desempate
+                normalized.sort((a, b) => {
+                    const timeA = parseCandidateTimestamp(a);
+                    const timeB = parseCandidateTimestamp(b);
+                    if (timeB !== timeA) return timeB - timeA;
+                    const idA = Number(a.id || a.id_cadastro || a.idcadastro || 0);
+                    const idB = Number(b.id || b.id_cadastro || b.idcadastro || 0);
+                    return idB - idA;
+                });
+
                 const uniqueByCPF = new Map();
                 normalized.forEach(item => {
-                    if (!item.cpf || !item.nomecompleto) return;
+                    if (!item || !item.cpf) return;
                     const cpfClean = String(item.cpf).replace(/\D/g, '');
                     if (!cpfClean) return;
 
-                    const dateVal = new Date(item.created_at || 0).getTime() || 0;
-
+                    // Como a lista já está ordenada do created_at mais novo para o mais antigo, a primeira ocorrência é a inscrição válida
                     if (!uniqueByCPF.has(cpfClean)) {
                         uniqueByCPF.set(cpfClean, item);
-                    } else {
-                        const existing = uniqueByCPF.get(cpfClean);
-                        const existingDateVal = new Date(existing.created_at || 0).getTime() || 0;
-                        if (dateVal > existingDateVal) {
-                            uniqueByCPF.set(cpfClean, item);
-                        }
                     }
                 });
                 allEnrollments = Array.from(uniqueByCPF.values());
@@ -4937,18 +4962,41 @@
                 const response = await callWebhook(RANKING_GERAL_ENDPOINT);
                 if (response && response.ok) {
                     const data = await parseJsonResponse(response);
-                    rankingGeralData = (data || []).map(item => {
+                    const rawList = (data || []).slice();
+                    // Ordenar por created_at mais novo primeiro (DESC)
+                    rawList.sort((a, b) => {
+                        const timeA = parseCandidateTimestamp(a);
+                        const timeB = parseCandidateTimestamp(b);
+                        if (timeB !== timeA) return timeB - timeA;
+                        const idA = Number(a.id || a.id_cadastro || a.idcadastro || 0);
+                        const idB = Number(b.id || b.id_cadastro || b.idcadastro || 0);
+                        return idB - idA;
+                    });
+
+                    const uniqueByCPF = new Map();
+                    rawList.forEach(item => {
+                        if (!item || !item.cpf) return;
+                        const cpfClean = String(item.cpf).replace(/\D/g, '');
+                        if (!cpfClean) return;
+                        if (!uniqueByCPF.has(cpfClean)) {
+                            uniqueByCPF.set(cpfClean, item);
+                        }
+                    });
+
+                    rankingGeralData = Array.from(uniqueByCPF.values()).map(item => {
                         return {
+                            ...item,
                             inscricao: item.inscricao || '',
                             cpf: item.cpf || '',
-                            nome: item.nome || '',
-                            data_de_nascimento: item.data_de_nascimento || '',
-                            ispcd: item.ispcd || '',
-                            is_ppni: item.is_ppni || '',
+                            nome: item.nome || item.nomecompleto || '',
+                            data_de_nascimento: item.data_de_nascimento || item.nasc || item.datanascimento || '',
+                            ispcd: item.ispcd || item.is_pcd || '',
+                            is_ppni: item.is_ppni || item.cotas_ppni || '',
                             nota: item.nota || '0',
                             classificacao_geral: item.classificacao_geral || '',
                             classificacao_pcd: item.classificacao_pcd || '',
-                            classificacao_ppni: item.classificacao_ppni || ''
+                            classificacao_ppni: item.classificacao_ppni || '',
+                            created_at: item.created_at || null
                         };
                     });
                 }

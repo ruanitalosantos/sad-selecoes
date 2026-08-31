@@ -4555,9 +4555,17 @@
         let data = null;
         try { data = JSON.parse(rawText); } catch (_) { /* resposta não é JSON */ }
 
-        const items = Array.isArray(data)
+        let items = Array.isArray(data)
           ? data
           : (data && typeof data === 'object' ? [data] : []);
+
+        // Ordenar da inscrição mais recente para a mais antiga pelo created_at
+        items.sort((a, b) => {
+          const tA = a && (a.created_at || a.updated_at) ? new Date(a.created_at || a.updated_at).getTime() || 0 : (Number(a && a.id) || 0);
+          const tB = b && (b.created_at || b.updated_at) ? new Date(b.created_at || b.updated_at).getTime() || 0 : (Number(b && b.id) || 0);
+          if (tB !== tA) return tB - tA;
+          return (Number(b && b.id) || 0) - (Number(a && a.id) || 0);
+        });
 
         if (!items.length) {
           if (emptyEl) emptyEl.classList.remove('hidden');
@@ -4571,7 +4579,7 @@
           } else {
             const countEl = document.createElement('p');
             countEl.className = 'text-muted mb-3';
-            countEl.textContent = `${items.length} inscrições encontradas. Clique em uma para ver os detalhes.`;
+            countEl.textContent = `${items.length} inscrições encontradas. A mais recente está destacada no topo.`;
             resultsEl.appendChild(countEl);
 
             const accordion = document.createElement('div');
