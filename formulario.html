@@ -1803,6 +1803,9 @@
                 <p class="text-muted">Nenhuma inscrição foi encontrada para este candidato.</p>
             </div>
             <div id="resumoResults"></div>
+            <!-- Parametrizáveis por certame pelo n8n; sem substituição, cai no padrão do RAPS. -->
+            <input type="hidden" id="resumo_webhook" value="{{ $json.webhook_resumo }}" />
+            <input type="hidden" id="id_selecao" value="{{ $json.id_selecao }}" />
         </section>
 
         <!-- Tab: Recursos -->
@@ -2447,6 +2450,25 @@
     };
 
     // ── Verificação de inscrição existente (executa quando período está aberto) ──
+    const RESUMO_WEBHOOK_PADRAO =
+      'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-dados-raps';
+
+    const valorParametrizado = (id) => {
+      const bruto = document.getElementById(id)?.value?.trim() || '';
+      // placeholder não substituído pelo n8n não serve como valor
+      return !bruto || bruto.includes('{{') ? '' : bruto;
+    };
+
+    // O endpoint estava fixo no certame do RAPS: em qualquer outra seleção a
+    // consulta não achava a inscrição do candidato e a tela dizia que ele não
+    // tinha inscrição nenhuma.
+    const resumoEndpoint = () => valorParametrizado('resumo_webhook') || RESUMO_WEBHOOK_PADRAO;
+
+    const temConteudoUtil = (item) =>
+      item && typeof item === 'object' && Object.values(item).some(
+        (v) => v !== null && v !== undefined && String(v).trim() !== ''
+      );
+
     const checkExistingInscricoes = async () => {
       if (REGISTRATION_EXPIRED) return;
       if (!isNaN(REGISTRATION_START.getTime()) && new Date() < REGISTRATION_START) return;
@@ -2455,9 +2477,14 @@
       if (!cpf) return;
 
       try {
+        const idSelecao = valorParametrizado('id_selecao');
         const response = await fetch(
-          'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-dados-raps',
-          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf }) }
+          resumoEndpoint(),
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(idSelecao ? { cpf, id_selecao: idSelecao } : { cpf }),
+          }
         );
         const rawText = await response.text();
         let data = null;
@@ -4481,7 +4508,7 @@
       descricaoformaca:    { label: 'Descrição formação',           group: 'Avaliação' },
     };
 
-    const RESUMO_GROUP_ORDER = ['Identificação', 'Documentos', 'Contato e Endereço', 'Profissional', 'Inclusão'];
+    const RESUMO_GROUP_ORDER = ['Identificação', 'Documentos', 'Contato e Endereço', 'Profissional', 'Inclusão', 'Avaliação'];
 
     const formatResumoValue = (value, type) => {
       if (value === null || value === undefined) return null;
@@ -4513,10 +4540,18 @@
         const dedupKey = def.group + ':' + def.label;
         if (seen.has(dedupKey)) return;
         seen.add(dedupKey);
+        // Um grupo fora do RESUMO_GROUP_ORDER quebrava o resumo inteiro: o push
+        // em undefined estourava, o catch assumia falha na consulta e o
+        // candidato via "Nenhuma inscrição encontrada" mesmo estando inscrito.
+        if (!grouped[def.group]) grouped[def.group] = [];
         grouped[def.group].push({ label: def.label, value: formatted });
       });
 
-      RESUMO_GROUP_ORDER.forEach((groupName) => {
+      const gruposParaRenderizar = RESUMO_GROUP_ORDER.concat(
+        Object.keys(grouped).filter((g) => !RESUMO_GROUP_ORDER.includes(g))
+      );
+
+      gruposParaRenderizar.forEach((groupName) => {
         const fields = grouped[groupName];
         if (!fields || !fields.length) return;
 
@@ -4805,16 +4840,28 @@
       if (resultsEl) resultsEl.innerHTML = '';
       if (loadingEl) loadingEl.classList.remove('hidden');
 
-      if (!cpf) {
+      if (!cpf || cpf.includes('{{')) {
         if (loadingEl) loadingEl.classList.add('hidden');
-        if (emptyEl) emptyEl.classList.remove('hidden');
+        if (errorEl) {
+          const msg = document.getElementById('resumoErrorMsg');
+          if (msg) {
+            msg.textContent = 'Não foi possível identificar o seu CPF na sessão. '
+              + 'Saia e entre novamente no portal para consultar suas inscrições.';
+          }
+          errorEl.classList.remove('hidden');
+        }
         return;
       }
 
       try {
+        const idSelecao = valorParametrizado('id_selecao');
         const response = await fetch(
-          'https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-dados-raps',
-          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf }) }
+          resumoEndpoint(),
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(idSelecao ? { cpf, id_selecao: idSelecao } : { cpf }),
+          }
         );
 
         if (loadingEl) loadingEl.classList.add('hidden');
@@ -4824,9 +4871,10 @@
         let data = null;
         try { data = JSON.parse(rawText); } catch (_) { /* resposta não é JSON */ }
 
-        let items = Array.isArray(data)
+        const items = (Array.isArray(data)
           ? data
-          : (data && typeof data === 'object' ? [data] : []);
+          : (data && typeof data === 'object' ? [data] : [])
+        ).filter(temConteudoUtil);
 
         // Ordenar da inscrição mais recente para a mais antiga pelo created_at
         items.sort((a, b) => {
@@ -4912,8 +4960,18 @@
         buildRecursosContent(items);
 
       } catch (error) {
+        // Antes caía em "Nenhuma inscrição encontrada", fazendo uma falha de rede
+        // parecer ausência de inscrição para o candidato.
         if (loadingEl) loadingEl.classList.add('hidden');
-        if (emptyEl) emptyEl.classList.remove('hidden');
+        if (emptyEl) emptyEl.classList.add('hidden');
+        if (errorEl) {
+          const msg = document.getElementById('resumoErrorMsg');
+          if (msg) {
+            msg.textContent = 'Não foi possível consultar suas inscrições agora. '
+              + 'Verifique sua conexão e use o botão "Atualizar" para tentar de novo.';
+          }
+          errorEl.classList.remove('hidden');
+        }
         console.error('Erro ao consultar inscrições:', error);
       }
     };

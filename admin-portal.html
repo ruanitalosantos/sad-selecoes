@@ -932,6 +932,12 @@
                                 <input type="text" class="form-control" id="sel-edital"
                                     placeholder="Ex: Edital nº 001/2026">
                             </div>
+                            <div class="col-12">
+                                <label class="form-label">E-mail de atendimento (canais de suporte)</label>
+                                <input type="email" class="form-control" id="sel-email-suporte"
+                                    placeholder="gggest.sad@recife.pe.gov.br">
+                                <div class="form-text">Exibido no bloco "Canais de suporte" do portal deste certame. Em branco, mantém o e-mail padrão da SAD.</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2505,6 +2511,7 @@
             document.getElementById('sel-status').value = 'homologacao';
             document.getElementById('sel-conteudo').value = '';
             document.getElementById('sel-descricao').value = '';
+            document.getElementById('sel-email-suporte').value = '';
             document.getElementById('sel-edital').value = '';
             document.getElementById('sel-multiplas').checked = false;
             document.getElementById('cargos-container').innerHTML =
@@ -2523,6 +2530,7 @@
             document.getElementById('sel-status').value = s.status || 'homologacao';
             document.getElementById('sel-conteudo').value = s.conteudo || '';
             document.getElementById('sel-descricao').value = s.descricao || '';
+            document.getElementById('sel-email-suporte').value = s.email_suporte || '';
             document.getElementById('sel-edital').value = s.edital || '';
             document.getElementById('sel-multiplas').checked = !!s.multiplas_inscricoes;
 
@@ -2629,14 +2637,23 @@
                 .filter(Boolean);
         }
 
+        function selecaoAindaNaoSalva() {
+            return !String(document.getElementById('sel-id').value || '').trim();
+        }
+
         function buildPreviewPayloadFromForm() {
+            // Seleção ainda não salva não tem id: sem esta marca explícita, o
+            // webhook recebia id_selecao null e caía no certame padrão, trazendo
+            // as publicações do Hospital Veterinário para o preview da nova.
             return {
                 id_selecao: document.getElementById('sel-id').value || null,
+                preview_sem_persistencia: selecaoAindaNaoSalva(),
                 selecao: document.getElementById('sel-nome').value,
                 status: document.getElementById('sel-status').value,
                 hash_drive: DEFAULT_HASH_DRIVE,
                 conteudo: document.getElementById('sel-conteudo').value,
                 descricao: document.getElementById('sel-descricao').value,
+                email_suporte: document.getElementById('sel-email-suporte').value.trim(),
                 multiplas_inscricoes: document.getElementById('sel-multiplas').checked,
                 cargos: collectCargos(),
                 termino_recurso_resultado_preliminar_avaliacao_pcd: document.getElementById('crono-termino_recurso_resultado_preliminar_avaliacao_pcd')?.value || null,
@@ -2744,6 +2761,15 @@
                 const htmlContent = await fetchPreviewHtml(payload);
                 renderPreviewIframe(previewContainer, htmlContent);
 
+                if (payload.preview_sem_persistencia) {
+                    const aviso = document.createElement('div');
+                    aviso.className = 'alert alert-warning m-3 mb-0';
+                    aviso.innerHTML = '<strong>Seleção ainda não salva.</strong> '
+                        + 'As publicações e demais dados vinculados só aparecem no preview '
+                        + 'depois de salvar a seleção. O que estiver listado aqui pode ser de outro certame.';
+                    previewContainer.insertAdjacentElement('afterbegin', aviso);
+                }
+
                 // Switch para a aba de preview
                 switchWizard('tab-preview');
                 showToast('Preview carregado com sucesso!');
@@ -2770,6 +2796,7 @@
                 conteudo: document.getElementById('sel-conteudo').value,
                 descricao: document.getElementById('sel-descricao').value,
                 edital: document.getElementById('sel-edital').value,
+                email_suporte: document.getElementById('sel-email-suporte').value.trim(),
                 multiplas_inscricoes: document.getElementById('sel-multiplas').checked,
                 cargos: collectCargos()
             };

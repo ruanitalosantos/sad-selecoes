@@ -792,12 +792,14 @@
         <div class="col-md-4">
           <div class="p-4 bg-white rounded-4 border shadow-sm h-100">
             <h3 class="h6 text-uppercase text-secondary">Atendimento eletrônico</h3>
-            <p class="mb-1 fw-semibold">gggest.sad@recife.pe.gov.br</p>
+            <p class="mb-1 fw-semibold" id="suporte-email">gggest.sad@recife.pe.gov.br</p>
             <p class="mb-0 text-muted">Resposta em até 2 dias úteis.</p>
           </div>
         </div>
       </div>
     </section>
+    <!-- Preenchido por certame pelo n8n; sem substituição, mantém o e-mail padrão da SAD. -->
+    <div id="suporte-email-data" style="display:none">{{ $json.email_suporte }}</div>
   </main>
 
   <footer class="bg-white border-top">
@@ -1193,23 +1195,37 @@
         });
       }
 
+      // O modal só existe para exibir comunicado ativo. O texto que vem no HTML
+      // é fallback de diagramação: quando a consulta não devolve aviso ativo
+      // (todos inativados no Portal SAD), não há o que mostrar e o modal não
+      // pode abrir — era isso que mantinha o "Leia atentamente o Edital!" na
+      // tela depois de o comunicado ter sido desativado.
       var avisosHtmlDataEl = document.getElementById("avisos-html-data");
-      if (avisosHtmlDataEl) {
-        var avisosHtmlRaw = avisosHtmlDataEl.innerHTML.trim();
-        if (avisosHtmlRaw && avisosHtmlRaw.indexOf("{{") === -1) {
-          var attentionMessageEl = document.getElementById("attention-modal-message");
-          if (attentionMessageEl) {
-            attentionMessageEl.innerHTML = avisosHtmlRaw;
-          }
-        }
+      var avisosHtmlRaw = avisosHtmlDataEl ? avisosHtmlDataEl.innerHTML.trim() : "";
+      var temAvisoAtivo = !!avisosHtmlRaw && avisosHtmlRaw.indexOf("{{") === -1;
+      var attentionMessageEl = document.getElementById("attention-modal-message");
+
+      if (temAvisoAtivo && attentionMessageEl) {
+        attentionMessageEl.innerHTML = avisosHtmlRaw;
       }
 
-      if (attentionModal) {
+      if (attentionModal && temAvisoAtivo) {
         openAttentionModal();
 
         attentionCloseButtons.forEach(function (buttonEl) {
           buttonEl.addEventListener("click", closeAttentionModal);
         });
+      } else if (attentionModal) {
+        attentionModal.remove();
+      }
+
+      var suporteEmailDataEl = document.getElementById("suporte-email-data");
+      if (suporteEmailDataEl) {
+        var suporteEmail = suporteEmailDataEl.textContent.trim();
+        var suporteEmailEl = document.getElementById("suporte-email");
+        if (suporteEmail && suporteEmail.indexOf("{{") === -1 && suporteEmailEl) {
+          suporteEmailEl.textContent = suporteEmail;
+        }
       }
 
       document.addEventListener("keydown", function (event) {
