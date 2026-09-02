@@ -4223,6 +4223,8 @@
                 fase = 'Resultado Preliminar da Análise Curricular';
             } else if (pubConc && hoje >= pubConc && (!rf || hoje < rf)) {
                 fase = 'Publicação da Concorrência';
+            } else if (fimInscr && hoje > fimInscr && (!resPrelimCurric || hoje < resPrelimCurric)) {
+                fase = 'Análise Curricular em Andamento';
             } else if (iniImpug && fimImpug && hoje >= iniImpug && hoje <= fimImpug) {
                 fase = 'Impugnação do Edital';
             } else if (iniInscr && fimInscr && hoje >= iniInscr && hoje <= fimInscr) {
@@ -4314,6 +4316,11 @@
         }
 
         window.cronogramasList = [];
+        window.configVinculosList = [];
+
+        async function fetchConfigVinculosList() {
+            return window.configVinculosList || [];
+        }
 
         async function fetchCronogramasList() {
             try {
@@ -4382,7 +4389,8 @@
                 const isEncerrada = info.isEncerrada;
 
                 // Verificação de Vínculo na Base 2 (atrelamento analista <-> seleção)
-                const vinc = (configVinculosList || []).find(v => 
+                const vincList = window.configVinculosList || [];
+                const vinc = vincList.find(v => 
                     String(v.id_analista || v.login_rede || v.login || '').toLowerCase().trim() === currentUser &&
                     String(v.id_selecao) === String(item.id)
                 );
@@ -4394,7 +4402,7 @@
                 );
 
                 const isTestUserForSelecao22 = String(item.id) === '22' && ['ruan.santos', 'indira.dutra', 'melanny.berenguer'].includes(currentUser);
-                const hasAccess = isMasterAdmin || Boolean(isVinculoActive) || isTestUserForSelecao22 || (!configVinculosList || configVinculosList.length === 0);
+                const hasAccess = isMasterAdmin || Boolean(isVinculoActive) || isTestUserForSelecao22 || (!vincList || vincList.length === 0);
 
                 if (!hasAccess) {
                     return `
@@ -4432,38 +4440,73 @@
 
                 const canBypassEncerrada = (typeof isMasterUser === 'function' ? isMasterUser(currentUser) : false) || isMasterAdmin;
 
-                if (isEncerrada && !canBypassEncerrada) {
-                    return `
-                        <div class="col-md-6 col-12 selecao-card-item" data-search="${(item.nome + ' encerrada ' + info.fase).toLowerCase()}">
-                            <div class="card border-0 shadow-sm h-100 p-3 selecao-card selecao-card-disabled" 
-                                 onclick="onSelectSelecaoCard(${item.id})" 
-                                 style="cursor: not-allowed; border-radius: 16px; transition: all 0.2s ease-in-out; border-left: 5px solid #dc3545 !important; background: #fff8f8;">
-                                <div class="d-flex justify-content-between align-items-center mb-2 gap-2 flex-wrap" style="min-width: 0;">
-                                    <span class="badge bg-danger text-uppercase flex-shrink-0" style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px;">
-                                        <i class="fas fa-lock me-1"></i>Encerrada
-                                    </span>
-                                    <span class="text-muted small text-truncate" style="font-size: 0.72rem; max-width: 100%;">
-                                        <i class="fas fa-calendar-alt me-1"></i>${createdDate}
-                                    </span>
-                                </div>
-                                <h6 class="fw-bold text-dark mb-2 text-break" style="font-size: 0.95rem; line-height: 1.35; word-break: break-word;">
-                                    ${item.nome || 'Sem Nome'}
-                                </h6>
-                                <div class="alert alert-danger py-1.5 px-2 mb-2 border-0 d-flex align-items-center gap-1.5" style="font-size: 0.72rem; border-radius: 8px; background-color: #fee2e2; color: #991b1b;">
-                                    <i class="fas fa-exclamation-circle text-danger flex-shrink-0"></i>
-                                    <span>Seleção encerrada (Resultado Final em <strong>${info.dataResultadoFinalLegivel}</strong>). Acesso bloqueado.</span>
-                                </div>
-                                <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between gap-2" style="min-width: 0;">
-                                    <div class="text-danger text-truncate me-1" style="font-size: 0.75rem; min-width: 0; flex: 1;">
-                                        <i class="fas fa-flag-checkered me-1 text-danger"></i><span class="fw-semibold">${info.fase}</span>
+                if (isEncerrada) {
+                    if (!canBypassEncerrada) {
+                        return `
+                            <div class="col-md-6 col-12 selecao-card-item" data-search="${(item.nome + ' encerrada ' + info.fase).toLowerCase()}">
+                                <div class="card border-0 shadow-sm h-100 p-3 selecao-card selecao-card-disabled" 
+                                     onclick="onSelectSelecaoCard(${item.id})" 
+                                     style="cursor: not-allowed; border-radius: 16px; transition: all 0.2s ease-in-out; border-left: 5px solid #dc3545 !important; background: #fff8f8;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2 flex-wrap" style="min-width: 0;">
+                                        <span class="badge bg-danger text-uppercase flex-shrink-0" style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px;">
+                                            <i class="fas fa-lock me-1"></i>Encerrada
+                                        </span>
+                                        <span class="text-muted small text-truncate" style="font-size: 0.72rem; max-width: 100%;">
+                                            <i class="fas fa-calendar-alt me-1"></i>${createdDate}
+                                        </span>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline-danger disabled py-1 px-2.5 fw-bold flex-shrink-0" style="border-radius: 8px; font-size: 0.78rem;" disabled>
-                                        <i class="fas fa-lock me-1"></i>Bloqueada
-                                    </button>
+                                    <h6 class="fw-bold text-dark mb-2 text-break" style="font-size: 0.95rem; line-height: 1.35; word-break: break-word;">
+                                        ${item.nome || 'Sem Nome'}
+                                    </h6>
+                                    <div class="alert alert-danger py-1.5 px-2 mb-2 border-0 d-flex align-items-center gap-1.5" style="font-size: 0.72rem; border-radius: 8px; background-color: #fee2e2; color: #991b1b;">
+                                        <i class="fas fa-exclamation-circle text-danger flex-shrink-0"></i>
+                                        <span>Seleção encerrada${info.dataResultadoFinalLegivel ? ' (Resultado Final em <strong>' + info.dataResultadoFinalLegivel + '</strong>)' : ''}. Acesso bloqueado.</span>
+                                    </div>
+                                    <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between gap-2" style="min-width: 0;">
+                                        <div class="text-danger text-truncate me-1" style="font-size: 0.75rem; min-width: 0; flex: 1;">
+                                            <i class="fas fa-flag-checkered me-1 text-danger"></i><span class="fw-semibold">${info.fase}</span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger disabled py-1 px-2.5 fw-bold flex-shrink-0" style="border-radius: 8px; font-size: 0.78rem;" disabled>
+                                            <i class="fas fa-lock me-1"></i>Bloqueada
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        // Exibição visual de seleção encerrada para Master Admin (com botão para prosseguir)
+                        return `
+                            <div class="col-md-6 col-12 selecao-card-item" data-search="${(item.nome + ' encerrada ' + info.fase).toLowerCase()}">
+                                <div class="card border-0 shadow-sm h-100 p-3 selecao-card ${isSelected ? 'border-danger' : ''}" 
+                                     onclick="onSelectSelecaoCard(${item.id})" 
+                                     style="cursor: pointer; border-radius: 16px; transition: all 0.2s ease-in-out; border-left: 5px solid #dc3545 !important; background: #fff8f8;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2 flex-wrap" style="min-width: 0;">
+                                        <span class="badge bg-danger text-uppercase flex-shrink-0" style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px;">
+                                            <i class="fas fa-lock me-1"></i>Encerrada (Master)
+                                        </span>
+                                        <span class="text-muted small text-truncate" style="font-size: 0.72rem; max-width: 100%;">
+                                            <i class="fas fa-calendar-alt me-1"></i>${createdDate}
+                                        </span>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2 text-break" style="font-size: 0.95rem; line-height: 1.35; word-break: break-word;">
+                                        ${item.nome || 'Sem Nome'}
+                                    </h6>
+                                    <div class="alert alert-warning py-1.5 px-2 mb-2 border-0 d-flex align-items-center gap-1.5" style="font-size: 0.72rem; border-radius: 8px; background-color: #fef3c7; color: #92400e;">
+                                        <i class="fas fa-shield-alt text-warning flex-shrink-0"></i>
+                                        <span>Seleção encerrada. Acesso permitido apenas via Perfil Master.</span>
+                                    </div>
+                                    <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between gap-2" style="min-width: 0;">
+                                        <div class="text-danger text-truncate me-1" style="font-size: 0.75rem; min-width: 0; flex: 1;">
+                                            <i class="fas fa-flag-checkered me-1 text-danger"></i><span class="fw-semibold">${info.fase}</span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm ${isSelected ? 'btn-danger' : 'btn-outline-danger'} py-1 px-2.5 fw-bold flex-shrink-0" style="border-radius: 8px; font-size: 0.78rem;">
+                                            ${isSelected ? '<i class="fas fa-check me-1"></i>Ativa (Master)' : '<i class="fas fa-user-shield me-1"></i>Selecionar'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
                 }
 
                 const statusBadgeClass = item.status === 'concluido' ? 'bg-success' : item.status === 'ativo' ? 'bg-primary' : 'bg-warning text-dark';
@@ -4501,13 +4544,13 @@
             showLoader();
             try {
                 const promises = [];
-                if (!configVinculosList || configVinculosList.length === 0) {
+                if (typeof fetchConfigVinculosList === 'function' && (!window.configVinculosList || window.configVinculosList.length === 0)) {
                     promises.push(fetchConfigVinculosList());
                 }
-                if (!window.selecoesList || window.selecoesList.length === 0) {
+                if (typeof fetchSelecoesList === 'function' && (!window.selecoesList || window.selecoesList.length === 0)) {
                     promises.push(fetchSelecoesList());
                 }
-                if (!window.cronogramasList || window.cronogramasList.length === 0) {
+                if (typeof fetchCronogramasList === 'function' && (!window.cronogramasList || window.cronogramasList.length === 0)) {
                     promises.push(fetchCronogramasList());
                 }
                 if (promises.length > 0) {
@@ -4515,6 +4558,8 @@
                 }
 
                 renderSelecoesCards(window.selecoesList || []);
+            } catch (err) {
+                console.error('Erro ao carregar seleções no modal:', err);
             } finally {
                 hideLoader();
             }
