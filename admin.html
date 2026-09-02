@@ -4182,11 +4182,8 @@
             const iniRecPpni = toYMD(crono.inicio_recurso_ppni);
             const fimRecPpni = toYMD(crono.termino_recurso_ppni);
 
-            // 1. Regra de Encerramento: data de resultado_final é MENOR que a data atual
-            const nomeLower = (selecao?.nome || '').toLowerCase();
-            const isTesteSelecao = nomeLower.includes('teste') || String(selecao?.id) === '99' || String(selecao?.id_selecao) === '99';
-
-            if (!isTesteSelecao && rf && rf < hoje) {
+            // 1. Regra de Encerramento: data de resultado_final é MENOR que a data atual (rf < hoje)
+            if (rf && rf < hoje) {
                 return {
                     fase: 'Seleção Encerrada',
                     isEncerrada: true,
@@ -4431,7 +4428,7 @@
                     `;
                 }
 
-                const canBypassEncerrada = isMasterUser(currentUser) || isMasterAdmin || ['teste', 'indira.dutra', 'ruan.santos', 'melanny.berenguer'].includes(currentUser);
+                const canBypassEncerrada = isMasterUser(currentUser) || isMasterAdmin;
 
                 if (isEncerrada && !canBypassEncerrada) {
                     return `
@@ -4547,11 +4544,9 @@
 
             const currentUser = (getCurrentAnalyst() || '').toLowerCase().trim();
             const isMasterAdmin = typeof isConfigAdminUser === 'function' ? isConfigAdminUser(currentUser) : false;
-            const canBypassEncerrada = isMasterUser(currentUser) || isMasterAdmin || ['teste', 'indira.dutra', 'ruan.santos', 'melanny.berenguer'].includes(currentUser);
-            const nomeLower = (selecao.nome || '').toLowerCase();
-            const isTesteSelecao = nomeLower.includes('teste') || String(id) === '99';
+            const canBypassEncerrada = isMasterUser(currentUser) || isMasterAdmin;
 
-            if (info.isEncerrada && !canBypassEncerrada && !isTesteSelecao) {
+            if (info.isEncerrada && !canBypassEncerrada) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Seleção Encerrada',
