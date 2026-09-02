@@ -971,6 +971,10 @@
                 <label for="nasc" class="form-label required">Data de nascimento</label>
                 <input type="date" class="form-control" id="nasc" name="nasc" value="{{ $json.nasc }}" required
                   readonly />
+                <div id="nascIdadeAviso" class="form-text mt-1 hidden text-danger fw-bold" role="alert">
+                  Data de nascimento informada indica idade inferior a 18 anos. Corrija seus dados no
+                  ConectaRecife antes de concluir a inscrição.
+                </div>
               </div>
               <div class="col-md-4">
                 <label for="nac-combo" class="form-label required">Nacionalidade</label>
@@ -1345,6 +1349,16 @@
                     value="{{ $json.alistamento_data }}" data-force-required="true" />
                 </div>
               </div>
+
+              <div class="row g-3 ms-0 hidden" id="militarJustificativaWrapper">
+                <div class="col-12">
+                  <label for="militar_justificativa" class="form-label required">Justificativa por não possuir o certificado de reservista ou dispensa</label>
+                  <textarea class="form-control" id="militar_justificativa" name="militar_justificativa" rows="3"
+                    maxlength="500" placeholder="Descreva o motivo de não possuir o certificado de reservista ou de dispensa."
+                    data-force-required="true">{{ $json.militar_justificativa }}</textarea>
+                  <div class="form-text">Anexe, na etapa &quot;Documentação&quot;, o documento que o dispensa do certificado.</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1552,16 +1566,43 @@
             </div>
           </div>
 
-          <div class="section-block hidden" id="docPpniGroup">
-            <h3 class="section-title">Heteroidentificação (PPNI)</h3>
-            <p class="section-subtitle">Documentos exigidos para candidatos que concorrem às vagas PPNI.</p>
+          <div class="section-block hidden" id="docPpniComumGroup">
+            <h3 class="section-title">Vagas PPNI &mdash; documento comum</h3>
+            <p class="section-subtitle">Exigido de todos os candidatos que concorrem &agrave;s vagas reservadas a pretos, pardos e ind&iacute;genas.</p>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 upload-row">
               <div class="col-sm-6 col-lg-4">
                 <div class="upload-card" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">🪪</div>
+                  <p class="upload-title">Documento oficial de identificação com foto</p>
+                  <p class="upload-instruction">Frente e verso em um único arquivo. Formato aceito: PDF.</p>
+                  <input type="file" class="upload-input" id="doc_ppni_rg" data-form-field="doc_ppni_rg" accept=".pdf" data-force-required="true" aria-label="Documento oficial de identificação com foto" />
+                  <label class="upload-button" for="doc_ppni_rg">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-block hidden" id="docPpniGroup">
+            <h3 class="section-title">Heteroidentificação &mdash; candidato negro (preto ou pardo)</h3>
+            <p class="section-subtitle">Documentos do procedimento de heteroidentificação, exigidos de quem se autodeclara preto ou pardo.</p>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 upload-row">
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card" data-upload-card>
+                  <div class="upload-emoji" aria-hidden="true">📄</div>
+                  <p class="upload-title">Termo de autodeclaração de candidato negro</p>
+                  <p class="upload-instruction">Termo assinado, conforme anexo do Edital. Formato aceito: PDF.</p>
+                  <input type="file" class="upload-input" id="doc_ppni_termo" data-form-field="doc_ppni_termo" accept=".pdf" data-force-required="true" aria-label="Termo de autodeclaração de candidato negro" />
+                  <label class="upload-button" for="doc_ppni_termo">Selecionar arquivo</label>
+                  <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
+                </div>
+              </div>
+              <div class="col-sm-6 col-lg-4">
+                <div class="upload-card" data-upload-card>
                   <div class="upload-emoji" aria-hidden="true">📸</div>
-                  <p class="upload-title">Foto Frontal (PPNI)</p>
-                  <p class="upload-instruction">Foto do rosto de frente. Formatos aceitos: JPG, JPEG, PNG.</p>
-                  <input type="file" class="upload-input" id="doc_ppni_foto_frontal" data-form-field="doc_ppni_foto_frontal" accept=".jpg,.jpeg,.png" data-force-required="true" aria-label="Foto frontal para heteroidentificação" />
+                  <p class="upload-title">Foto frontal com fundo branco</p>
+                  <p class="upload-instruction">Foto do rosto de frente, com fundo branco. Formatos aceitos: JPG, JPEG, PNG.</p>
+                  <input type="file" class="upload-input" id="doc_ppni_foto_frontal" data-form-field="doc_ppni_foto_frontal" accept=".jpg,.jpeg,.png" data-force-required="true" aria-label="Foto frontal com fundo branco" />
                   <label class="upload-button" for="doc_ppni_foto_frontal">Selecionar arquivo</label>
                   <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
                 </div>
@@ -1569,9 +1610,9 @@
               <div class="col-sm-6 col-lg-4">
                 <div class="upload-card" data-upload-card>
                   <div class="upload-emoji" aria-hidden="true">🤳</div>
-                  <p class="upload-title">Foto de Perfil (PPNI)</p>
-                  <p class="upload-instruction">Foto do rosto de perfil. Formatos aceitos: JPG, JPEG, PNG.</p>
-                  <input type="file" class="upload-input" id="doc_ppni_foto_perfil" data-form-field="doc_ppni_foto_perfil" accept=".jpg,.jpeg,.png" data-force-required="true" aria-label="Foto de perfil para heteroidentificação" />
+                  <p class="upload-title">Foto de perfil com fundo branco</p>
+                  <p class="upload-instruction">Foto do rosto de perfil, com fundo branco. Formatos aceitos: JPG, JPEG, PNG.</p>
+                  <input type="file" class="upload-input" id="doc_ppni_foto_perfil" data-form-field="doc_ppni_foto_perfil" accept=".jpg,.jpeg,.png" data-force-required="true" aria-label="Foto de perfil com fundo branco" />
                   <label class="upload-button" for="doc_ppni_foto_perfil">Selecionar arquivo</label>
                   <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
                 </div>
@@ -1579,30 +1620,37 @@
               <div class="col-sm-6 col-lg-4">
                 <div class="upload-card" data-upload-card>
                   <div class="upload-emoji" aria-hidden="true">🎥</div>
-                  <p class="upload-title">Vídeo de Autodeclaração (PPNI)</p>
-                  <p class="upload-instruction">Vídeo de autodeclaração racial. Formatos aceitos: MP4, MOV, WEBM.</p>
-                  <input type="file" class="upload-input" id="doc_ppni_video" data-form-field="doc_ppni_video" accept=".mp4,.mov,.webm" data-force-required="true" aria-label="Vídeo de autodeclaração para heteroidentificação" />
+                  <p class="upload-title">Vídeo de autodeclaração</p>
+                  <p class="upload-instruction">Até 20 segundos, com a autodeclaração prevista no Edital. Formatos aceitos: MP4, MOV, WEBM.</p>
+                  <input type="file" class="upload-input" id="doc_ppni_video" data-form-field="doc_ppni_video" accept=".mp4,.mov,.webm" data-force-required="true" aria-label="Vídeo de autodeclaração de até 20 segundos" />
                   <label class="upload-button" for="doc_ppni_video">Selecionar arquivo</label>
                   <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div class="section-block hidden" id="docIndigenaGroup">
+            <h3 class="section-title">Autodeclaração de identidade indígena</h3>
+            <p class="section-subtitle">Documentos exigidos de quem se autodeclara indígena.</p>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 upload-row">
               <div class="col-sm-6 col-lg-4">
                 <div class="upload-card" data-upload-card>
-                  <div class="upload-emoji" aria-hidden="true">📄</div>
-                  <p class="upload-title">Termo de Autodeclaração Racial (PPNI)</p>
-                  <p class="upload-instruction">Termo de autodeclaração racial assinado. Formato aceito: PDF.</p>
-                  <input type="file" class="upload-input" id="doc_ppni_termo" data-form-field="doc_ppni_termo" accept=".pdf" data-force-required="true" aria-label="Termo de autodeclaração racial assinado" />
-                  <label class="upload-button" for="doc_ppni_termo">Selecionar arquivo</label>
+                  <div class="upload-emoji" aria-hidden="true">📜</div>
+                  <p class="upload-title">Termo de Autodeclaração de Identidade Indígena (TADII)</p>
+                  <p class="upload-instruction">Termo assinado, conforme anexo do Edital. Formato aceito: PDF.</p>
+                  <input type="file" class="upload-input" id="doc_ppni_tadii" data-form-field="doc_ppni_tadii" accept=".pdf" data-force-required="true" aria-label="Termo de Autodeclaração de Identidade Indígena (TADII)" />
+                  <label class="upload-button" for="doc_ppni_tadii">Selecionar arquivo</label>
                   <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
                 </div>
               </div>
               <div class="col-sm-6 col-lg-4">
                 <div class="upload-card" data-upload-card>
-                  <div class="upload-emoji" aria-hidden="true">🪪</div>
-                  <p class="upload-title">Foto RG Frente e Verso (PPNI)</p>
-                  <p class="upload-instruction">Foto do RG frente e verso em um único arquivo. Formato aceito: PDF.</p>
-                  <input type="file" class="upload-input" id="doc_ppni_rg" data-form-field="doc_ppni_rg" accept=".pdf" data-force-required="true" aria-label="Foto RG frente e verso para heteroidentificação" />
-                  <label class="upload-button" for="doc_ppni_rg">Selecionar arquivo</label>
+                  <div class="upload-emoji" aria-hidden="true">🏹</div>
+                  <p class="upload-title">RANI e/ou Carta de Recomendação</p>
+                  <p class="upload-instruction">Registro Administrativo de Nascimento Indígena e/ou carta emitida por liderança, ancião, órgão indigenista ou associação indígena reconhecidos. Anexe um único arquivo em PDF.</p>
+                  <input type="file" class="upload-input" id="doc_ppni_rani" data-form-field="doc_ppni_rani" accept=".pdf" data-force-required="true" aria-label="RANI e/ou Carta de Recomendação" />
+                  <label class="upload-button" for="doc_ppni_rani">Selecionar arquivo</label>
                   <p class="upload-filename" data-upload-filename>Nenhum arquivo selecionado</p>
                 </div>
               </div>
@@ -2827,6 +2875,11 @@
       });
     };
 
+    const normalizarTexto = (value) => String(value ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
     const escapeSelector = (value) => {
       const stringValue = String(value ?? '');
       if (typeof CSS !== 'undefined' && CSS.escape) {
@@ -3425,6 +3478,12 @@
 
     const validateCurrentStep = () => {
       const panel = stepPanels[currentStep];
+      revalidarDatas(panel);
+      // etapa 1 = Identificação, onde fica a data de nascimento. Avisa antes de
+      // validar o resto, senão o alerta só apareceria depois que todos os
+      // outros campos estivessem preenchidos. Não trava: a data é readonly, e
+      // travar aqui deixaria o candidato sem saída dentro do formulário.
+      if (currentStep === 1) alertarIdadeMinima();
       const inputs = Array.from(panel.querySelectorAll('input, select, textarea'));
       for (const field of inputs) {
         // Anexos e campos ocultos nao exibem a bolha nativa do navegador; se
@@ -3512,6 +3571,159 @@
       if (!field.required) card.classList.remove('is-missing');
     };
 
+    // --- Validação de datas (itens 1.4 e 1.8 do documento de ajustes) --------
+    // O input type="date" já barra dia/mês inexistentes na digitação, mas não
+    // impede ano fora de faixa, data futura nem idade abaixo do mínimo do Edital.
+    const IDADE_MINIMA = 18;
+    const IDADE_MAXIMA = 100;
+    const ANO_MINIMO = 1900;
+
+    const hojeLocal = () => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return d;
+    };
+
+    const isoParaData = (valor) => {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(valor || '').trim());
+      if (!m) return null;
+      const [ano, mes, dia] = [Number(m[1]), Number(m[2]), Number(m[3])];
+      const d = new Date(ano, mes - 1, dia);
+      // descarta data que não existe no calendário (00/08, 31/02, 30/02...)
+      if (d.getFullYear() !== ano || d.getMonth() !== mes - 1 || d.getDate() !== dia) return null;
+      d.setHours(0, 0, 0, 0);
+      return d;
+    };
+
+    const dataParaIso = (data) => [
+      data.getFullYear(),
+      String(data.getMonth() + 1).padStart(2, '0'),
+      String(data.getDate()).padStart(2, '0'),
+    ].join('-');
+
+    const idadeEm = (nascimento, referencia) => {
+      let idade = referencia.getFullYear() - nascimento.getFullYear();
+      const jaFezAniversario =
+        referencia.getMonth() > nascimento.getMonth() ||
+        (referencia.getMonth() === nascimento.getMonth() && referencia.getDate() >= nascimento.getDate());
+      if (!jaFezAniversario) idade -= 1;
+      return idade;
+    };
+
+    const validarCampoData = (field) => {
+      if (!field || field.type !== 'date') return true;
+      field.setCustomValidity('');
+      const valor = String(field.value || '').trim();
+      if (!valor) return true;
+
+      const data = isoParaData(valor);
+      if (!data) {
+        field.setCustomValidity('Data inválida. Verifique se o dia, o mês e o ano informados existem no calendário.');
+        return false;
+      }
+
+      const hoje = hojeLocal();
+
+      if (field.id === 'nasc') {
+        if (data > hoje) {
+          field.setCustomValidity('A data de nascimento não pode ser uma data futura.');
+          return false;
+        }
+        const idade = idadeEm(data, hoje);
+        if (idade < IDADE_MINIMA) {
+          field.setCustomValidity('Data de nascimento informada indica idade inferior a ' + IDADE_MINIMA + ' anos.');
+          return false;
+        }
+        if (idade > IDADE_MAXIMA) {
+          field.setCustomValidity('Data de nascimento informada indica idade superior a ' + IDADE_MAXIMA + ' anos. Confira o ano digitado.');
+          return false;
+        }
+        return true;
+      }
+
+      if (data > hoje) {
+        field.setCustomValidity('A data informada não pode ser posterior a hoje.');
+        return false;
+      }
+      if (data.getFullYear() < ANO_MINIMO) {
+        field.setCustomValidity('Ano inválido. Informe uma data a partir de ' + ANO_MINIMO + '.');
+        return false;
+      }
+      return true;
+    };
+
+    // O campo de nascimento vem preenchido do ConectaRecife e é readonly, o que
+    // o exclui da validação nativa do navegador (setCustomValidity não surte
+    // efeito). Por isso a idade mínima é sinalizada por aviso, não por bloqueio
+    // de campo — o candidato corrige o dado na origem, não aqui.
+    const idadeDoCandidato = () => {
+      const nasc = document.getElementById('nasc');
+      const data = nasc ? isoParaData(nasc.value) : null;
+      return data ? idadeEm(data, hojeLocal()) : null;
+    };
+
+    const verificarIdadeMinima = () => {
+      const idade = idadeDoCandidato();
+      const menorDeIdade = idade !== null && idade < IDADE_MINIMA;
+      const aviso = document.getElementById('nascIdadeAviso');
+      const nasc = document.getElementById('nasc');
+      if (aviso) aviso.classList.toggle('hidden', !menorDeIdade);
+      if (nasc) nasc.classList.toggle('is-invalid', menorDeIdade);
+      return !menorDeIdade;
+    };
+
+    const alertarIdadeMinima = () => {
+      if (verificarIdadeMinima()) return true;
+      const msg = document.createElement('div');
+      const linha1 = document.createElement('p');
+      linha1.className = 'mb-2';
+      linha1.textContent = 'Data de nascimento informada indica idade inferior a ' + IDADE_MINIMA + ' anos.';
+      const linha2 = document.createElement('p');
+      linha2.className = 'mb-0 small text-muted';
+      linha2.textContent = 'A data vem do seu cadastro no ConectaRecife e não pode ser alterada nesta tela. '
+        + 'Corrija o dado no ConectaRecife para não comprometer sua classificação.';
+      msg.appendChild(linha1);
+      msg.appendChild(linha2);
+      showFriendlyAlert(msg, { title: '⚠️ Confira sua data de nascimento', titleClass: 'text-danger' });
+      return false;
+    };
+
+    const revalidarDatas = (root) => {
+      (root || document).querySelectorAll('input[type="date"]').forEach(validarCampoData);
+    };
+
+    const configurarLimitesDeData = () => {
+      const hoje = hojeLocal();
+
+      const nasc = document.getElementById('nasc');
+      if (nasc) {
+        const maisNovo = new Date(hoje);
+        maisNovo.setFullYear(hoje.getFullYear() - IDADE_MINIMA);
+        const maisVelho = new Date(hoje);
+        maisVelho.setFullYear(hoje.getFullYear() - IDADE_MAXIMA);
+        nasc.max = dataParaIso(maisNovo);
+        nasc.min = dataParaIso(maisVelho);
+      }
+
+      ['rg_data', 'alistamento_data'].forEach((id) => {
+        const campo = document.getElementById(id);
+        if (!campo) return;
+        campo.min = ANO_MINIMO + '-01-01';
+        campo.max = dataParaIso(hoje);
+      });
+
+      document.querySelectorAll('input[type="date"]').forEach((campo) => {
+        validarCampoData(campo);
+        campo.addEventListener('change', () => {
+          validarCampoData(campo);
+          if (campo.id === 'nasc') verificarIdadeMinima();
+        });
+        campo.addEventListener('blur', () => validarCampoData(campo));
+        // limpa a mensagem enquanto o candidato ainda está digitando
+        campo.addEventListener('input', () => campo.setCustomValidity(''));
+      });
+    };
+
     const toggleHiddenGroup = (condition, element) => {
       if (!element) return;
       element.classList.toggle('hidden', !condition);
@@ -3535,22 +3747,54 @@
       const sexo = document.getElementById('sexo');
       const show = sexo && (sexo.value === 'Masculino' || sexo.value === 'MASCULINO');
       const wrapper = document.getElementById('alistamentoWrapper');
+      const justificativaWrapper = document.getElementById('militarJustificativaWrapper');
       const docGroup = document.getElementById('docMilitarGroup');
       const militarGroup = document.getElementById('militarGroup');
-      
+      const militarSim = document.getElementById('militar_sim');
+      const militarNao = document.getElementById('militar_nao');
+
+      // Os dados do certificado só fazem sentido para quem respondeu "sim";
+      // quem respondeu "não" justifica a ausência. O anexo continua exigido nos
+      // dois casos, porque o "não" precisa comprovar o que o dispensa.
+      const temCertificado = show && militarSim && militarSim.checked;
+      const semCertificado = show && militarNao && militarNao.checked;
+
       toggleHiddenGroup(show, militarGroup);
-      toggleHiddenGroup(show, wrapper);
+      toggleHiddenGroup(temCertificado, wrapper);
+      toggleHiddenGroup(semCertificado, justificativaWrapper);
       toggleHiddenGroup(show, docGroup);
+
+      const docMilitarCard = document.getElementById('doc_militar')?.closest('[data-upload-card]');
+      if (docMilitarCard) {
+        const titulo = docMilitarCard.querySelector('.upload-title');
+        const instrucao = docMilitarCard.querySelector('.upload-instruction');
+        if (titulo) {
+          titulo.textContent = semCertificado
+            ? 'Documento que dispensa o certificado militar'
+            : 'Comprovante de Quitação do Serviço Militar';
+        }
+        if (instrucao) {
+          instrucao.textContent = semCertificado
+            ? 'Documento que comprova a dispensa do certificado de reservista. Anexe apenas arquivo em PDF.'
+            : 'Candidatos do sexo masculino. Anexe apenas arquivo em PDF.';
+        }
+      }
+
+      if (!temCertificado && wrapper) {
+        wrapper.querySelectorAll('input').forEach((input) => {
+          input.value = '';
+        });
+      }
+      if (!semCertificado && justificativaWrapper) {
+        justificativaWrapper.querySelectorAll('textarea').forEach((field) => {
+          field.value = '';
+        });
+      }
 
       if (!show) {
         document.querySelectorAll('input[name="militar"]').forEach((input) => {
           input.checked = false;
         });
-        if (wrapper) {
-          wrapper.querySelectorAll('input').forEach((input) => {
-            input.value = '';
-          });
-        }
         const docMilitar = document.getElementById('doc_militar');
         if (docMilitar) {
           resetUploadIndicator(docMilitar);
@@ -3632,6 +3876,17 @@
       }
     };
 
+    const DOCS_PPNI_COMUM = ['doc_ppni_rg'];
+    const DOCS_PPNI_NEGRO = ['doc_ppni_termo', 'doc_ppni_foto_frontal', 'doc_ppni_foto_perfil', 'doc_ppni_video'];
+    const DOCS_PPNI_INDIGENA = ['doc_ppni_tadii', 'doc_ppni_rani'];
+
+    const limparAnexos = (ids) => {
+      ids.forEach((id) => {
+        const input = document.getElementById(id);
+        if (input) resetUploadIndicator(input);
+      });
+    };
+
     const updatePpniFieldVisibility = () => {
       const raca = document.getElementById('raca');
       const ppni = document.getElementById('cotasPPNI');
@@ -3665,18 +3920,32 @@
       }
 
       const isYes = ppni && ppni.value.toUpperCase() === 'SIM';
+      // Negros e indigenas disputam as mesmas vagas, mas comprovam a
+      // autodeclaracao com documentos diferentes: libera so o conjunto da opcao
+      // escolhida, evitando que o candidato anexe o arquivo errado.
+      const racaNorm = normalizarTexto(raca && raca.value);
+      const isNegro = isYes && (racaNorm === 'preta' || racaNorm === 'parda');
+      const isIndigena = isYes && racaNorm === 'indigena';
+
       const info = document.getElementById('ppniDocsInfo');
+      const comumGroup = document.getElementById('docPpniComumGroup');
       const docsGroup = document.getElementById('docPpniGroup');
+      const indigenaGroup = document.getElementById('docIndigenaGroup');
 
       toggleHiddenGroup(isYes, info);
-      toggleHiddenGroup(isYes, docsGroup);
+      toggleHiddenGroup(isYes, comumGroup);
+      toggleHiddenGroup(isNegro, docsGroup);
+      toggleHiddenGroup(isIndigena, indigenaGroup);
 
-      if (!isYes && docsGroup) {
-        ['doc_ppni_foto_frontal', 'doc_ppni_foto_perfil', 'doc_ppni_video', 'doc_ppni_termo', 'doc_ppni_rg'].forEach((id) => {
-          const input = document.getElementById(id);
-          if (input) resetUploadIndicator(input);
-        });
+      if (info) {
+        info.textContent = isIndigena
+          ? '* Você deverá anexar a documentação de autodeclaração indígena na etapa "Documentação".'
+          : '* Você deverá anexar a documentação de heteroidentificação na etapa "Documentação".';
       }
+
+      if (!isNegro) limparAnexos(DOCS_PPNI_NEGRO);
+      if (!isIndigena) limparAnexos(DOCS_PPNI_INDIGENA);
+      if (!isYes) limparAnexos(DOCS_PPNI_COMUM);
     };
 
     const updateCondicaoEspecial = () => {
@@ -4723,6 +4992,7 @@
             { label: 'Seção', name: 'secao' },
             { label: 'Serviço militar', name: 'militar' },
             { label: 'Certificado de reservista', name: 'alistamento_numero' },
+            { label: 'Justificativa (sem certificado militar)', name: 'militar_justificativa' },
             { label: 'Órgão do certificado', name: 'alistamento_orgao' },
             { label: 'Data do certificado', name: 'alistamento_data' },
             { label: 'Atuação como jurado(a)', name: 'foi_jurado' },
@@ -4756,8 +5026,10 @@
             { label: 'Foto frontal (PPNI)', name: 'doc_ppni_foto_frontal' },
             { label: 'Foto de perfil (PPNI)', name: 'doc_ppni_foto_perfil' },
             { label: 'Vídeo de autodeclaração (PPNI)', name: 'doc_ppni_video' },
-            { label: 'Termo de autodeclaração racial (PPNI)', name: 'doc_ppni_termo' },
-            { label: 'Foto RG frente e verso (PPNI)', name: 'doc_ppni_rg' },
+            { label: 'Termo de autodeclaração de candidato negro (PPNI)', name: 'doc_ppni_termo' },
+            { label: 'Documento oficial com foto (PPNI)', name: 'doc_ppni_rg' },
+            { label: 'Termo de autodeclaração indígena - TADII (PPNI)', name: 'doc_ppni_tadii' },
+            { label: 'RANI e/ou Carta de Recomendação (PPNI)', name: 'doc_ppni_rani' },
             { label: 'Declaração de deficiência (PCD)', name: 'doc_declaracao_deficiencia' },
             { label: 'Laudo médico especialista (PCD)', name: 'doc_laudo_medico_pcd' },
             { label: 'Certificado de jurado(a)', name: 'doc_jurado' },
@@ -5007,6 +5279,8 @@
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       validateEmailsMatch(false);
+      revalidarDatas(form);
+      verificarIdadeMinima();
       const pendingFields = collectInvalidFields(form, { ignoreVisibility: true });
       if (pendingFields.length > 0) {
         event.stopPropagation();
@@ -5107,10 +5381,20 @@
       document
         .querySelectorAll('input[name="condicao_especial"]')
         .forEach((input) => input.addEventListener('change', updateCondicaoEspecial));
+      // sem este listener, responder "não" mantinha número, órgão e data
+      // visíveis e obrigatórios, travando o avanço da etapa
+      document
+        .querySelectorAll('input[name="militar"]')
+        .forEach((input) => input.addEventListener('change', updateMilitar));
       const cotasSelect = document.getElementById('cotasPPNI');
       if (cotasSelect) cotasSelect.addEventListener('change', updatePPNI);
       const racaSelect = document.getElementById('raca');
-      if (racaSelect) racaSelect.addEventListener('change', updatePpniFieldVisibility);
+      if (racaSelect) {
+        racaSelect.addEventListener('change', updatePpniFieldVisibility);
+        // sem isto, trocar a cor/raça não alternava entre os anexos de
+        // heteroidentificação e os de autodeclaração indígena
+        racaSelect.addEventListener('change', updatePPNI);
+      }
       const emailInput = document.getElementById('email');
       const emailConfirmInput = document.getElementById('email_confirm');
       if (emailInput) emailInput.addEventListener('input', validateEmailsMatch);
@@ -5207,6 +5491,8 @@
       enforceNumericOnly();
       populateUfSelects();
       renderCronograma();
+      configurarLimitesDeData();
+      verificarIdadeMinima();
       filterNivelOptions();
       filterCargoOptions();
       filterEspecialidadeOptions();

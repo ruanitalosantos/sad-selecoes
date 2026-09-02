@@ -387,6 +387,19 @@
                             etapaText = "Aguardando início das inscrições";
                         }
 
+                        // A etapa gravada em selecoes_cadastradas.etapa_atual só é
+                        // recalculada por trigger de escrita do cronograma, então fica
+                        // defasada quando a data passa (ver n8n-etapa-atual-calculada.sql).
+                        // Enquanto a query do webhook não usa a etapa calculada, esta
+                        // guarda impede o certame encerrado de anunciar inscrições abertas.
+                        const etapaNormalizada = etapaText
+                            .toLowerCase()
+                            .normalize("NFD")
+                            .replace(/[\u0300-\u036f]/g, "");
+                        if (isConcluido && etapaNormalizada.includes("inscricoes abertas")) {
+                            etapaText = "Inscrições encerradas";
+                        }
+
                         if (etapaText) {
                             const tagSpan = document.createElement('span');
                             tagSpan.className = 'selection-tag';
