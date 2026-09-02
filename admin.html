@@ -3519,13 +3519,19 @@
                     `;
                 }).join('');
 
+                const isFormacao = (grp.categoria === 'formacao') || (grp.titulo && grp.titulo.toLowerCase().includes('forma'));
+                const isExperiencia = (grp.categoria === 'experiencia') || (grp.titulo && grp.titulo.toLowerCase().includes('experi'));
+                const catIcon = isFormacao ? 'fa-graduation-cap text-primary' : (isExperiencia ? 'fa-briefcase text-warning' : 'fa-folder-open text-info');
+                const catBadge = isFormacao ? '<span class="badge bg-primary me-2"><i class="fas fa-graduation-cap me-1"></i>Formação</span>' : (isExperiencia ? '<span class="badge bg-warning text-dark me-2"><i class="fas fa-briefcase me-1"></i>Experiência</span>' : '<span class="badge bg-secondary me-2">Geral</span>');
+
                 return `
                     <div class="accordion-item border rounded-3 mb-2 overflow-hidden shadow-sm">
                         <h2 class="accordion-header" id="${headingId}">
                             <button class="accordion-button ${isFirst ? '' : 'collapsed'} bg-light fw-bold text-dark py-2.5" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}">
                                 <div class="d-flex align-items-center justify-content-between w-100 me-3 flex-wrap gap-2">
-                                    <span><i class="fas ${idx === 0 ? 'fa-graduation-cap text-primary' : 'fa-briefcase text-warning'} me-2"></i>${grp.titulo || 'Grupo de Critérios'}</span>
+                                    <span><i class="fas ${catIcon} me-2"></i>${grp.titulo || 'Grupo de Critérios'}</span>
                                     <div class="d-flex align-items-center gap-2">
+                                        ${catBadge}
                                         <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1">Teto do Grupo: ${groupCeiling.toFixed(1)} pts</span>
                                         <span class="btn btn-xs btn-outline-secondary py-0 px-2" title="Editar Nome/Teto do Grupo" onclick="event.stopPropagation(); createNewConfigGroup('${grp.id_grupo}')"><i class="fas fa-edit"></i></span>
                                     </div>
@@ -3583,9 +3589,26 @@
             summaryEl.innerHTML = `<i class="fas fa-check-circle me-1 text-success"></i>Soma dos tetos dos grupos: <strong>${sumGroupCeilings.toFixed(1)} / ${maxNota.toFixed(1)} pts</strong>. Ponto de Corte: <strong>${(window.currentConfigBuilderData.ponto_de_corte || 50).toFixed(1)} pts</strong>.`;
         }
 
+        function fillQuickGroupTemplate(type) {
+            const catEl = document.getElementById('cfg-modal-grupo-categoria');
+            const tituloEl = document.getElementById('cfg-modal-grupo-titulo');
+            const tetoEl = document.getElementById('cfg-modal-grupo-teto');
+
+            if (type === 'formacao') {
+                if (catEl) catEl.value = 'formacao';
+                if (tituloEl) tituloEl.value = 'Formação Profissional';
+                if (tetoEl) tetoEl.value = 70.0;
+            } else if (type === 'experiencia') {
+                if (catEl) catEl.value = 'experiencia';
+                if (tituloEl) tituloEl.value = 'Experiência Profissional';
+                if (tetoEl) tetoEl.value = 30.0;
+            }
+        }
+
         function createNewConfigGroup(groupId = null) {
             const titleEl = document.getElementById('modalConfigCriterioGrupoTitle');
             const editingIdEl = document.getElementById('cfg-modal-grupo-editing-id');
+            const catEl = document.getElementById('cfg-modal-grupo-categoria');
             const tituloEl = document.getElementById('cfg-modal-grupo-titulo');
             const tetoEl = document.getElementById('cfg-modal-grupo-teto');
 
@@ -3598,11 +3621,13 @@
                 const groups = window.currentConfigBuilderData.config_criterios || [];
                 const grp = groups.find(g => g.id_grupo === groupId);
                 if (grp) {
+                    if (catEl) catEl.value = grp.categoria || (grp.titulo && grp.titulo.toLowerCase().includes('experi') ? 'experiencia' : 'formacao');
                     tituloEl.value = grp.titulo || '';
                     tetoEl.value = grp.teto_grupo !== undefined ? grp.teto_grupo : 50.0;
                 }
             } else {
                 titleEl.innerHTML = '<i class="fas fa-folder-plus text-primary me-2"></i>Criar Novo Grupo de Critérios';
+                if (catEl) catEl.value = 'formacao';
                 tituloEl.value = '';
                 tetoEl.value = 50.0;
             }
@@ -3617,6 +3642,7 @@
         function saveConfigCriterioGrupoFromModal(e) {
             e.preventDefault();
             const editingId = document.getElementById('cfg-modal-grupo-editing-id').value;
+            const categoria = document.getElementById('cfg-modal-grupo-categoria')?.value || 'formacao';
             const titulo = document.getElementById('cfg-modal-grupo-titulo').value.trim();
             const teto = parseFloat(document.getElementById('cfg-modal-grupo-teto').value) || 0;
 
@@ -3629,6 +3655,7 @@
             if (editingId) {
                 const grp = window.currentConfigBuilderData.config_criterios.find(g => g.id_grupo === editingId);
                 if (grp) {
+                    grp.categoria = categoria;
                     grp.titulo = titulo;
                     grp.teto_grupo = teto;
                 }
@@ -3636,6 +3663,7 @@
                 const newId = 'grp_' + Date.now();
                 window.currentConfigBuilderData.config_criterios.push({
                     id_grupo: newId,
+                    categoria: categoria,
                     titulo: titulo,
                     teto_grupo: teto,
                     itens: []
@@ -14783,8 +14811,27 @@
                     <form id="form-config-criterio-grupo" onsubmit="saveConfigCriterioGrupoFromModal(event)">
                         <input type="hidden" id="cfg-modal-grupo-editing-id" value="">
                         <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Preenchimento Rápido</label>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary fw-semibold flex-fill" onclick="fillQuickGroupTemplate('formacao')">
+                                    <i class="fas fa-graduation-cap me-1"></i>Formação Profissional
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-semibold flex-fill" onclick="fillQuickGroupTemplate('experiencia')">
+                                    <i class="fas fa-briefcase me-1"></i>Experiência Profissional
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Categoria do Grupo <span class="text-danger">*</span></label>
+                            <select id="cfg-modal-grupo-categoria" class="form-select fw-semibold" required style="border-radius: 10px;">
+                                <option value="formacao">Formação Profissional / Títulos</option>
+                                <option value="experiencia">Experiência Profissional (Tempo de Serviço)</option>
+                                <option value="outros">Outros Critérios Gerais</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-bold text-dark">Nome do Grupo <span class="text-danger">*</span></label>
-                            <input type="text" id="cfg-modal-grupo-titulo" class="form-control fw-semibold" placeholder="Ex: Formação Profissional / Títulos" required style="border-radius: 10px;">
+                            <input type="text" id="cfg-modal-grupo-titulo" class="form-control fw-semibold" placeholder="Ex: Formação Profissional" required style="border-radius: 10px;">
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-dark">Teto Máximo do Grupo (Pontos) <span class="text-danger">*</span></label>
