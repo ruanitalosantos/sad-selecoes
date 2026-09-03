@@ -9838,6 +9838,54 @@
                 }
             };
 
+            // Função para consultar as configurações de critérios via POST no webhook consultar-config-json
+            async function fetchConfigCriteriosFromWebhook(selecaoId) {
+                if (!selecaoId) return null;
+                try {
+                    const response = await fetch('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-config-json', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id_selecao: Number(selecaoId), id: Number(selecaoId) })
+                    });
+                    if (response && response.ok) {
+                        const data = await parseJsonResponse(response);
+                        const list = Array.isArray(data) ? data : [data];
+                        const selecaoObj = list.find(s => s && Number(s.id || s.id_selecao) === Number(selecaoId)) || list[0];
+                        if (selecaoObj) {
+                            let rawConfig = selecaoObj.config_criterios || selecaoObj;
+                            while (typeof rawConfig === 'string') {
+                                try {
+                                    const parsed = JSON.parse(rawConfig);
+                                    if (parsed === rawConfig) break;
+                                    rawConfig = parsed;
+                                } catch (e) {
+                                    break;
+                                }
+                            }
+                            let grupos = null;
+                            if (Array.isArray(rawConfig)) {
+                                grupos = rawConfig;
+                            } else if (rawConfig && typeof rawConfig === 'object') {
+                                grupos = Array.isArray(rawConfig.grupos) ? rawConfig.grupos : (Array.isArray(rawConfig.config_criterios) ? rawConfig.config_criterios : null);
+                            }
+                            if (grupos && Array.isArray(grupos) && grupos.length > 0) {
+                                const parsedResult = {
+                                    id_selecao: Number(selecaoId),
+                                    ponto_de_corte: parseFloat(selecaoObj.ponto_de_corte || rawConfig?.ponto_de_corte || 50.0),
+                                    nota_maxima: parseFloat(selecaoObj.nota_maxima || rawConfig?.nota_maxima || 100.0),
+                                    grupos: grupos
+                                };
+                                safeStorage.setItem(`cfg_criterios_selecao_${selecaoId}`, JSON.stringify(parsedResult));
+                                return parsedResult;
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error('Erro ao consultar config_criterios via webhook POST:', err);
+                }
+                return null;
+            }
+
             // Helper para resgatar a parametrização de critérios de pontuação da seleção ativa
             function getConfigCriteriosForSelecao(selecaoId) {
                 if (!selecaoId) {
@@ -9864,7 +9912,6 @@
                 }
 
                 if (rawConfig) {
-                    // Desfazer qualquer nível de JSON.stringify (ex: se stringificada 1 ou 2 vezes)
                     while (typeof rawConfig === 'string') {
                         try {
                             const parsed = JSON.parse(rawConfig);
@@ -9897,184 +9944,171 @@
             // Função para montar o formulário de pontuação no modal do candidato
             function setupAnalyzerCriteriosForm(e, forceCurricularReadOnly) {
                 const selecaoId = e.id_selecao || e.selecao_id || getSelectedSelecaoId();
-                const configData = getConfigCriteriosForSelecao(selecaoId);
+                let configData = getConfigCriteriosForSelecao(selecaoId);
                 window.currentCandidateConfigCriterios = configData;
 
-                const container = document.getElementById('section-criterios-pontuacao');
-                if (!container) return;
+                const renderForm = (cfg) => {
+                    window.currentCandidateConfigCriterios = cfg;
+                    const container = document.getElementById('section-criterios-pontuacao');
+                    if (!container) return;
 
-                if (!configData || !configData.grupos || configData.grupos.length === 0) {
-                    // Layout RAPS Fallback (Padrão)
-                    container.innerHTML = `
-                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-graduation-cap me-2"></i>CRITÉRIOS DE PONTUAÇÃO</h6>
-                        <div class="mb-4">
-                            <label class="small fw-bold text-muted mb-2 col-12">FORMAÇÃO PROFISSIONAL (Máximo 70 pontos - Não cumulativo)</label>
-                            <select id="sel_pontuacao_formacao" class="form-select" onchange="updatePontuacaoCurricular()">
-                                <option value="0">0</option>
-                                <option value="20">20</option>
-                                <option value="30">30</option>
-                                <option value="40">40</option>
-                                <option value="50">50</option>
-                                <option value="60">60</option>
-                                <option value="70">70</option>
-                            </select>
-                        </div>
-                        <div class="row g-3">
-                            <label class="small fw-bold text-muted col-12 mb-0">EXPERIÊNCIA PROFISSIONAL (5 pontos por semestre - Máximo 30 pontos no total)</label>
-                            <div class="col-md-6">
-                                <label class="small text-muted mb-1" for="num_semestres_capsi">Experiência profissional em CAPSi</label>
-                                <select id="num_semestres_capsi" class="form-select" onchange="updatePontuacaoCurricular()">
+                    if (!cfg || !cfg.grupos || cfg.grupos.length === 0) {
+                        // Layout RAPS Fallback (Padrão)
+                        container.innerHTML = `
+                            <h6 class="fw-bold text-primary mb-3"><i class="fas fa-graduation-cap me-2"></i>CRITÉRIOS DE PONTUAÇÃO</h6>
+                            <div class="mb-4">
+                                <label class="small fw-bold text-muted mb-2 col-12">FORMAÇÃO PROFISSIONAL (Máximo 70 pontos - Não cumulativo)</label>
+                                <select id="sel_pontuacao_formacao" class="form-select" onchange="updatePontuacaoCurricular()">
                                     <option value="0">0</option>
-                                    <option value="1">5</option>
-                                    <option value="2">10</option>
-                                    <option value="3">15</option>
-                                    <option value="4">20</option>
-                                    <option value="5">25</option>
-                                    <option value="6">30</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                    <option value="40">40</option>
+                                    <option value="50">50</option>
+                                    <option value="60">60</option>
+                                    <option value="70">70</option>
                                 </select>
-                                <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_capsi" class="fw-semibold text-primary">0</span></div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="small text-muted mb-1" for="num_semestres_psic">Experiência profissional na área de assistência em Psiquiatria da infância e adolescência</label>
-                                <select id="num_semestres_psic" class="form-select" onchange="updatePontuacaoCurricular()">
-                                    <option value="0">0</option>
-                                    <option value="1">5</option>
-                                    <option value="2">10</option>
-                                    <option value="3">15</option>
-                                    <option value="4">20</option>
-                                </select>
-                                <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_psic" class="fw-semibold text-primary">0</span></div>
-                            </div>
-                        </div>
-                        <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border-start border-4 border-primary" style="background-color: #f8fafc !important;">
-                            <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Nota Total Curricular</span>
-                            <span class="fs-4 fw-bold text-primary" id="nota_total_curricular_val">0 / 100</span>
-                        </div>
-                    `;
-
-                    const selFormacao = document.getElementById('sel_pontuacao_formacao');
-                    const numCapsi = document.getElementById('num_semestres_capsi');
-                    const numPsic = document.getElementById('num_semestres_psic');
-
-                    if (selFormacao) {
-                        selFormacao.value = e.notacurricular || e.pontuacao_formacao || e.nprovatitulos || "0";
-                        selFormacao.disabled = forceCurricularReadOnly;
-                    }
-                    if (numCapsi) {
-                        numCapsi.value = e.semestres_capsi || "0";
-                        numCapsi.disabled = forceCurricularReadOnly;
-                    }
-                    if (numPsic) {
-                        numPsic.value = e.semestres_psic || "0";
-                        numPsic.disabled = forceCurricularReadOnly;
-                    }
-                    return;
-                }
-
-                // Dynamic Layout para Seleção com Configuração Personalizada
-                let savedScores = {};
-                if (e.detalhes_criterios) {
-                    try {
-                        savedScores = typeof e.detalhes_criterios === 'string' ? JSON.parse(e.detalhes_criterios) : e.detalhes_criterios;
-                    } catch (err) {}
-                } else if (e.config_criterios_valores) {
-                    savedScores = e.config_criterios_valores;
-                }
-
-                let html = `
-                    <div class="alert alert-success border-0 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; border-left: 4px solid #166534 !important;">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fas fa-sliders-h text-success fs-5"></i>
-                            <div>
-                                <h6 class="fw-bold text-success mb-0" style="font-size: 0.88rem;">CRITÉRIOS DINÂMICOS DA SELEÇÃO</h6>
-                                <span class="text-muted small">Pontuação configurada no edital desta seleção</span>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-success text-white px-3 py-2 fw-bold">Ponto de Corte: ${configData.ponto_de_corte} pts</span>
-                            <span class="badge bg-primary text-white px-3 py-2 fw-bold">Teto Máximo: ${configData.nota_maxima} pts</span>
-                        </div>
-                    </div>
-                `;
-
-                configData.grupos.forEach((g) => {
-                    const catBadge = g.categoria === 'experiencia'
-                        ? '<span class="badge bg-warning text-dark me-2"><i class="fas fa-briefcase me-1"></i>Experiência</span>'
-                        : '<span class="badge bg-info text-white me-2"><i class="fas fa-graduation-cap me-1"></i>Formação</span>';
-
-                    html += `
-                        <div class="card border-0 shadow-sm mb-4" style="border-radius: 14px; border: 1px solid var(--border-color); overflow: hidden;">
-                            <div class="card-header bg-light p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                <div class="d-flex align-items-center">
-                                    ${catBadge}
-                                    <h6 class="fw-bold mb-0 text-dark">${g.titulo}</h6>
-                                </div>
-                                <span class="badge bg-primary text-white fw-bold" id="group_pts_${g.id_grupo}">0 / ${g.teto_grupo} pts</span>
-                            </div>
-                            <div class="card-body p-3">
-                                <div class="row g-3">
-                    `;
-
-                    (g.itens || []).forEach(item => {
-                        const currentVal = savedScores[item.id] !== undefined ? savedScores[item.id] : 0;
-
-                        if (item.tipo === 'tempo') {
-                            const maxBlocos = Math.max(1, Math.ceil(item.teto / (item.pontos_bloco || 1)));
-                            let options = `<option value="0" ${currentVal == 0 ? 'selected' : ''}>0 (0 pts)</option>`;
-                            for (let b = 1; b <= maxBlocos; b++) {
-                                const pts = Math.min(item.teto, b * item.pontos_bloco);
-                                const labelMeses = item.bloco_meses ? `${b * item.bloco_meses} meses (${b} ${b === 1 ? 'bloco' : 'blocos'})` : `${b} blocos`;
-                                options += `<option value="${b}" ${currentVal == b ? 'selected' : ''}>${labelMeses} - ${pts} pts</option>`;
-                            }
-
-                            html += `
-                                <div class="col-md-6 mb-2">
-                                    <label class="small fw-semibold text-dark mb-1 d-block">${item.nome}</label>
-                                    <span class="x-small text-muted d-block mb-1" style="font-size: 0.72rem;">(${item.pontos_bloco} pts a cada ${item.bloco_meses || 6} meses - Máx: ${item.teto} pts)</span>
-                                    <select id="dyn_item_${item.id}" class="form-select dynamic-score-input" data-group-id="${g.id_grupo}" data-item-id="${item.id}" data-tipo="tempo" data-pontos-bloco="${item.pontos_bloco}" data-teto="${item.teto}" onchange="updatePontuacaoCurricular()" ${forceCurricularReadOnly ? 'disabled' : ''}>
-                                        ${options}
+                            <div class="row g-3">
+                                <label class="small fw-bold text-muted col-12 mb-0">EXPERIÊNCIA PROFISSIONAL (5 pontos por semestre - Máximo 30 pontos no total)</label>
+                                <div class="col-md-6">
+                                    <label class="small text-muted mb-1" for="num_semestres_capsi">Experiência profissional em CAPSi</label>
+                                    <select id="num_semestres_capsi" class="form-select" onchange="updatePontuacaoCurricular()">
+                                        <option value="0">0</option>
+                                        <option value="1">5</option>
+                                        <option value="2">10</option>
+                                        <option value="3">15</option>
+                                        <option value="4">20</option>
+                                        <option value="5">25</option>
+                                        <option value="6">30</option>
                                     </select>
-                                    <div class="small text-muted mt-1">Pontos acumulados: <span id="item_pts_${item.id}" class="fw-bold text-primary">0 pts</span></div>
+                                    <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_capsi" class="fw-semibold text-primary">0</span></div>
                                 </div>
-                            `;
-                        } else {
-                            // Tipo Unitário
-                            const maxQtd = item.max_qtd || 1;
-                            let options = `<option value="0" ${currentVal == 0 ? 'selected' : ''}>0 (0 pts)</option>`;
-                            for (let q = 1; q <= maxQtd; q++) {
-                                const pts = Math.min(item.teto, q * item.pontos);
-                                options += `<option value="${q}" ${currentVal == q ? 'selected' : ''}>${q} ${q === 1 ? 'item' : 'itens'} - ${pts} pts</option>`;
-                            }
-
-                            html += `
-                                <div class="col-md-6 mb-2">
-                                    <label class="small fw-semibold text-dark mb-1 d-block">${item.nome}</label>
-                                    <span class="x-small text-muted d-block mb-1" style="font-size: 0.72rem;">(${item.pontos} pts por item - Máx: ${item.teto} pts)</span>
-                                    <select id="dyn_item_${item.id}" class="form-select dynamic-score-input" data-group-id="${g.id_grupo}" data-item-id="${item.id}" data-tipo="unitario" data-pontos="${item.pontos}" data-teto="${item.teto}" onchange="updatePontuacaoCurricular()" ${forceCurricularReadOnly ? 'disabled' : ''}>
-                                        ${options}
+                                <div class="col-md-6">
+                                    <label class="small text-muted mb-1" for="num_semestres_psic">Experiência profissional na área de assistência em Psiquiatria da infância e adolescência</label>
+                                    <select id="num_semestres_psic" class="form-select" onchange="updatePontuacaoCurricular()">
+                                        <option value="0">0</option>
+                                        <option value="1">5</option>
+                                        <option value="2">10</option>
+                                        <option value="3">15</option>
+                                        <option value="4">20</option>
                                     </select>
-                                    <div class="small text-muted mt-1">Pontos acumulados: <span id="item_pts_${item.id}" class="fw-bold text-primary">0 pts</span></div>
+                                    <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_psic" class="fw-semibold text-primary">0</span></div>
                                 </div>
-                            `;
+                            </div>
+                            <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border-start border-4 border-primary" style="background-color: #f8fafc !important;">
+                                <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Nota Total Curricular</span>
+                                <span class="fs-4 fw-bold text-primary" id="nota_total_curricular_val">0 / 100</span>
+                            </div>
+                        `;
+
+                        const selFormacao = document.getElementById('sel_pontuacao_formacao');
+                        const numCapsi = document.getElementById('num_semestres_capsi');
+                        const numPsic = document.getElementById('num_semestres_psic');
+
+                        if (selFormacao) {
+                            selFormacao.value = e.notacurricular || e.pontuacao_formacao || e.nprovatitulos || "0";
+                            selFormacao.disabled = forceCurricularReadOnly;
                         }
+                        if (numCapsi) {
+                            numCapsi.value = e.semestres_capsi || "0";
+                            numCapsi.disabled = forceCurricularReadOnly;
+                        }
+                        if (numPsic) {
+                            numPsic.value = e.semestres_psic || "0";
+                            numPsic.disabled = forceCurricularReadOnly;
+                        }
+                        updateLocalScore();
+                        return;
+                    }
+
+                    // Dynamic Layout para Seleção com Configuração Personalizada
+                    let savedScores = {};
+                    if (e.detalhes_criterios) {
+                        try {
+                            savedScores = typeof e.detalhes_criterios === 'string' ? JSON.parse(e.detalhes_criterios) : e.detalhes_criterios;
+                        } catch (err) {}
+                    } else if (e.config_criterios_valores) {
+                        savedScores = e.config_criterios_valores;
+                    }
+
+                    let html = `
+                        <div class="alert alert-success border-0 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; border-left: 4px solid #166534 !important;">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-sliders-h text-success fs-5"></i>
+                                <div>
+                                    <h6 class="fw-bold text-success mb-0" style="font-size: 0.88rem;">CRITÉRIOS DINÂMICOS DA SELEÇÃO</h6>
+                                    <span class="text-muted small">Pontuação configurada no edital desta seleção</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success text-white px-3 py-2 fw-bold">Ponto de Corte: ${cfg.ponto_de_corte} pts</span>
+                                <span class="badge bg-primary text-white px-3 py-2 fw-bold">Teto Máximo: ${cfg.nota_maxima} pts</span>
+                            </div>
+                        </div>
+                    `;
+
+                    cfg.grupos.forEach((g) => {
+                        html += `
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius: 14px; border: 1px solid var(--border-color); overflow: hidden;">
+                                <div class="card-header bg-light p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <h6 class="fw-bold mb-0 text-dark">${g.titulo} (Máximo ${g.teto_grupo} pontos)</h6>
+                                    <span class="badge bg-primary text-white fw-bold" id="group_pts_${g.id_grupo}">0 / ${g.teto_grupo} pts</span>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="row g-3">
+                        `;
+
+                        (g.itens || []).forEach(item => {
+                            const currentVal = savedScores[item.id] !== undefined ? savedScores[item.id] : 0;
+                            const maxQtd = item.max_qtd !== undefined && item.max_qtd !== null ? Number(item.max_qtd) : (item.tipo === 'tempo' ? Math.max(1, Math.ceil(item.teto / (item.pontos_bloco || 1))) : 1);
+
+                            let options = `<option value="0" ${currentVal == 0 ? 'selected' : ''}>0</option>`;
+                            for (let q = 1; q <= maxQtd; q++) {
+                                options += `<option value="${q}" ${currentVal == q ? 'selected' : ''}>${q}</option>`;
+                            }
+
+                            const pUnitario = item.pontos !== undefined ? item.pontos : (item.pontos_bloco || 0);
+
+                            html += `
+                                <div class="col-md-6 mb-2">
+                                    <label class="small fw-semibold text-dark mb-1 d-block">${item.nome}</label>
+                                    <select id="dyn_item_${item.id}" class="form-select dynamic-score-input" data-group-id="${g.id_grupo}" data-item-id="${item.id}" data-tipo="${item.tipo || 'unitario'}" data-pontos="${pUnitario}" data-teto="${item.teto || 0}" onchange="updatePontuacaoCurricular()" ${forceCurricularReadOnly ? 'disabled' : ''}>
+                                        ${options}
+                                    </select>
+                                    <div class="small text-muted mt-1">Pontos: <span id="item_pts_${item.id}" class="fw-bold text-primary">0</span></div>
+                                </div>
+                            `;
+                        });
+
+                        html += `
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     });
 
                     html += `
-                                </div>
-                            </div>
+                        <!-- Nota Total Curricular -->
+                        <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border-start border-4 border-primary" style="background-color: #f8fafc !important;">
+                            <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Nota Total Curricular</span>
+                            <span class="fs-4 fw-bold text-primary" id="nota_total_curricular_val">0 / ${cfg.nota_maxima}</span>
                         </div>
                     `;
-                });
 
-                html += `
-                    <!-- Nota Total Curricular -->
-                    <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border-start border-4 border-primary" style="background-color: #f8fafc !important;">
-                        <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Nota Total Curricular</span>
-                        <span class="fs-4 fw-bold text-primary" id="nota_total_curricular_val">0 / ${configData.nota_maxima}</span>
-                    </div>
-                `;
+                    container.innerHTML = html;
+                    updateLocalScore();
+                };
 
-                container.innerHTML = html;
+                renderForm(configData);
+
+                // Disparar requisição POST ao webhook consultar-config-json para obter e atualizar critérios em tempo real
+                if (selecaoId) {
+                    fetchConfigCriteriosFromWebhook(selecaoId).then(remoteConfig => {
+                        if (remoteConfig && remoteConfig.grupos && remoteConfig.grupos.length > 0) {
+                            renderForm(remoteConfig);
+                        }
+                    });
+                }
             }
 
             // 1. Atualizar Título e Dados de Identificação
@@ -11145,7 +11179,7 @@
 
                             const itemBadge = document.getElementById('item_pts_' + item.id);
                             if (itemBadge) {
-                                itemBadge.innerText = `${itemPoints} pts`;
+                                itemBadge.innerText = itemPoints;
                             }
 
                             groupEarned += itemPoints;
