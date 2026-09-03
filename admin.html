@@ -9835,7 +9835,228 @@
                 }
             };
 
-            updateHumanResultCardUI();
+            // Helper para resgatar a parametrização de critérios de pontuação da seleção ativa
+            function getConfigCriteriosForSelecao(selecaoId) {
+                if (!selecaoId) {
+                    selecaoId = getSelectedSelecaoId();
+                }
+                if (!selecaoId) return null;
+
+                const list = window.selecoesList || [];
+                const selecaoItem = list.find(s => Number(s.id || s.id_selecao) === Number(selecaoId));
+                let rawConfig = selecaoItem ? selecaoItem.config_criterios : null;
+
+                if (!rawConfig) {
+                    const cached = safeStorage.getItem(`cfg_criterios_selecao_${selecaoId}`);
+                    if (cached) {
+                        try { rawConfig = JSON.parse(cached); } catch (e) {}
+                    }
+                }
+
+                if (rawConfig) {
+                    if (typeof rawConfig === 'string') {
+                        try { rawConfig = JSON.parse(rawConfig); } catch (e) {}
+                    }
+                    let grupos = null;
+                    if (Array.isArray(rawConfig)) {
+                        grupos = rawConfig;
+                    } else if (rawConfig && typeof rawConfig === 'object') {
+                        grupos = Array.isArray(rawConfig.grupos) ? rawConfig.grupos : (Array.isArray(rawConfig.config_criterios) ? rawConfig.config_criterios : null);
+                    }
+                    if (grupos && Array.isArray(grupos) && grupos.length > 0) {
+                        return {
+                            id_selecao: Number(selecaoId),
+                            ponto_de_corte: parseFloat(selecaoItem?.ponto_de_corte || rawConfig?.ponto_de_corte || 50.0),
+                            nota_maxima: parseFloat(selecaoItem?.nota_maxima || rawConfig?.nota_maxima || 100.0),
+                            grupos: grupos
+                        };
+                    }
+                }
+                return null;
+            }
+
+            // Função para montar o formulário de pontuação no modal do candidato
+            function setupAnalyzerCriteriosForm(e, forceCurricularReadOnly) {
+                const selecaoId = e.id_selecao || e.selecao_id || getSelectedSelecaoId();
+                const configData = getConfigCriteriosForSelecao(selecaoId);
+                window.currentCandidateConfigCriterios = configData;
+
+                const container = document.getElementById('section-criterios-pontuacao');
+                if (!container) return;
+
+                if (!configData || !configData.grupos || configData.grupos.length === 0) {
+                    // Layout RAPS Fallback (Padrão)
+                    container.innerHTML = `
+                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-graduation-cap me-2"></i>CRITÉRIOS DE PONTUAÇÃO</h6>
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-2 col-12">FORMAÇÃO PROFISSIONAL (Máximo 70 pontos - Não cumulativo)</label>
+                            <select id="sel_pontuacao_formacao" class="form-select" onchange="updatePontuacaoCurricular()">
+                                <option value="0">0</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                                <option value="60">60</option>
+                                <option value="70">70</option>
+                            </select>
+                        </div>
+                        <div class="row g-3">
+                            <label class="small fw-bold text-muted col-12 mb-0">EXPERIÊNCIA PROFISSIONAL (5 pontos por semestre - Máximo 30 pontos no total)</label>
+                            <div class="col-md-6">
+                                <label class="small text-muted mb-1" for="num_semestres_capsi">Experiência profissional em CAPSi</label>
+                                <select id="num_semestres_capsi" class="form-select" onchange="updatePontuacaoCurricular()">
+                                    <option value="0">0</option>
+                                    <option value="1">5</option>
+                                    <option value="2">10</option>
+                                    <option value="3">15</option>
+                                    <option value="4">20</option>
+                                    <option value="5">25</option>
+                                    <option value="6">30</option>
+                                </select>
+                                <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_capsi" class="fw-semibold text-primary">0</span></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="small text-muted mb-1" for="num_semestres_psic">Experiência profissional na área de assistência em Psiquiatria da infância e adolescência</label>
+                                <select id="num_semestres_psic" class="form-select" onchange="updatePontuacaoCurricular()">
+                                    <option value="0">0</option>
+                                    <option value="1">5</option>
+                                    <option value="2">10</option>
+                                    <option value="3">15</option>
+                                    <option value="4">20</option>
+                                </select>
+                                <div class="small text-muted mt-1">Pontos: <span id="pts_semestres_psic" class="fw-semibold text-primary">0</span></div>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border-start border-4 border-primary" style="background-color: #f8fafc !important;">
+                            <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Nota Total Curricular</span>
+                            <span class="fs-4 fw-bold text-primary" id="nota_total_curricular_val">0 / 100</span>
+                        </div>
+                    `;
+
+                    const selFormacao = document.getElementById('sel_pontuacao_formacao');
+                    const numCapsi = document.getElementById('num_semestres_capsi');
+                    const numPsic = document.getElementById('num_semestres_psic');
+
+                    if (selFormacao) {
+                        selFormacao.value = e.notacurricular || e.pontuacao_formacao || e.nprovatitulos || "0";
+                        selFormacao.disabled = forceCurricularReadOnly;
+                    }
+                    if (numCapsi) {
+                        numCapsi.value = e.semestres_capsi || "0";
+                        numCapsi.disabled = forceCurricularReadOnly;
+                    }
+                    if (numPsic) {
+                        numPsic.value = e.semestres_psic || "0";
+                        numPsic.disabled = forceCurricularReadOnly;
+                    }
+                    return;
+                }
+
+                // Dynamic Layout para Seleção com Configuração Personalizada
+                let savedScores = {};
+                if (e.detalhes_criterios) {
+                    try {
+                        savedScores = typeof e.detalhes_criterios === 'string' ? JSON.parse(e.detalhes_criterios) : e.detalhes_criterios;
+                    } catch (err) {}
+                } else if (e.config_criterios_valores) {
+                    savedScores = e.config_criterios_valores;
+                }
+
+                let html = `
+                    <div class="alert alert-success border-0 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; border-left: 4px solid #166534 !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-sliders-h text-success fs-5"></i>
+                            <div>
+                                <h6 class="fw-bold text-success mb-0" style="font-size: 0.88rem;">CRITÉRIOS DINÂMICOS DA SELEÇÃO</h6>
+                                <span class="text-muted small">Pontuação configurada no edital desta seleção</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success text-white px-3 py-2 fw-bold">Ponto de Corte: ${configData.ponto_de_corte} pts</span>
+                            <span class="badge bg-primary text-white px-3 py-2 fw-bold">Teto Máximo: ${configData.nota_maxima} pts</span>
+                        </div>
+                    </div>
+                `;
+
+                configData.grupos.forEach((g) => {
+                    const catBadge = g.categoria === 'experiencia'
+                        ? '<span class="badge bg-warning text-dark me-2"><i class="fas fa-briefcase me-1"></i>Experiência</span>'
+                        : '<span class="badge bg-info text-white me-2"><i class="fas fa-graduation-cap me-1"></i>Formação</span>';
+
+                    html += `
+                        <div class="card border-0 shadow-sm mb-4" style="border-radius: 14px; border: 1px solid var(--border-color); overflow: hidden;">
+                            <div class="card-header bg-light p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div class="d-flex align-items-center">
+                                    ${catBadge}
+                                    <h6 class="fw-bold mb-0 text-dark">${g.titulo}</h6>
+                                </div>
+                                <span class="badge bg-primary text-white fw-bold" id="group_pts_${g.id_grupo}">0 / ${g.teto_grupo} pts</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-3">
+                    `;
+
+                    (g.itens || []).forEach(item => {
+                        const currentVal = savedScores[item.id] !== undefined ? savedScores[item.id] : 0;
+
+                        if (item.tipo === 'tempo') {
+                            const maxBlocos = Math.max(1, Math.ceil(item.teto / (item.pontos_bloco || 1)));
+                            let options = `<option value="0" ${currentVal == 0 ? 'selected' : ''}>0 (0 pts)</option>`;
+                            for (let b = 1; b <= maxBlocos; b++) {
+                                const pts = Math.min(item.teto, b * item.pontos_bloco);
+                                const labelMeses = item.bloco_meses ? `${b * item.bloco_meses} meses (${b} ${b === 1 ? 'bloco' : 'blocos'})` : `${b} blocos`;
+                                options += `<option value="${b}" ${currentVal == b ? 'selected' : ''}>${labelMeses} - ${pts} pts</option>`;
+                            }
+
+                            html += `
+                                <div class="col-md-6 mb-2">
+                                    <label class="small fw-semibold text-dark mb-1 d-block">${item.nome}</label>
+                                    <span class="x-small text-muted d-block mb-1" style="font-size: 0.72rem;">(${item.pontos_bloco} pts a cada ${item.bloco_meses || 6} meses - Máx: ${item.teto} pts)</span>
+                                    <select id="dyn_item_${item.id}" class="form-select dynamic-score-input" data-group-id="${g.id_grupo}" data-item-id="${item.id}" data-tipo="tempo" data-pontos-bloco="${item.pontos_bloco}" data-teto="${item.teto}" onchange="updatePontuacaoCurricular()" ${forceCurricularReadOnly ? 'disabled' : ''}>
+                                        ${options}
+                                    </select>
+                                    <div class="small text-muted mt-1">Pontos acumulados: <span id="item_pts_${item.id}" class="fw-bold text-primary">0 pts</span></div>
+                                </div>
+                            `;
+                        } else {
+                            // Tipo Unitário
+                            const maxQtd = item.max_qtd || 1;
+                            let options = `<option value="0" ${currentVal == 0 ? 'selected' : ''}>0 (0 pts)</option>`;
+                            for (let q = 1; q <= maxQtd; q++) {
+                                const pts = Math.min(item.teto, q * item.pontos);
+                                options += `<option value="${q}" ${currentVal == q ? 'selected' : ''}>${q} ${q === 1 ? 'item' : 'itens'} - ${pts} pts</option>`;
+                            }
+
+                            html += `
+                                <div class="col-md-6 mb-2">
+                                    <label class="small fw-semibold text-dark mb-1 d-block">${item.nome}</label>
+                                    <span class="x-small text-muted d-block mb-1" style="font-size: 0.72rem;">(${item.pontos} pts por item - Máx: ${item.teto} pts)</span>
+                                    <select id="dyn_item_${item.id}" class="form-select dynamic-score-input" data-group-id="${g.id_grupo}" data-item-id="${item.id}" data-tipo="unitario" data-pontos="${item.pontos}" data-teto="${item.teto}" onchange="updatePontuacaoCurricular()" ${forceCurricularReadOnly ? 'disabled' : ''}>
+                                        ${options}
+                                    </select>
+                                    <div class="small text-muted mt-1">Pontos acumulados: <span id="item_pts_${item.id}" class="fw-bold text-primary">0 pts</span></div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    html += `
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <!-- Nota Total Curricular -->
+                    <div class="mt-4 p-3 bg-light rounded d-flex justify-content-between align-items-center border-start border-4 border-primary" style="background-color: #f8fafc !important;">
+                        <span class="fw-bold text-dark"><i class="fas fa-calculator text-primary me-2"></i>Nota Total Curricular</span>
+                        <span class="fs-4 fw-bold text-primary" id="nota_total_curricular_val">0 / ${configData.nota_maxima}</span>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
 
             // 1. Atualizar Título e Dados de Identificação
             document.getElementById('analyzer-name').innerText = e.nomecompleto || 'Analisador de Inscrição';
@@ -10879,47 +11100,106 @@
             function updateLocalScore() {
                 let formacao = 0;
                 let experiencia = 0;
+                let totalScore = 0;
 
                 const isCurricularTab = (resolvedSourceTab === "humano");
+                const acatarCheck = document.getElementById('val_acatar_curriculo');
+                const isAcatado = isCurricularTab ? (acatarCheck && acatarCheck.checked) : true;
 
-                if (isCurricularTab) {
-                    const acatarCheck = document.getElementById('val_acatar_curriculo');
-                    if (acatarCheck && acatarCheck.checked) {
-                        formacao = parseInt(document.getElementById('sel_pontuacao_formacao').value) || 0;
+                if (window.currentCandidateConfigCriterios && window.currentCandidateConfigCriterios.grupos && window.currentCandidateConfigCriterios.grupos.length > 0) {
+                    const configData = window.currentCandidateConfigCriterios;
 
-                        const numCapsi = parseInt(document.getElementById('num_semestres_capsi').value) || 0;
-                        const numPsic = parseInt(document.getElementById('num_semestres_psic').value) || 0;
+                    configData.grupos.forEach(g => {
+                        let groupEarned = 0;
+                        (g.itens || []).forEach(item => {
+                            const el = document.getElementById('dyn_item_' + item.id);
+                            let val = 0;
+                            if (el && isAcatado) {
+                                val = parseFloat(el.value) || 0;
+                            }
+                            let itemPoints = 0;
+                            if (item.tipo === 'tempo') {
+                                itemPoints = Math.min(item.teto, val * (item.pontos_bloco || 0));
+                            } else {
+                                itemPoints = Math.min(item.teto, val * (item.pontos || 0));
+                            }
 
-                        experiencia = (numCapsi * 5) + (numPsic * 5);
-                        experiencia = Math.min(30, experiencia);
-                    }
+                            const itemBadge = document.getElementById('item_pts_' + item.id);
+                            if (itemBadge) {
+                                itemBadge.innerText = `${itemPoints} pts`;
+                            }
+
+                            groupEarned += itemPoints;
+                        });
+
+                        groupEarned = Math.min(g.teto_grupo, groupEarned);
+
+                        const groupBadge = document.getElementById('group_pts_' + g.id_grupo);
+                        if (groupBadge) {
+                            groupBadge.innerText = `${groupEarned} / ${g.teto_grupo} pts`;
+                        }
+
+                        const sidebarGroupBadge = document.getElementById('sidebar_group_pts_' + g.id_grupo);
+                        if (sidebarGroupBadge) {
+                            sidebarGroupBadge.innerText = `${groupEarned} / ${g.teto_grupo}`;
+                            sidebarGroupBadge.classList.remove('bg-success', 'bg-light', 'text-dark', 'text-white');
+                            if (groupEarned > 0) {
+                                sidebarGroupBadge.classList.add('bg-success', 'text-white');
+                            } else {
+                                sidebarGroupBadge.classList.add('bg-light', 'text-dark');
+                            }
+                        }
+
+                        if (g.categoria === 'experiencia') {
+                            experiencia += groupEarned;
+                        } else {
+                            formacao += groupEarned;
+                        }
+                    });
+
+                    totalScore = Math.min(configData.nota_maxima || 100, formacao + experiencia);
+
                 } else {
-                    formacao = parseInt(e.pontuacao_formacao) || 0;
-                    experiencia = parseInt(e.pontuacao_experiencia) || 0;
+                    // Fallback RAPS
+                    if (isCurricularTab) {
+                        if (isAcatado) {
+                            const selF = document.getElementById('sel_pontuacao_formacao');
+                            formacao = selF ? (parseInt(selF.value) || 0) : 0;
+
+                            const numCapsi = parseInt(document.getElementById('num_semestres_capsi')?.value || 0) || 0;
+                            const numPsic = parseInt(document.getElementById('num_semestres_psic')?.value || 0) || 0;
+
+                            experiencia = Math.min(30, (numCapsi * 5) + (numPsic * 5));
+                        }
+                    } else {
+                        formacao = parseInt(e.pontuacao_formacao) || 0;
+                        experiencia = parseInt(e.pontuacao_experiencia) || 0;
+                    }
+
+                    totalScore = Math.min(100, formacao + experiencia);
+
+                    const setScoreUI = (id, points, max) => {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        el.innerText = `${points} / ${max}`;
+                        el.classList.remove('bg-success', 'bg-light', 'text-dark', 'text-white');
+                        if (points > 0) {
+                            el.classList.add('bg-success', 'text-white');
+                        } else {
+                            el.classList.add('bg-light', 'text-dark');
+                        }
+                    };
+
+                    setScoreUI('s_formacao', formacao, 70);
+                    setScoreUI('s_experiencia', experiencia, 30);
                 }
 
-                const total = Math.min(100, formacao + experiencia);
-
-                const setScoreUI = (id, points, max) => {
-                    const el = document.getElementById(id);
-                    if (!el) return;
-                    el.innerText = `${points} / ${max}`;
-                    el.classList.remove('bg-success', 'bg-light', 'text-dark', 'text-white');
-                    if (points > 0) {
-                        el.classList.add('bg-success', 'text-white');
-                    } else {
-                        el.classList.add('bg-light', 'text-dark');
-                    }
-                };
-
-                setScoreUI('s_formacao', formacao, 70);
-                setScoreUI('s_experiencia', experiencia, 30);
-
+                const totalMax = window.currentCandidateConfigCriterios ? (window.currentCandidateConfigCriterios.nota_maxima || 100) : 100;
                 const totalEl = document.getElementById('s_total');
-                if (totalEl) totalEl.innerText = `${total} / 100`;
+                if (totalEl) totalEl.innerText = `${totalScore} / ${totalMax}`;
 
                 const totalElCurricular = document.getElementById('nota_total_curricular_val');
-                if (totalElCurricular) totalElCurricular.innerText = `${total} / 100`;
+                if (totalElCurricular) totalElCurricular.innerText = `${totalScore} / ${totalMax}`;
             }
 
             window.toggleJustificativaDoc = () => {
@@ -10944,26 +11224,31 @@
             window.toggleCriteriosPontuacao = toggleCriteriosPontuacao;
 
             function updatePontuacaoCurricular() {
-                let numCapsi = parseInt(document.getElementById('num_semestres_capsi').value) || 0;
-                let numPsic = parseInt(document.getElementById('num_semestres_psic').value) || 0;
+                const numCapsiEl = document.getElementById('num_semestres_capsi');
+                const numPsicEl = document.getElementById('num_semestres_psic');
 
-                if (numCapsi < 0 || numCapsi > 6) {
-                    numCapsi = Math.max(0, Math.min(6, numCapsi));
-                    document.getElementById('num_semestres_capsi').value = numCapsi;
+                if (numCapsiEl && numPsicEl) {
+                    let numCapsi = parseInt(numCapsiEl.value) || 0;
+                    let numPsic = parseInt(numPsicEl.value) || 0;
+
+                    if (numCapsi < 0 || numCapsi > 6) {
+                        numCapsi = Math.max(0, Math.min(6, numCapsi));
+                        numCapsiEl.value = numCapsi;
+                    }
+                    if (numPsic < 0 || numPsic > 4) {
+                        numPsic = Math.max(0, Math.min(4, numPsic));
+                        numPsicEl.value = numPsic;
+                    }
+
+                    const ptsCapsi = numCapsi * 5;
+                    const ptsPsic = numPsic * 5;
+
+                    const spanCapsi = document.getElementById('pts_semestres_capsi');
+                    const spanPsic = document.getElementById('pts_semestres_psic');
+
+                    if (spanCapsi) spanCapsi.innerText = ptsCapsi;
+                    if (spanPsic) spanPsic.innerText = ptsPsic;
                 }
-                if (numPsic < 0 || numPsic > 4) {
-                    numPsic = Math.max(0, Math.min(4, numPsic));
-                    document.getElementById('num_semestres_psic').value = numPsic;
-                }
-
-                const ptsCapsi = numCapsi * 5;
-                const ptsPsic = numPsic * 5;
-
-                const spanCapsi = document.getElementById('pts_semestres_capsi');
-                const spanPsic = document.getElementById('pts_semestres_psic');
-
-                if (spanCapsi) spanCapsi.innerText = ptsCapsi;
-                if (spanPsic) spanPsic.innerText = ptsPsic;
 
                 updateLocalScore();
             }
@@ -11328,12 +11613,40 @@
                         return;
                     }
 
-                    const ptsFormacao = acatado ? (parseInt(document.getElementById('sel_pontuacao_formacao').value) || 0) : 0;
-                    const semestresCapsi = acatado ? (parseInt(document.getElementById('num_semestres_capsi').value) || 0) : 0;
-                    const semestresPsic = acatado ? (parseInt(document.getElementById('num_semestres_psic').value) || 0) : 0;
+                    let ptsFormacao = 0;
+                    let ptsExperiencia = 0;
+                    let scoreFinalCurricular = 0;
+                    let detalhesCriteriosObj = {};
 
-                    const ptsExperiencia = acatado ? Math.min(30, (semestresCapsi * 5) + (semestresPsic * 5)) : 0;
-                    const scoreFinalCurricular = acatado ? (ptsFormacao + ptsExperiencia) : 0;
+                    if (window.currentCandidateConfigCriterios && window.currentCandidateConfigCriterios.grupos && window.currentCandidateConfigCriterios.grupos.length > 0) {
+                        if (acatado) {
+                            window.currentCandidateConfigCriterios.grupos.forEach(g => {
+                                let grpPts = 0;
+                                (g.itens || []).forEach(item => {
+                                    const el = document.getElementById('dyn_item_' + item.id);
+                                    const val = el ? (parseFloat(el.value) || 0) : 0;
+                                    detalhesCriteriosObj[item.id] = val;
+
+                                    let itemPts = (item.tipo === 'tempo') ? Math.min(item.teto, val * (item.pontos_bloco || 0)) : Math.min(item.teto, val * (item.pontos || 0));
+                                    grpPts += itemPts;
+                                });
+                                grpPts = Math.min(g.teto_grupo, grpPts);
+                                if (g.categoria === 'experiencia') {
+                                    ptsExperiencia += grpPts;
+                                } else {
+                                    ptsFormacao += grpPts;
+                                }
+                            });
+                            scoreFinalCurricular = Math.min(window.currentCandidateConfigCriterios.nota_maxima || 100, ptsFormacao + ptsExperiencia);
+                        }
+                    } else {
+                        // Fallback RAPS
+                        ptsFormacao = acatado ? (parseInt(document.getElementById('sel_pontuacao_formacao')?.value || 0) || 0) : 0;
+                        const semestresCapsi = acatado ? (parseInt(document.getElementById('num_semestres_capsi')?.value || 0) || 0) : 0;
+                        const semestresPsic = acatado ? (parseInt(document.getElementById('num_semestres_psic')?.value || 0) || 0) : 0;
+                        ptsExperiencia = acatado ? Math.min(30, (semestresCapsi * 5) + (semestresPsic * 5)) : 0;
+                        scoreFinalCurricular = acatado ? (ptsFormacao + ptsExperiencia) : 0;
+                    }
 
                     let novaSituacaoVal = '';
                     if (resolvedSourceTab === "recursos" && acatado) {
@@ -11372,11 +11685,13 @@
                         cargo: getCandidateCargo(e),
                         pontuacao_formacao: ptsFormacao,
                         notacurricular: ptsFormacao,
-                        semestres_capsi: semestresCapsi,
-                        semestres_psic: semestresPsic,
+                        semestres_capsi: e.semestres_capsi || 0,
+                        semestres_psic: e.semestres_psic || 0,
                         pontuacao_experiencia: ptsExperiencia,
                         nota_total: scoreFinalCurricular,
                         score_final: scoreFinalCurricular,
+                        detalhes_criterios: JSON.stringify(detalhesCriteriosObj),
+                        config_criterios_valores: detalhesCriteriosObj,
                         inscricao: e.inscricao,
                         cpf: e.cpf || '',
                         nome: e.nomecompleto || e.nome || '',
@@ -11385,8 +11700,8 @@
                         eh_ppni: e.eh_ppni || e.cotas_ppni || e.ppni || '',
                         pontuacao_final: e.score_final || e.nota_total || e.nota || 0,
                         foi_jurado: e.foi_jurado || e.jurado || e.is_jurado || '',
-                        nota_experiencia: e.pontuacao_experiencia || e.nota_experiencia || e.notaexperiencia || 0,
-                        nota_curricular: e.notacurricular || e.pontuacao_formacao || e.nprovatitulos || 0,
+                        nota_experiencia: ptsExperiencia,
+                        nota_curricular: ptsFormacao,
                         avaliarpm: e.avaliarpm || 'Não',
                         acatado: acatado ? "Sim" : "Não",
                         analisecurricular: acatado ? "Sim" : "Não",
