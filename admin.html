@@ -3414,18 +3414,72 @@
                     </div>`;
             }
 
-            const key = `cfg_criterios_selecao_${selecaoId}`;
-            const cached = safeStorage.getItem(key);
-            let configObj = null;
-
-            if (cached) {
-                try {
-                    configObj = JSON.parse(cached);
-                } catch (e) {
-                    configObj = null;
+            // Garantir que a lista de seleções esteja disponível
+            if (!window.selecoesList || window.selecoesList.length === 0) {
+                if (typeof fetchSelecoesList === 'function') {
+                    await fetchSelecoesList();
                 }
             }
 
+            let configObj = null;
+            let isConfigPrevia = false;
+
+            // 1. PRIMEIRO: Consultar no objeto retornado no GET de seleções (consultar-selecao-uyhubbuu)
+            const selecaoItem = (window.selecoesList || []).find(s => Number(s.id || s.id_selecao) === Number(selecaoId));
+
+            if (selecaoItem && selecaoItem.config_criterios) {
+                let rawConfig = selecaoItem.config_criterios;
+                if (typeof rawConfig === 'string') {
+                    try { rawConfig = JSON.parse(rawConfig); } catch (e) { rawConfig = null; }
+                }
+
+                let grupos = null;
+                if (Array.isArray(rawConfig)) {
+                    grupos = rawConfig;
+                } else if (rawConfig && typeof rawConfig === 'object') {
+                    if (Array.isArray(rawConfig.grupos)) {
+                        grupos = rawConfig.grupos;
+                    } else if (Array.isArray(rawConfig.config_criterios)) {
+                        grupos = rawConfig.config_criterios;
+                    }
+                }
+
+                if (grupos && Array.isArray(grupos) && grupos.length > 0) {
+                    const pc = selecaoItem.ponto_de_corte !== undefined && selecaoItem.ponto_de_corte !== null 
+                        ? parseFloat(selecaoItem.ponto_de_corte) 
+                        : (rawConfig?.ponto_de_corte !== undefined ? parseFloat(rawConfig.ponto_de_corte) : 50.0);
+                    const nm = selecaoItem.nota_maxima !== undefined && selecaoItem.nota_maxima !== null 
+                        ? parseFloat(selecaoItem.nota_maxima) 
+                        : (rawConfig?.nota_maxima !== undefined ? parseFloat(rawConfig.nota_maxima) : 100.0);
+
+                    configObj = {
+                        id_selecao: Number(selecaoId),
+                        config_criterios: grupos,
+                        ponto_de_corte: isNaN(pc) ? 50.0 : pc,
+                        nota_maxima: isNaN(nm) ? 100.0 : nm
+                    };
+                    isConfigPrevia = true;
+                }
+            }
+
+            // 2. SEGUNDO: Se não veio do GET de seleções, tentar sessionStorage
+            if (!configObj) {
+                const key = `cfg_criterios_selecao_${selecaoId}`;
+                const cached = safeStorage.getItem(key);
+                if (cached) {
+                    try {
+                        const parsed = JSON.parse(cached);
+                        if (parsed && parsed.config_criterios && Array.isArray(parsed.config_criterios) && parsed.config_criterios.length > 0) {
+                            configObj = parsed;
+                            isConfigPrevia = true;
+                        }
+                    } catch (e) {
+                        configObj = null;
+                    }
+                }
+            }
+
+            // 3. TERCEIRO: Consultar webhook secundario consultar-config-json
             if (!configObj) {
                 try {
                     const res = await callWebhook('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/consultar-config-json', {
@@ -3433,17 +3487,37 @@
                         queryParams: { id_selecao: selecaoId }
                     });
                     if (res && (res.config_criterios || res.id_selecao)) {
-                        configObj = res;
-                        safeStorage.setItem(key, JSON.stringify(res));
+                        let g = res.config_criterios;
+                        if (typeof g === 'string') {
+                            try { g = JSON.parse(g); } catch(e) {}
+                        }
+                        if (g && !Array.isArray(g) && g.grupos) {
+                            g = g.grupos;
+                        }
+                        if (Array.isArray(g) && g.length > 0) {
+                            res.config_criterios = g;
+                            configObj = res;
+                            isConfigPrevia = true;
+                        }
                     }
                 } catch (err) {
-                    console.log('Nenhuma parametrização prévia encontrada para a seleção #' + selecaoId);
+                    console.log('Nenhuma parametrização prévia encontrada via webhook para a seleção #' + selecaoId);
                 }
             }
 
+            // 4. FALLBACK: Se nenhuma configuração prévia for encontrada
             if (!configObj) {
                 configObj = getDefaultConfigForSelecao(selecaoId);
+                isConfigPrevia = false;
             }
+
+            if (configObj && configObj.config_criterios && !Array.isArray(configObj.config_criterios) && configObj.config_criterios.grupos) {
+                configObj.config_criterios = configObj.config_criterios.grupos;
+            }
+
+            // Salvar no sessionStorage para manter o cache local atualizado
+            const key = `cfg_criterios_selecao_${selecaoId}`;
+            safeStorage.setItem(key, JSON.stringify(configObj));
 
             window.currentConfigBuilderData = configObj;
 
@@ -3452,7 +3526,7 @@
             if (pcEl) pcEl.value = configObj.ponto_de_corte !== undefined ? configObj.ponto_de_corte : 50.0;
             if (nmEl) nmEl.value = configObj.nota_maxima !== undefined ? configObj.nota_maxima : 100.0;
 
-            renderConfigCriteriosAccordion();
+            renderConfigCriteriosAccordion(isConfigPrevia);
         }
 
         function updateConfigBuilderGeneralSettings() {
@@ -3462,15 +3536,34 @@
             if (nmEl) window.currentConfigBuilderData.nota_maxima = parseFloat(nmEl.value) || 100.0;
         }
 
-        function renderConfigCriteriosAccordion() {
+        function renderConfigCriteriosAccordion(isConfigPrevia = false) {
             const container = document.getElementById('accordionCriterios');
             if (!container) return;
 
             const config = window.currentConfigBuilderData;
             const grupos = config.config_criterios || [];
 
+            const alertHtml = isConfigPrevia ? `
+                <div class="alert alert-success d-flex align-items-center justify-content-between py-2.5 px-3 mb-3 border-0 rounded-3 shadow-sm" style="background-color: #dcfce7; color: #15803d; font-size: 0.83rem;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2 fs-5 text-success"></i>
+                        <div><strong>Configuração prévia localizada e carregada!</strong> Esta seleção já possui critérios de pontuação cadastrados no banco de dados.</div>
+                    </div>
+                    <span class="badge bg-success text-uppercase flex-shrink-0 ms-2" style="font-size: 0.68rem; letter-spacing: 0.5px;">Configuração Carregada</span>
+                </div>
+            ` : `
+                <div class="alert alert-secondary d-flex align-items-center justify-content-between py-2.5 px-3 mb-3 border-0 rounded-3" style="background-color: #f1f5f9; color: #475569; font-size: 0.83rem;">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2 fs-5 text-secondary"></i>
+                        <div><strong>Nenhuma configuração prévia encontrada.</strong> Você pode criar novos grupos e critérios de pontuação para esta seleção abaixo.</div>
+                    </div>
+                    <span class="badge bg-secondary text-uppercase flex-shrink-0 ms-2" style="font-size: 0.68rem; letter-spacing: 0.5px;">Nova Configuração</span>
+                </div>
+            `;
+
             if (grupos.length === 0) {
                 container.innerHTML = `
+                    ${alertHtml}
                     <div class="text-center py-4 bg-light rounded-3 border">
                         <i class="fas fa-folder-open text-muted fs-3 mb-2"></i>
                         <p class="text-muted small mb-2">Nenhum grupo de critérios cadastrado para esta seleção.</p>
@@ -3484,7 +3577,7 @@
 
             let sumGroupCeilings = 0;
 
-            container.innerHTML = grupos.map((grp, idx) => {
+            const groupsHtml = grupos.map((grp, idx) => {
                 const groupCeiling = parseFloat(grp.teto_grupo || 0);
                 sumGroupCeilings += groupCeiling;
                 const collapseId = `collapseGrp_${idx}`;
@@ -3578,6 +3671,8 @@
                     </div>
                 `;
             }).join('');
+
+            container.innerHTML = alertHtml + groupsHtml;
 
             updateConfigSummaryText(sumGroupCeilings);
         }
