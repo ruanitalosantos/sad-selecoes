@@ -4441,14 +4441,17 @@
                 const response = await fetch('https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/d7984936-consultar-selecao-uyhubbuu');
                 if (response && response.ok) {
                     const data = await parseJsonResponse(response);
-                    if (Array.isArray(data)) {
-                        window.selecoesList = data;
+                    const list = Array.isArray(data) ? data : (data && Array.isArray(data.value) ? data.value : []);
+                    if (list && list.length > 0) {
+                        window.selecoesList = list;
+                        list.forEach(s => {
+                            const sId = s.id || s.id_selecao;
+                            if (sId && s.config_criterios) {
+                                safeStorage.setItem(`cfg_criterios_selecao_${sId}`, typeof s.config_criterios === 'object' ? JSON.stringify(s.config_criterios) : s.config_criterios);
+                            }
+                        });
                         populateSelecaoDropdownInConfigCriterios();
-                        return data;
-                    } else if (data && Array.isArray(data.value)) {
-                        window.selecoesList = data.value;
-                        populateSelecaoDropdownInConfigCriterios();
-                        return data.value;
+                        return list;
                     }
                 }
             } catch (err) {
@@ -9843,26 +9846,42 @@
                 if (!selecaoId) return null;
 
                 const list = window.selecoesList || [];
-                const selecaoItem = list.find(s => Number(s.id || s.id_selecao) === Number(selecaoId));
+                let selecaoItem = list.find(s => Number(s.id || s.id_selecao) === Number(selecaoId));
+                if (!selecaoItem) {
+                    const activeObj = getSelectedSelecaoObj();
+                    if (activeObj && Number(activeObj.id || activeObj.id_selecao) === Number(selecaoId)) {
+                        selecaoItem = activeObj;
+                    }
+                }
+
                 let rawConfig = selecaoItem ? selecaoItem.config_criterios : null;
 
                 if (!rawConfig) {
                     const cached = safeStorage.getItem(`cfg_criterios_selecao_${selecaoId}`);
                     if (cached) {
-                        try { rawConfig = JSON.parse(cached); } catch (e) {}
+                        rawConfig = cached;
                     }
                 }
 
                 if (rawConfig) {
-                    if (typeof rawConfig === 'string') {
-                        try { rawConfig = JSON.parse(rawConfig); } catch (e) {}
+                    // Desfazer qualquer nível de JSON.stringify (ex: se stringificada 1 ou 2 vezes)
+                    while (typeof rawConfig === 'string') {
+                        try {
+                            const parsed = JSON.parse(rawConfig);
+                            if (parsed === rawConfig) break;
+                            rawConfig = parsed;
+                        } catch (e) {
+                            break;
+                        }
                     }
+
                     let grupos = null;
                     if (Array.isArray(rawConfig)) {
                         grupos = rawConfig;
                     } else if (rawConfig && typeof rawConfig === 'object') {
                         grupos = Array.isArray(rawConfig.grupos) ? rawConfig.grupos : (Array.isArray(rawConfig.config_criterios) ? rawConfig.config_criterios : null);
                     }
+
                     if (grupos && Array.isArray(grupos) && grupos.length > 0) {
                         return {
                             id_selecao: Number(selecaoId),
